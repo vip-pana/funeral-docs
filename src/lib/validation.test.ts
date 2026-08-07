@@ -394,7 +394,7 @@ describe("vehicleSchema and bearerSchema", () => {
 
   it("accepts a bearer and trims the name", () => {
     const result = bearerSchema.safeParse({ name: " Giuseppe Bianchi " });
-    expect(result.success && result.data.name).toBe("Giuseppe Verdi");
+    expect(result.success && result.data.name).toBe("Giuseppe Bianchi");
   });
 
   it("rejects a blank bearer name", () => {
