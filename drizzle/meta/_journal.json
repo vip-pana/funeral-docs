@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1786041413703,
+      "tag": "0000_living_gorgon",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1786046055878,
+      "tag": "0001_natural_union_jack",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1786089117837,
+      "tag": "0002_colossal_ezekiel",
+      "breakpoints": true
+    }
+  ]
+}

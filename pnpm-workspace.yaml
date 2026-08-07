@@ -1,0 +1,8 @@
+onlyBuiltDependencies:
+  # Modulo nativo: senza il build script non c'e' binario e il DB non si apre.
+  - better-sqlite3
+  - esbuild
+
+ignoredBuiltDependencies:
+  - sharp
+  - unrs-resolver

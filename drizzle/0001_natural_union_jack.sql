@@ -1,0 +1,1 @@
+ALTER TABLE `practices` ADD `person_sex` text DEFAULT 'M' NOT NULL;

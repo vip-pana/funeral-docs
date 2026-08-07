@@ -1,0 +1,21 @@
+# Sviluppo: il codice e' montato dall'host e Next ricarica a ogni modifica.
+# Per il serverino si usa docker-compose.prod.yml.
+services:
+  app:
+    build:
+      context: .
+      target: deps
+    command: sh -c "pnpm db:migrate && pnpm dev -H 0.0.0.0 -p 3000"
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      # node_modules resta quello dell'immagine: i binari nativi compilati per
+      # Linux non funzionerebbero se sovrascritti da quelli dell'host.
+      - /app/node_modules
+      - /app/.next
+    env_file:
+      - .env
+    environment:
+      DATABASE_PATH: /app/data/funeral.db
+      NEXT_TELEMETRY_DISABLED: "1"

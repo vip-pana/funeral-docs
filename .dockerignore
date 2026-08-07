@@ -1,0 +1,21 @@
+node_modules/
+.next/
+.git/
+tests/
+
+# Il database arriva dal volume montato, mai dall'immagine: copiarlo dentro
+# significherebbe distribuire dati reali e mascherare un mount fallito.
+data/
+**/*.db
+**/*.db-shm
+**/*.db-wal
+
+# I segreti arrivano dall'ambiente.
+.env
+.env.local
+
+# Copie di lavoro dei template.
+templates/_backup/
+
+.DS_Store
+*.log

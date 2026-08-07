@@ -1,0 +1,141 @@
+import { chromium } from 'playwright-core';
+import fs from 'node:fs';
+import JSZip from 'jszip';
+import { fillPractice, pickComune, pickSelect } from './helpers.mjs';
+
+const B = process.env.BASE_URL ?? 'http://localhost:3000';
+const b = await chromium.launch({ channel: 'chrome' });
+const ctx = await b.newContext({ acceptDownloads: true });
+const p = await ctx.newPage();
+p.on('pageerror', e => console.log('  [pageerror]', e.message.slice(0,150)));
+let fail = 0;
+const check = (n,c,x='') => { console.log(c?'ok  ':'FAIL', n, x); if(!c) fail++; };
+
+// login
+await p.goto(`${B}/login`);
+await p.fill('#password',(process.env.TEST_PASSWORD ?? 'sviluppo123'));
+await Promise.all([p.waitForURL(/pratiche/,{timeout:15000}), p.click('button[type=submit]')]);
+
+// --- nuova pratica ---
+await p.goto(`${B}/pratiche/nuova`);
+check('1 form nuova pratica', (await p.textContent('h1'))?.includes('Nuova'));
+
+// autocompilazione da CF: scrivo il CF e sposto il focus
+await p.fill('#personTaxCode','RSSMRA40C12D643D');
+await p.locator('#personLastName').focus();
+await p.waitForTimeout(600);
+check('2 data nascita da CF', await p.inputValue('#personBirthDate') === '1940-03-12',
+      await p.inputValue('#personBirthDate'));
+
+// compilo il resto
+const v = {
+  personFirstName:'Mario', personLastName:'Rossi',
+  personBirthCity:'Foggia', personResidenceCity:'San Severo',
+  personResidenceAddress:'Via Roma 15',
+  personDeathDate:'2026-08-04', personDeathTime:'14:30',
+  personDeathCity:'San Severo', personDeathPlace:'Ospedale Masselli',
+  transportDate:'2026-08-06', transportTime:'09:00', transportPermitDate:'2026-08-05',
+  funeralChurch:'Chiesa San Severino',
+  destinationCity:'Foggia',
+  destinationCemetery:'Cimitero Comunale',
+};
+await fillPractice(p, v);
+// L'autofunebre la lascia veicoli.mjs, che gira prima: senza, la targa non
+// finirebbe nel documento e il check piu' sotto perderebbe senso.
+const hasVehicle = await pickSelect(p, 'vehicleId', 'FG123AB');
+await Promise.all([
+  p.waitForURL(/\/pratiche\/\d+$/, { timeout: 15000 }),
+  p.click('button:has-text("Crea pratica")'),
+]);
+check('3b autofunebre selezionata', hasVehicle, hasVehicle ? '' : 'nessun veicolo in elenco');
+const url = p.url();
+check('3 creata e aperta', /\/pratiche\/\d+$/.test(url), url);
+check('  intestazione', (await p.textContent('h1'))?.includes('Rossi'));
+
+// provincia normalizzata
+check('4 provincia dal comune', await p.inputValue('#destinationProvince') === 'FG',
+      await p.inputValue('#destinationProvince'));
+
+// --- download singolo ---
+const id = url.match(/(\d+)$/)[1];
+await p.locator('[role=checkbox]').nth(0).check();
+for (let i=1;i<5;i++) await p.locator('[role=checkbox]').nth(i).uncheck();
+const [d1] = await Promise.all([
+  p.waitForEvent('download', {timeout:20000}),
+  p.click('button:has-text("Scarica")'),
+]);
+const f1 = `/tmp/dl_${d1.suggestedFilename()}`;
+await d1.saveAs(f1);
+check('5 docx singolo', d1.suggestedFilename().endsWith('.docx'), d1.suggestedFilename());
+
+// contenuto: dati reali dentro?
+const z1 = await JSZip.loadAsync(fs.readFileSync(f1));
+const xml = await z1.file('word/document.xml').async('string');
+const txt = [...xml.matchAll(/<w:t[^>]*>([\s\S]*?)<\/w:t>/g)].map(m=>m[1]).join('');
+check('6 nome nel documento', txt.includes('Mario') && txt.includes('Rossi'));
+check('  data italiana', txt.includes('12/03/1940'), txt.match(/\d{2}\/\d{2}\/\d{4}/g)?.slice(0,3).join(' '));
+// il doc 1 e' l'atto del Sindaco: non contiene dati della ditta per costruzione
+check('  nessun placeholder', !txt.match(/\{[^}]*\}/));
+
+// --- download multiplo: N file separati, non uno zip ---
+const got = [];
+p.on('download', d => got.push(d));
+for (let i=0;i<5;i++) await p.locator('[role=checkbox]').nth(i).check();
+await p.waitForTimeout(300);
+await p.click('button:has-text("Scarica")');
+for (let i=0; i<40 && got.length<5; i++) await p.waitForTimeout(250);
+
+check('7 cinque download separati', got.length===5, `${got.length}`);
+const names = got.map(d=>d.suggestedFilename());
+check('  tutti .docx', names.every(n=>n.endsWith('.docx')));
+check('  nessuno zip', !names.some(n=>n.endsWith('.zip')));
+check('  nomi distinti', new Set(names).size===names.length);
+
+// il documento 4 usa tutti i campi della ditta
+const d4 = got.find(d=>d.suggestedFilename().endsWith('_4.docx'));
+const f4 = `/tmp/dl_${d4.suggestedFilename()}`;
+await d4.saveAs(f4);
+const z4 = await JSZip.loadAsync(fs.readFileSync(f4));
+const t4 = [...(await z4.file('word/document.xml').async('string'))
+  .matchAll(/<w:t[^>]*>([\s\S]*?)<\/w:t>/g)].map(m=>m[1]).join('');
+check('  doc4 dati ditta', t4.includes('Rossi'));
+check('  doc4 targa autofunebre', t4.includes('FG123AB'), t4.match(/[A-Z]{2}\d{3}[A-Z]{2}/)?.[0] ?? 'assente');
+check('  doc4 conducente', t4.includes('Giuseppe Verdi') || t4.includes('Mario Bianchi'), '');
+check('  doc4 codice fiscale', t4.includes('RSSMRA40C12D643D'));
+check('  doc4 nessun placeholder', !t4.match(/\{[^}]*\}/));
+
+// --- modifica ---
+await p.fill('#personDeathPlace','Abitazione');
+await p.click('button:has-text("Salva modifiche")');
+await p.waitForFunction(()=>[...document.querySelectorAll('[data-sonner-toast]')]
+  .some(t=>t.textContent?.includes('aggiornata')), null, {timeout:12000});
+await p.reload();
+check('8 modifica persiste', await p.inputValue('#personDeathPlace') === 'Abitazione');
+
+// --- elenco ---
+await p.goto(`${B}/pratiche`);
+check('9 compare in elenco', (await p.textContent('body')).includes('Rossi'));
+
+// --- validazione ---
+await p.goto(`${B}/pratiche/nuova`);
+await p.click('button:has-text("Crea pratica")');
+await p.waitForFunction(()=>document.querySelectorAll('[role=alert]').length>3,null,{timeout:12000});
+check('10 validazione blocca vuoto', true);
+check('  resta su nuova', p.url().includes('/nuova'));
+
+// CF non valido rifiutato
+await p.fill('#personTaxCode','ABC');
+await p.locator('#personFirstName').focus();
+await p.waitForTimeout(400);
+check('11 CF invalido non compila', await p.inputValue('#personBirthDate') === '');
+
+// Ripulisce la pratica creata: senza, ogni esecuzione ne lascia una e
+// l'elenco si riempie di duplicati identici.
+await p.goto(`${B}/pratiche/${id}`);
+await p.click('button:has-text("Elimina")');
+await Promise.all([p.waitForURL(u=>u.pathname==='/pratiche',{timeout:15000}),
+                   p.click('button:has-text("Confermi")')]);
+
+await b.close();
+console.log(fail?`\n=== ${fail} FALLITI ===`:'\n=== TUTTI OK ===');
+process.exit(fail?1:0);

@@ -1,0 +1,439 @@
+"use client";
+
+import { useActionState, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+
+import { ComuneField } from "@/components/comune-field";
+import { Field } from "@/components/field";
+import { Button } from "@/components/ui/button";
+import {
+  Field as FieldRoot,
+  FieldDescription,
+  FieldLabel,
+} from "@/components/ui/field";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import type { Practice, Vehicle } from "@/lib/db/schema";
+import { FIELD_LABELS } from "@/lib/fields";
+import { computeTaxCode } from "@/lib/tax-code";
+import { parseTaxCode } from "@/lib/validation";
+
+import type { PracticeFormState } from "./actions";
+
+type Action = (
+  state: PracticeFormState,
+  formData: FormData,
+) => Promise<PracticeFormState>;
+
+export function PracticeForm({
+  action,
+  practice,
+  vehicles,
+  submitLabel,
+}: {
+  action: Action;
+  practice?: Practice;
+  vehicles: Vehicle[];
+  submitLabel: string;
+}) {
+  const [state, formAction, pending] = useActionState<PracticeFormState, FormData>(
+    action,
+    {},
+  );
+  const formRef = useRef<HTMLFormElement>(null);
+  // Segnala all'utente cosa e' stato dedotto dal codice fiscale.
+  const [fromTaxCode, setFromTaxCode] = useState({ birth: false, city: false });
+  const [firstName, setFirstName] = useState(practice?.personFirstName ?? "");
+  const [lastName, setLastName] = useState(practice?.personLastName ?? "");
+  const [sex, setSex] = useState<"M" | "F">(practice?.personSex ?? "M");
+  const [taxCode, setTaxCode] = useState(practice?.personTaxCode ?? "");
+  const [birthDate, setBirthDate] = useState(practice?.personBirthDate ?? "");
+  const [birthCity, setBirthCity] = useState(practice?.personBirthCity ?? "");
+  // Il calcolo del codice fiscale usa il codice catastale, non il nome: si
+  // conserva quando il comune viene scelto dall'elenco.
+  const [birthCode, setBirthCode] = useState("");
+  const [computed, setComputed] = useState(false);
+  const [destinationCity, setDestinationCity] = useState(
+    practice?.destinationCity ?? "",
+  );
+  const [province, setProvince] = useState(practice?.destinationProvince ?? "");
+  const [vehicleId, setVehicleId] = useState(
+    practice?.vehicleId ? String(practice.vehicleId) : "",
+  );
+
+  // Il veicolo puo' essere stato eliminato dopo il salvataggio: la pratica
+  // conserva la targa, ma l'elenco non ha piu' la voce da selezionare.
+  const missingVehicle = Boolean(
+    practice?.vehiclePlate && !vehicles.some((v) => String(v.id) === vehicleId),
+  );
+
+  useEffect(() => {
+    if (state.message) {
+      if (state.errors) toast.error(state.message);
+      else toast.success(state.message);
+    }
+  }, [state]);
+
+  /**
+   * Dati sufficienti per il calcolo. Il codice catastale non serve qui: se
+   * manca — succede riaprendo una pratica salvata, dove c'e' solo il nome del
+   * comune — viene cercato al momento del clic.
+   */
+  const canCompute = Boolean(
+    firstName.trim() && lastName.trim() && birthDate && birthCity.trim(),
+  );
+
+  /**
+   * Calcola il codice fiscale su richiesta.
+   *
+   * Non avviene da solo: il codice calcolato puo' differire da quello reale
+   * per omocodia, e sovrascrivere in silenzio un valore copiato dalla tessera
+   * sanitaria sarebbe peggio che non proporre nulla.
+   */
+  async function handleCompute() {
+    let code = birthCode;
+
+    // Comune digitato o pratica riaperta: si risale al codice catastale dal
+    // nome, che e' l'unica cosa memorizzata.
+    if (!code && birthCity.trim()) {
+      const res = await fetch(
+        `/api/comuni?q=${encodeURIComponent(birthCity.trim())}`,
+      );
+      if (res.ok) {
+        const found: { nome: string; codice: string }[] = await res.json();
+        const exact = found.find(
+          (c) => c.nome.toLowerCase() === birthCity.trim().toLowerCase(),
+        );
+        if (exact) {
+          code = exact.codice;
+          setBirthCode(exact.codice);
+        }
+      }
+    }
+
+    const cf = computeTaxCode({
+      firstName,
+      lastName,
+      birthDate,
+      cadastralCode: code,
+      isFemale: sex === "F",
+    });
+
+    if (!cf) {
+      toast.error(
+        code
+          ? "Dati insufficienti per calcolare il codice fiscale."
+          : `Comune «${birthCity}» non riconosciuto: scegline uno dall'elenco.`,
+      );
+      return;
+    }
+
+    setTaxCode(cf);
+    setComputed(true);
+    toast.success("Codice fiscale calcolato: confrontalo con la tessera.");
+  }
+
+  const err = (name: string) => state.errors?.[name];
+  const val = (name: keyof Practice) =>
+    practice ? (practice[name] as string) : undefined;
+
+  /**
+   * Il codice fiscale contiene data e comune di nascita: si compilano da soli,
+   * ma solo dove il campo e' ancora vuoto — un valore inserito a mano non va
+   * sovrascritto.
+   */
+  async function handleTaxCode(event: React.FocusEvent<HTMLInputElement>) {
+    const parsed = parseTaxCode(event.target.value);
+    if (!parsed) return;
+
+    if (!birthDate) {
+      setBirthDate(parsed.birthDate);
+      setFromTaxCode((s) => ({ ...s, birth: true }));
+    }
+    // Il sesso e' nel giorno di nascita: sopra 40 e' femminile.
+    setSex(parsed.isFemale ? "F" : "M");
+
+    if (!birthCity) {
+      // Gli ultimi quattro caratteri prima del controllo sono il codice
+      // catastale del comune di nascita.
+      const res = await fetch(`/api/comuni?codice=${parsed.cadastralCode}`);
+      if (res.ok) {
+        const comune = await res.json();
+        setBirthCity(comune.nome);
+        setBirthCode(comune.codice);
+        setFromTaxCode((s) => ({ ...s, city: true }));
+      }
+    }
+  }
+
+  return (
+    <form ref={formRef} action={formAction} className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Defunto</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-2">
+          <Field
+            name="personFirstName"
+            label={FIELD_LABELS.personFirstName}
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            error={err("personFirstName")}
+            autoFocus={!practice}
+          />
+          <Field
+            name="personLastName"
+            label={FIELD_LABELS.personLastName}
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            error={err("personLastName")}
+          />
+          <FieldRoot>
+            <FieldLabel htmlFor="personSex">Sesso</FieldLabel>
+            <Select
+              name="personSex"
+              value={sex}
+              onValueChange={(v) => setSex(v as "M" | "F")}
+            >
+              <SelectTrigger id="personSex" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="M">Maschile</SelectItem>
+                <SelectItem value="F">Femminile</SelectItem>
+              </SelectContent>
+            </Select>
+            <FieldDescription>
+              Serve al calcolo del codice fiscale
+            </FieldDescription>
+          </FieldRoot>
+          <Field
+            name="personBirthDate"
+            label={FIELD_LABELS.personBirthDate}
+            type="date"
+            value={birthDate}
+            onChange={(e) => setBirthDate(e.target.value)}
+            error={err("personBirthDate")}
+            hint={fromTaxCode.birth ? "Ricavata dal codice fiscale" : undefined}
+          />
+          <ComuneField
+            name="personBirthCity"
+            label={FIELD_LABELS.personBirthCity}
+            value={birthCity}
+            onChange={setBirthCity}
+            onPick={(c) => setBirthCode(c.codice)}
+            error={err("personBirthCity")}
+            hint={fromTaxCode.city ? "Ricavato dal codice fiscale" : undefined}
+          />
+          {/* `items-start` piu' il margine fisso sul pulsante: allineare in
+              basso lo farebbe saltare su e giu' a seconda che sotto al campo
+              compaia il suggerimento o un errore. */}
+          <div className="flex items-start gap-2">
+            <Field
+              name="personTaxCode"
+              label={FIELD_LABELS.personTaxCode}
+              value={taxCode}
+              onChange={(e) => {
+                setTaxCode(e.target.value.toUpperCase());
+                setComputed(false);
+              }}
+              error={err("personTaxCode")}
+              onBlur={handleTaxCode}
+              inputClassName="uppercase"
+              className="flex-1"
+              hint={
+                computed
+                  ? "Calcolato: confrontalo con la tessera sanitaria"
+                  : "Compila da solo data e comune di nascita"
+              }
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCompute}
+              disabled={!canCompute}
+              // Scende all'altezza dell'input, saltando l'etichetta sopra.
+              className="mt-[calc(--spacing(6)+2px)] shrink-0"
+              title={
+                canCompute
+                  ? "Calcola dal nome, cognome, data e comune di nascita"
+                  : "Servono nome, cognome, data e comune di nascita (scelto dall'elenco)"
+              }
+            >
+              Calcola
+            </Button>
+          </div>
+          <ComuneField
+            name="personResidenceCity"
+            label={FIELD_LABELS.personResidenceCity}
+            defaultValue={val("personResidenceCity")}
+            error={err("personResidenceCity")}
+          />
+          <Field
+            name="personResidenceAddress"
+            label={FIELD_LABELS.personResidenceAddress}
+            defaultValue={val("personResidenceAddress")}
+            error={err("personResidenceAddress")}
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Decesso</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-2">
+          <Field
+            name="personDeathDate"
+            label={FIELD_LABELS.personDeathDate}
+            type="date"
+            defaultValue={val("personDeathDate")}
+            error={err("personDeathDate")}
+          />
+          <Field
+            name="personDeathTime"
+            label={FIELD_LABELS.personDeathTime}
+            type="time"
+            defaultValue={val("personDeathTime")}
+            error={err("personDeathTime")}
+          />
+          <ComuneField
+            name="personDeathCity"
+            label={FIELD_LABELS.personDeathCity}
+            defaultValue={val("personDeathCity")}
+            error={err("personDeathCity")}
+          />
+          <Field
+            name="personDeathPlace"
+            label={FIELD_LABELS.personDeathPlace}
+            defaultValue={val("personDeathPlace")}
+            error={err("personDeathPlace")}
+            hint="Es. ospedale, abitazione"
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Trasporto</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-2">
+          <Field
+            name="transportDate"
+            label={FIELD_LABELS.transportDate}
+            type="date"
+            defaultValue={val("transportDate")}
+            error={err("transportDate")}
+          />
+          <Field
+            name="transportTime"
+            label={FIELD_LABELS.transportTime}
+            type="time"
+            defaultValue={val("transportTime")}
+            error={err("transportTime")}
+          />
+          <Field
+            name="transportPermitDate"
+            label={FIELD_LABELS.transportPermitDate}
+            type="date"
+            defaultValue={val("transportPermitDate")}
+            error={err("transportPermitDate")}
+          />
+          <Field
+            name="funeralChurch"
+            label={FIELD_LABELS.funeralChurch}
+            defaultValue={val("funeralChurch")}
+            error={err("funeralChurch")}
+            hint="Facoltativo"
+          />
+          <FieldRoot>
+            <FieldLabel htmlFor="vehicleId">Autofunebre</FieldLabel>
+            {/* Nessuna voce "nessuna": Radix vieta un SelectItem con valore
+                vuoto, e un valore fittizio non passerebbe la validazione. Il
+                segnaposto copre gia' il caso. */}
+            <Select
+              name="vehicleId"
+              value={vehicleId}
+              onValueChange={setVehicleId}
+            >
+              <SelectTrigger id="vehicleId" className="w-full">
+                <SelectValue placeholder="Nessuna" />
+              </SelectTrigger>
+              <SelectContent>
+                {vehicles.map((v) => (
+                  <SelectItem key={v.id} value={String(v.id)}>
+                    {v.name} — {v.plate}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FieldDescription>
+              {/* La targa registrata viene prima: se il mezzo e' stato
+                  eliminato, dire solo "nessuna autofunebre configurata"
+                  farebbe credere che il documento esca senza targa, mentre la
+                  pratica ne conserva una. */}
+              {missingVehicle
+                ? `Mezzo non piu' in elenco. Targa registrata: ${practice?.vehiclePlate}`
+                : vehicles.length === 0
+                  ? "Nessuna autofunebre configurata: aggiungila in Impostazioni."
+                  : "La targa finisce nei documenti 2, 3 e 4"}
+            </FieldDescription>
+          </FieldRoot>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Destinazione</CardTitle>
+          <CardDescription>Dove viene trasportato il feretro.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-3">
+          <ComuneField
+            name="destinationCity"
+            label={FIELD_LABELS.destinationCity}
+            value={destinationCity}
+            onChange={setDestinationCity}
+            // La provincia si ricava dal comune scelto: si compila da sola, ma
+            // resta modificabile.
+            onPick={(c) => setProvince(c.provincia)}
+            error={err("destinationCity")}
+          />
+          <Field
+            name="destinationProvince"
+            label={FIELD_LABELS.destinationProvince}
+            value={province}
+            onChange={(e) => setProvince(e.target.value.toUpperCase())}
+            error={err("destinationProvince")}
+            maxLength={2}
+            inputClassName="uppercase"
+            hint="Sigla, es. FG"
+          />
+          <Field
+            name="destinationCemetery"
+            label={FIELD_LABELS.destinationCemetery}
+            defaultValue={val("destinationCemetery")}
+            error={err("destinationCemetery")}
+          />
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-end">
+        <Button type="submit" disabled={pending}>
+          {pending ? "Salvataggio…" : submitLabel}
+        </Button>
+      </div>
+    </form>
+  );
+}

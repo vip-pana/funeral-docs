@@ -1,0 +1,44 @@
+# Produzione: la macchina in ufficio che resta accesa, raggiungibile via
+# Tailscale.
+#
+#   docker compose -f docker-compose.prod.yml up -d --build
+#
+services:
+  app:
+    build:
+      context: .
+      target: runner
+    restart: unless-stopped
+    ports:
+      # Mai 0.0.0.0: pubblicherebbe l'app a tutta la rete locale, vanificando
+      # la scelta di tenerla dentro Tailscale.
+      #
+      # BIND_ADDRESS va impostato all'indirizzo tailnet della macchina
+      # (`tailscale ip -4`, un 100.x.y.z). Il traffico che arriva da Tailscale
+      # atterra su quell'interfaccia, non su loopback: un binding su 127.0.0.1
+      # lo rifiuterebbe.
+      - "${BIND_ADDRESS:-127.0.0.1}:${PORT:-3000}:3000"
+    volumes:
+      # Il database. La directory host deve esistere gia': l'entrypoint si
+      # rifiuta di partire se il mount non e' andato a buon fine, invece di
+      # creare un archivio vuoto che sembrerebbe solo nuovo.
+      - ${FUNERAL_DATA_DIR:-./data}:/data
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      DATABASE_PATH: /data/funeral.db
+      NEXT_TELEMETRY_DISABLED: "1"
+      # Su Tailscale si accede in http a un indirizzo 100.x.y.z: il browser non
+      # concede a un IP l'eccezione che fa per localhost, quindi un cookie
+      # `secure` non verrebbe memorizzato e l'accesso sarebbe impossibile.
+      # Da rimettere a true solo dietro un reverse proxy con https.
+      COOKIE_SECURE: "${COOKIE_SECURE:-false}"
+    healthcheck:
+      # La pagina di login risponde senza sessione: se il server muore mentre
+      # il container resta vivo, questo lo segnala.
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
