@@ -46,6 +46,9 @@ export const owner = sqliteTable("owner", {
   ownerIdIssuer: text("owner_id_issuer").notNull().default(""),
   ownerIdDate: text("owner_id_date").notNull().default(""),
 
+  /** Printed beside the declarant's name by document 9. */
+  ownerCitizenship: text("owner_citizenship").notNull().default("italiana"),
+
   updatedAt: text("updated_at")
     .notNull()
     .default(sql`(datetime('now'))`),
@@ -136,6 +139,25 @@ export const practices = sqliteTable("practices", {
   destinationCity: text("destination_city").notNull(),
   destinationProvince: text("destination_province").notNull(),
   destinationCemetery: text("destination_cemetery").notNull(),
+
+  // Cremation, documents 8 and 9. The route is three separate municipalities
+  // there — the crematorium, the stop for the funeral service, and where the
+  // ashes end up — which `destination*` alone cannot express. Default to empty
+  // so a record saved before these documents existed stays valid: 1-7 do not
+  // use them and print nothing.
+  /** Municipality of the crematorium. */
+  crematoryCity: text("crematory_city").notNull().default(""),
+  /** Municipality of the stop for the funeral service, on the way there. */
+  funeralStopCity: text("funeral_stop_city").notNull().default(""),
+  /** Municipality whose cemetery the ashes are buried in. */
+  ashesCity: text("ashes_city").notNull().default(""),
+  /** Who declared the wish to be cremated, e.g. "la moglie". Document 8. */
+  cremationConsentRelative: text("cremation_consent_relative")
+    .notNull()
+    .default(""),
+  burialPermitDate: text("burial_permit_date").notNull().default(""),
+  /** Printed beside the deceased's name by document 9. */
+  personCitizenship: text("person_citizenship").notNull().default("italiana"),
 
   createdAt: text("created_at")
     .notNull()

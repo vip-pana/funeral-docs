@@ -32,6 +32,8 @@ export const OWNER_FIELDS = [
   "ownerIdNumber",
   "ownerIdIssuer",
   "ownerIdDate",
+  // Document 9 only, which states the citizenship of the declarant.
+  "ownerCitizenship",
 ] as const;
 
 export const PRACTICE_FIELDS = [
@@ -56,14 +58,34 @@ export const PRACTICE_FIELDS = [
   // Documents 6 and 7 only.
   "applicantRole",
   "bearerNames",
+  // Cremation, documents 8 and 9.
+  "crematoryCity",
+  "funeralStopCity",
+  "ashesCity",
+  "cremationConsentRelative",
+  "burialPermitDate",
+  "personCitizenship",
 ] as const;
 
 /**
- * Computed at generation time, never stored. The birth province is derived from
- * the birth municipality through the ISTAT dataset, so there is no field to fill
- * in and no way for the two to disagree.
+ * Computed at generation time, never stored. Every province is derived from the
+ * municipality beside it through the ISTAT dataset, so there is no field to fill
+ * in and no way for the two to disagree. `provinciaOf` gives nothing back for a
+ * name that is not in the list or shared by two provinces, and the documents
+ * then print an empty pair of brackets.
  */
-export const SYSTEM_FIELDS = ["todayDate", "personBirthProvince"] as const;
+export const SYSTEM_FIELDS = [
+  "todayDate",
+  "personBirthProvince",
+  "personResidenceProvince",
+  "personDeathProvince",
+  // Documents 8 and 9 print the province beside almost every municipality.
+  "crematoryProvince",
+  "funeralStopProvince",
+  "ashesProvince",
+  "ownerBirthProvince",
+  "ownerCompanyProvince",
+] as const;
 
 export type OwnerField = (typeof OWNER_FIELDS)[number];
 export type PracticeField = (typeof PRACTICE_FIELDS)[number];
@@ -95,6 +117,7 @@ export const FIELD_LABELS: Record<TemplateField, string> = {
   ownerIdNumber: "Numero del documento",
   ownerIdIssuer: "Rilasciato da",
   ownerIdDate: "Data di rilascio",
+  ownerCitizenship: "Cittadinanza",
   personFirstName: "Nome",
   personLastName: "Cognome",
   personTaxCode: "Codice fiscale",
@@ -115,8 +138,21 @@ export const FIELD_LABELS: Record<TemplateField, string> = {
   destinationCemetery: "Cimitero / forno crematorio",
   applicantRole: "Qualità del richiedente",
   bearerNames: "Necrofori",
+  crematoryCity: "Comune del forno crematorio",
+  funeralStopCity: "Comune della sosta per le esequie",
+  ashesCity: "Comune di destinazione delle ceneri",
+  cremationConsentRelative: "Dichiarazione di volontà resa",
+  burialPermitDate: "Data del permesso di seppellimento",
+  personCitizenship: "Cittadinanza",
   todayDate: "Data di compilazione",
   personBirthProvince: "Provincia di nascita",
+  personResidenceProvince: "Provincia di residenza",
+  personDeathProvince: "Provincia del decesso",
+  crematoryProvince: "Provincia del forno crematorio",
+  funeralStopProvince: "Provincia della sosta",
+  ashesProvince: "Provincia di destinazione delle ceneri",
+  ownerBirthProvince: "Provincia di nascita del dichiarante",
+  ownerCompanyProvince: "Provincia della sede della ditta",
 };
 
 /** Sections of the practice form, in the order they appear. */
@@ -132,6 +168,7 @@ export const PRACTICE_SECTIONS = [
       "personBirthCity",
       "personResidenceCity",
       "personResidenceAddress",
+      "personCitizenship",
     ],
   },
   {
@@ -158,6 +195,17 @@ export const PRACTICE_SECTIONS = [
     id: "destinazione",
     title: "Destinazione",
     fields: ["destinationCity", "destinationProvince", "destinationCemetery"],
+  },
+  {
+    id: "cremazione",
+    title: "Cremazione",
+    fields: [
+      "crematoryCity",
+      "funeralStopCity",
+      "ashesCity",
+      "cremationConsentRelative",
+      "burialPermitDate",
+    ],
   },
 ] as const satisfies readonly {
   id: string;
@@ -207,6 +255,18 @@ export const DOCUMENTS = [
     file: "7.docx",
     title: "Allegato 3 — Autorizzazione al trasporto",
     description: "L.R. 34/2008, rilasciata dal Comune",
+  },
+  {
+    id: "8",
+    file: "8.docx",
+    title: "Richiesta di trasporto e cremazione",
+    description: "L.R. 34/2008 art. 12-13, presentata dalla ditta",
+  },
+  {
+    id: "9",
+    file: "9.docx",
+    title: "Autorizzazione al trasporto e cremazione",
+    description: "L.R. 34/2008 art. 12-13, rilasciata dal Comune",
   },
 ] as const;
 

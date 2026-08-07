@@ -25,6 +25,7 @@ const OWNER: Owner = {
   ownerIdNumber: "AA1234567",
   ownerIdIssuer: "COMUNE DI SAN SEVERO",
   ownerIdDate: "2020-06-10",
+  ownerCitizenship: "italiana",
   updatedAt: "2026-08-07 10:00:00",
 };
 
@@ -47,6 +48,8 @@ describe("ownerValues", () => {
       ownerIdNumber: "AA1234567",
       ownerIdIssuer: "COMUNE DI SAN SEVERO",
       ownerIdDate: "2020-06-10",
+      // Document 9.
+      ownerCitizenship: "italiana",
     });
   });
 

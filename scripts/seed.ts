@@ -37,6 +37,7 @@ const OWNER = {
   ownerIdNumber: "AA1234567",
   ownerIdIssuer: "COMUNE DI SAN SEVERO",
   ownerIdDate: "2020-06-10",
+  ownerCitizenship: "italiana",
 };
 
 const VEHICLES = [
@@ -81,6 +82,18 @@ type Person = {
   church: string;
   destinationCity: string;
   cemetery: string;
+  /**
+   * Cremation, documents 8 and 9. Only one of the samples is a cremation: the
+   * others have to look right with the card left empty, which is the common
+   * case.
+   */
+  cremation?: {
+    crematoryCity: string;
+    funeralStopCity: string;
+    ashesCity: string;
+    consentRelative: string;
+    burialPermitDate: string;
+  };
 };
 
 const PEOPLE: Person[] = [
@@ -133,6 +146,11 @@ const PEOPLE: Person[] = [
     transportDate: "2026-08-06", transportTime: "11:30", permitDate: "2026-08-05",
     church: "Chiesa di Santa Maria della Pietà",
     destinationCity: "Torremaggiore", cemetery: "Cimitero di Torremaggiore",
+    cremation: {
+      crematoryCity: "Foggia", funeralStopCity: "Torremaggiore",
+      ashesCity: "Torremaggiore", consentRelative: "dalla figlia",
+      burialPermitDate: "2026-08-05",
+    },
   },
   {
     firstName: "Nicola", lastName: "Cassano", isFemale: false,
@@ -156,11 +174,13 @@ function seedOwner() {
     `INSERT INTO owner (id, owner_first_name, owner_middle_name, owner_last_name,
        owner_company_name, owner_company_city, owner_city, owner_city_name,
        owner_birth_date, owner_birth_city, owner_address, owner_postal_code,
-       owner_id_type, owner_id_number, owner_id_issuer, owner_id_date)
+       owner_id_type, owner_id_number, owner_id_issuer, owner_id_date,
+       owner_citizenship)
      VALUES (1, @ownerFirstName, @ownerMiddleName, @ownerLastName,
        @ownerCompanyName, @ownerCompanyCity, @ownerCity, @ownerCityName,
        @ownerBirthDate, @ownerBirthCity, @ownerAddress, @ownerPostalCode,
-       @ownerIdType, @ownerIdNumber, @ownerIdIssuer, @ownerIdDate)`,
+       @ownerIdType, @ownerIdNumber, @ownerIdIssuer, @ownerIdDate,
+       @ownerCitizenship)`,
   ).run(OWNER);
   return "inserted";
 }
@@ -222,7 +242,9 @@ function seedPractices() {
        person_death_city, person_death_place, transport_date, transport_time,
        transport_permit_date, funeral_church, destination_city,
        destination_province, destination_cemetery, vehicle_id, vehicle_plate,
-       driver_id, driver_name, bearer_ids, bearer_names, applicant_role
+       driver_id, driver_name, bearer_ids, bearer_names, applicant_role,
+       crematory_city, funeral_stop_city, ashes_city,
+       cremation_consent_relative, burial_permit_date
      ) VALUES (
        @id,
        @firstName, @lastName, @sex, @taxCode,
@@ -231,7 +253,9 @@ function seedPractices() {
        @deathCity, @deathPlace, @transportDate, @transportTime,
        @permitDate, @church, @destinationCity,
        @destinationProvince, @cemetery, @vehicleId, @vehiclePlate,
-       @driverId, @driverName, @bearerIds, @bearerNames, @applicantRole
+       @driverId, @driverName, @bearerIds, @bearerNames, @applicantRole,
+       @crematoryCity, @funeralStopCity, @ashesCity,
+       @consentRelative, @burialPermitDate
      )`,
   );
 
@@ -309,6 +333,13 @@ function seedPractices() {
       bearerIds: bearers.map((b) => b.id).join(","),
       bearerNames: bearers.map((b) => b.name).join(", "),
       applicantRole: "INCARICATO",
+      // Empty strings rather than null for the burials: the columns are NOT
+      // NULL, and the documents print nothing either way.
+      crematoryCity: p.cremation?.crematoryCity ?? "",
+      funeralStopCity: p.cremation?.funeralStopCity ?? "",
+      ashesCity: p.cremation?.ashesCity ?? "",
+      consentRelative: p.cremation?.consentRelative ?? "",
+      burialPermitDate: p.cremation?.burialPermitDate ?? "",
     });
     inserted++;
   });

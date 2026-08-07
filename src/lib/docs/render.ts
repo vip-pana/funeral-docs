@@ -40,6 +40,8 @@ const DATE_FIELDS = new Set<TemplateField>([
   // Declarant, documents 6 and 7.
   "ownerBirthDate",
   "ownerIdDate",
+  // Cremation, document 8.
+  "burialPermitDate",
 ]);
 
 export type FieldValues = Partial<Record<TemplateField, string>>;

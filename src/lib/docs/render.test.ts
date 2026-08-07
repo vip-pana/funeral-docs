@@ -41,6 +41,7 @@ describe("prepareValues", () => {
       transportDate: "2026-08-06",
       transportPermitDate: "2026-08-05",
       ownerRequestDate: "2026-08-05",
+      burialPermitDate: "2026-08-05",
       todayDate: "2026-08-07",
       // Times are not dates: they must not be touched.
       personDeathTime: "14:30",
@@ -53,6 +54,7 @@ describe("prepareValues", () => {
     expect(out.transportDate).toBe("06/08/2026");
     expect(out.transportPermitDate).toBe("05/08/2026");
     expect(out.ownerRequestDate).toBe("05/08/2026");
+    expect(out.burialPermitDate).toBe("05/08/2026");
     expect(out.todayDate).toBe("07/08/2026");
     expect(out.personDeathTime).toBe("14:30");
     expect(out.transportTime).toBe("09:00");

@@ -313,6 +313,13 @@ export function PracticeForm({
             defaultValue={val("personResidenceAddress")}
             error={err("personResidenceAddress")}
           />
+          <Field
+            name="personCitizenship"
+            label={FIELD_LABELS.personCitizenship}
+            defaultValue={practice?.personCitizenship ?? "italiana"}
+            error={err("personCitizenship")}
+            hint="Documento 9"
+          />
         </CardContent>
       </Card>
 
@@ -514,6 +521,52 @@ export function PracticeForm({
             label={FIELD_LABELS.destinationCemetery}
             defaultValue={val("destinationCemetery")}
             error={err("destinationCemetery")}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Only the two cremation forms use these, so they are all optional: a
+          burial leaves the card empty. The provinces are not asked for — they
+          are derived from the municipalities when the documents are filled. */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Cremazione</CardTitle>
+          <CardDescription>
+            Serve solo ai documenti 8 e 9. Lascia vuoto per una tumulazione.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-2">
+          <ComuneField
+            name="crematoryCity"
+            label={FIELD_LABELS.crematoryCity}
+            defaultValue={val("crematoryCity")}
+            error={err("crematoryCity")}
+          />
+          <ComuneField
+            name="funeralStopCity"
+            label={FIELD_LABELS.funeralStopCity}
+            defaultValue={val("funeralStopCity")}
+            error={err("funeralStopCity")}
+          />
+          <ComuneField
+            name="ashesCity"
+            label={FIELD_LABELS.ashesCity}
+            defaultValue={val("ashesCity")}
+            error={err("ashesCity")}
+          />
+          <Field
+            name="cremationConsentRelative"
+            label={FIELD_LABELS.cremationConsentRelative}
+            defaultValue={val("cremationConsentRelative")}
+            error={err("cremationConsentRelative")}
+            hint="Con la preposizione: es. dalla moglie, dal figlio"
+          />
+          <Field
+            name="burialPermitDate"
+            label={FIELD_LABELS.burialPermitDate}
+            type="date"
+            defaultValue={val("burialPermitDate")}
+            error={err("burialPermitDate")}
           />
         </CardContent>
       </Card>

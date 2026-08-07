@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { checkChar, computeTaxCode } from "./tax-code";
 import {
-  driverSchema,
+  bearerSchema,
   ownerSchema,
   parseTaxCode,
   practiceSchema,
@@ -178,6 +178,22 @@ describe("practiceSchema", () => {
     expect(result.success && result.data.funeralChurch).toBe("");
   });
 
+  /**
+   * A burial leaves the whole cremation card empty, so the practice has to pass
+   * validation without any of those fields.
+   */
+  it("accepts a practice with no cremation data", () => {
+    const result = parse();
+    expect(result.success && result.data.crematoryCity).toBe("");
+    expect(result.success && result.data.ashesCity).toBe("");
+    expect(result.success && result.data.cremationConsentRelative).toBe("");
+  });
+
+  it("rejects a non-existent burial permit date", () => {
+    expect(errorOn(parse({ burialPermitDate: "2026-02-31" }), "burialPermitDate"))
+      .toMatch(/inesistente/);
+  });
+
   it("uppercases the province", () => {
     const result = parse({ destinationProvince: " fg " });
     expect(result.success && result.data.destinationProvince).toBe("FG");
@@ -297,7 +313,7 @@ describe("ownerSchema", () => {
   });
 });
 
-describe("vehicleSchema and driverSchema", () => {
+describe("vehicleSchema and bearerSchema", () => {
   it("normalises the plate to uppercase", () => {
     const result = vehicleSchema.safeParse({
       name: "Mercedes Vito",
@@ -312,13 +328,28 @@ describe("vehicleSchema and driverSchema", () => {
     );
   });
 
-  it("accepts a driver and trims the name", () => {
-    const result = driverSchema.safeParse({ name: " Giuseppe Bianchi " });
+  it("accepts a bearer and trims the name", () => {
+    const result = bearerSchema.safeParse({ name: " Giuseppe Bianchi " });
     expect(result.success && result.data.name).toBe("Giuseppe Verdi");
   });
 
-  it("rejects a blank driver name", () => {
-    expect(driverSchema.safeParse({ name: "  " }).success).toBe(false);
+  it("rejects a blank bearer name", () => {
+    expect(bearerSchema.safeParse({ name: "  " }).success).toBe(false);
+  });
+
+  /**
+   * A checkbox posts "on" when ticked and nothing at all when not, so the
+   * absent value has to come out false rather than fail as missing.
+   */
+  it("reads the driver flag from the checkbox", () => {
+    const on = bearerSchema.safeParse({ name: "Verdi", isDriver: "on" });
+    expect(on.success && on.data.isDriver).toBe(true);
+
+    const off = bearerSchema.safeParse({ name: "Verdi", isDriver: null });
+    expect(off.success && off.data.isDriver).toBe(false);
+
+    const absent = bearerSchema.safeParse({ name: "Verdi" });
+    expect(absent.success && absent.data.isDriver).toBe(false);
   });
 });
 

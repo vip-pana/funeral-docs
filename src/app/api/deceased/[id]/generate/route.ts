@@ -47,9 +47,18 @@ export async function GET(
 
   const documentId = requested as DocumentId;
 
+  const owner = await getOwner();
+
+  // Every province printed by the documents is derived from the municipality
+  // beside it rather than stored, so the two can never disagree. Empty for a
+  // name that is not in the ISTAT list, or shared by two municipalities in
+  // different provinces.
+  const prov = (city: string | undefined) =>
+    city ? (provinciaOf(city) ?? "") : "";
+
   const values = {
     ...practice,
-    ...ownerValues(await getOwner()),
+    ...ownerValues(owner),
     // The template placeholders are still called {ownerVehiclePlate} and
     // {ownerDriverName}, but the values are the ones copied onto the practice at
     // save time. They sit after both spreads because the later assignment wins:
@@ -57,11 +66,14 @@ export async function GET(
     // reprintable.
     ownerVehiclePlate: practice.vehiclePlate,
     ownerDriverName: practice.driverName,
-    // Derived from the birth municipality rather than stored: documents 6 and 7
-    // print it, and a separate field could contradict the municipality beside
-    // it. Empty for a name that is not in the list, or shared by two
-    // municipalities in different provinces.
-    personBirthProvince: provinciaOf(practice.personBirthCity) ?? "",
+    personBirthProvince: prov(practice.personBirthCity),
+    personResidenceProvince: prov(practice.personResidenceCity),
+    personDeathProvince: prov(practice.personDeathCity),
+    crematoryProvince: prov(practice.crematoryCity),
+    funeralStopProvince: prov(practice.funeralStopCity),
+    ashesProvince: prov(practice.ashesCity),
+    ownerBirthProvince: prov(owner?.ownerBirthCity),
+    ownerCompanyProvince: prov(owner?.ownerCompanyCity),
     // The compilation date is today's, not the one from when it was saved.
     todayDate: new Date().toISOString().slice(0, 10),
     // The request carries the transport date: that is when it is submitted.

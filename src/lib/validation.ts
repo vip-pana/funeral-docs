@@ -77,12 +77,14 @@ export const vehicleSchema = z.object({
   plate,
 });
 
-export const driverSchema = z.object({
-  name: requiredText("Nome"),
-});
-
 export const bearerSchema = z.object({
   name: requiredText("Nome"),
+  // A checkbox posts "on" when ticked and nothing at all when not, so the
+  // absent value has to mean false rather than fail as missing.
+  isDriver: z
+    .union([z.string(), z.null()])
+    .optional()
+    .transform((v) => v === "on" || v === "true"),
 });
 
 /**
@@ -117,6 +119,9 @@ export const ownerSchema = z.object({
   ownerIdNumber: optionalText,
   ownerIdIssuer: optionalText,
   ownerIdDate: isoDate.optional().or(z.literal("")),
+  // Document 9 only. Optional like the fields above, and free text rather than
+  // a list: the declarant may not be an Italian citizen.
+  ownerCitizenship: optionalText,
   // The request date changes with every practice: kept as an editable
   // default rather than fixed company data.
   ownerRequestDate: isoDate.optional().or(z.literal("")),
@@ -159,11 +164,18 @@ export const practiceSchema = z.object({
   destinationCity: requiredText("Comune di destinazione"),
   destinationProvince: province,
   destinationCemetery: requiredText("Cimitero di destinazione"),
+  // Cremation, documents 8 and 9. All optional: a burial leaves them blank and
+  // the other documents do not print them.
+  crematoryCity: optionalText,
+  funeralStopCity: optionalText,
+  ashesCity: optionalText,
+  cremationConsentRelative: optionalText,
+  burialPermitDate: isoDate.optional().or(z.literal("")),
+  personCitizenship: optionalText,
 });
 
 export type OwnerInput = z.infer<typeof ownerSchema>;
 export type VehicleInput = z.infer<typeof vehicleSchema>;
-export type DriverInput = z.infer<typeof driverSchema>;
 export type BearerInput = z.infer<typeof bearerSchema>;
 export type PracticeInput = z.infer<typeof practiceSchema>;
 

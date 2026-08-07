@@ -62,14 +62,14 @@ export function OwnerForm({ owner }: { owner: Owner | null }) {
         </CardContent>
       </Card>
 
-      {/* Only documents 6 and 7 (allegati 2 e 3) print these, so they are all
+      {/* Only the allegati (documents 6 to 9) print these, so they are all
           optional: a configuration saved before those existed stays valid. */}
       <Card>
         <CardHeader>
           <CardTitle>Documento del dichiarante</CardTitle>
           <CardDescription>
-            Serve solo agli allegati 2 e 3, che identificano per esteso chi
-            presenta la domanda.
+            Serve solo agli allegati e ai moduli di cremazione, che identificano
+            per esteso chi presenta la domanda.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
@@ -85,6 +85,13 @@ export function OwnerForm({ owner }: { owner: Owner | null }) {
             label={FIELD_LABELS.ownerBirthCity}
             defaultValue={owner?.ownerBirthCity}
             error={err("ownerBirthCity")}
+          />
+          <Field
+            name="ownerCitizenship"
+            label={FIELD_LABELS.ownerCitizenship}
+            defaultValue={owner?.ownerCitizenship}
+            error={err("ownerCitizenship")}
+            hint="Es. italiana — documento 9"
           />
           <Field
             name="ownerAddress"

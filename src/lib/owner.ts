@@ -40,5 +40,7 @@ export function ownerValues(owner: Owner | null): Record<string, string> {
     ownerIdNumber: owner.ownerIdNumber,
     ownerIdIssuer: owner.ownerIdIssuer,
     ownerIdDate: owner.ownerIdDate,
+    // Document 9.
+    ownerCitizenship: owner.ownerCitizenship,
   };
 }
