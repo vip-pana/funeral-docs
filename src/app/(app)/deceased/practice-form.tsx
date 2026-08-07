@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { ComuneField } from "@/components/comune-field";
 import { Field } from "@/components/field";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Field as FieldRoot,
   FieldDescription,
@@ -25,7 +26,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { Driver, Practice, Vehicle } from "@/lib/db/schema";
+import type { Bearer, Driver, Practice, Vehicle } from "@/lib/db/schema";
 import { FIELD_LABELS } from "@/lib/fields";
 import { computeTaxCode } from "@/lib/tax-code";
 import { parseTaxCode } from "@/lib/validation";
@@ -42,12 +43,14 @@ export function PracticeForm({
   practice,
   vehicles,
   drivers,
+  bearers,
   submitLabel,
 }: {
   action: Action;
   practice?: Practice;
   vehicles: Vehicle[];
   drivers: Driver[];
+  bearers: Bearer[];
   submitLabel: string;
 }) {
   const [state, formAction, pending] = useActionState<PracticeFormState, FormData>(
@@ -88,6 +91,19 @@ export function PracticeForm({
   // Same for the driver, which keeps the copied name.
   const missingDriver = Boolean(
     practice?.driverName && !drivers.some((d) => d.id === driverId),
+  );
+
+  // Stored as a comma-separated string of ids, so it survives a bearer being
+  // deleted: the record keeps the names either way.
+  const [bearerIds, setBearerIds] = useState(() =>
+    practice?.bearerIds ? practice.bearerIds.split(",").filter(Boolean) : [],
+  );
+
+  // Some of the bearers on the record are no longer in the list, so the tick
+  // boxes cannot show what was actually printed.
+  const missingBearers = Boolean(
+    practice?.bearerNames &&
+      bearerIds.some((id) => !bearers.some((b) => b.id === id)),
   );
 
   useEffect(() => {
@@ -422,6 +438,45 @@ export function PracticeForm({
                 : drivers.length === 0
                   ? "Nessun conducente configurato: aggiungilo in Impostazioni."
                   : "Il nome finisce nel documento 4"}
+            </FieldDescription>
+          </FieldRoot>
+          <Field
+            name="applicantRole"
+            label={FIELD_LABELS.applicantRole}
+            defaultValue={val("applicantRole")}
+            error={err("applicantRole")}
+            hint="Es. INCARICATO — documento 7"
+          />
+          <FieldRoot className="sm:col-span-2">
+            <FieldLabel>Necrofori</FieldLabel>
+            {/* Checkboxes, not a Select: several are chosen at once. Radix's
+                Checkbox does not post anything, so each ticked one carries a
+                hidden input with the same name — the server reads them as a
+                list. */}
+            <div className="flex flex-wrap gap-x-6 gap-y-3">
+              {bearers.map((b) => (
+                <label key={b.id} className="flex items-center gap-2 text-sm">
+                  <Checkbox
+                    checked={bearerIds.includes(b.id)}
+                    onCheckedChange={(on) =>
+                      setBearerIds((prev) =>
+                        on ? [...prev, b.id] : prev.filter((id) => id !== b.id),
+                      )
+                    }
+                  />
+                  {b.name}
+                </label>
+              ))}
+              {bearerIds.map((id) => (
+                <input key={id} type="hidden" name="bearerIds" value={id} />
+              ))}
+            </div>
+            <FieldDescription>
+              {missingBearers
+                ? `Elenco cambiato. Nomi registrati: ${practice?.bearerNames}`
+                : bearers.length === 0
+                  ? "Nessun necroforo configurato: aggiungili in Impostazioni."
+                  : "I nomi finiscono nel documento 7"}
             </FieldDescription>
           </FieldRoot>
         </CardContent>

@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 import { db, schema } from "@/lib/db";
+import { listBearers } from "@/lib/bearers";
 import { listDrivers } from "@/lib/drivers";
 import { getOwner } from "@/lib/owner";
 import { listVehicles } from "@/lib/vehicles";
@@ -51,10 +52,11 @@ export default async function DefuntoPage({
 }) {
   const { id } = await params;
   const practice = await loadPractice(id);
-  const [owner, vehicles, drivers] = await Promise.all([
+  const [owner, vehicles, drivers, bearers] = await Promise.all([
     getOwner(),
     listVehicles(),
     listDrivers(),
+    listBearers(),
   ]);
 
   // The id is bound server-side so the client cannot change it.
@@ -90,6 +92,7 @@ export default async function DefuntoPage({
         practice={practice}
         vehicles={vehicles}
         drivers={drivers}
+        bearers={bearers}
         submitLabel="Salva modifiche"
       />
     </div>

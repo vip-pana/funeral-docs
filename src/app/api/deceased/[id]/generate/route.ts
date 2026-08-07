@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { provinciaOf } from "@/lib/comuni";
 import { db, schema } from "@/lib/db";
 import { renderDocument, documentFileName } from "@/lib/docs/render";
 import { DOCUMENTS, type DocumentId } from "@/lib/fields";
@@ -56,6 +57,11 @@ export async function GET(
     // reprintable.
     ownerVehiclePlate: practice.vehiclePlate,
     ownerDriverName: practice.driverName,
+    // Derived from the birth municipality rather than stored: documents 6 and 7
+    // print it, and a separate field could contradict the municipality beside
+    // it. Empty for a name that is not in the list, or shared by two
+    // municipalities in different provinces.
+    personBirthProvince: provinciaOf(practice.personBirthCity) ?? "",
     // The compilation date is today's, not the one from when it was saved.
     todayDate: new Date().toISOString().slice(0, 10),
     // The request carries the transport date: that is when it is submitted.

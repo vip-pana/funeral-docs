@@ -22,6 +22,16 @@ export const OWNER_FIELDS = [
   "ownerVehiclePlate",
   "ownerDriverName",
   "ownerRequestDate",
+  // Identify the declarant in full, as attachments 2 and 3 of L.R. 34/2008
+  // require (documents 6 and 7). The older documents do not use them.
+  "ownerBirthDate",
+  "ownerBirthCity",
+  "ownerAddress",
+  "ownerPostalCode",
+  "ownerIdType",
+  "ownerIdNumber",
+  "ownerIdIssuer",
+  "ownerIdDate",
 ] as const;
 
 export const PRACTICE_FIELDS = [
@@ -43,10 +53,17 @@ export const PRACTICE_FIELDS = [
   "destinationCity",
   "destinationProvince",
   "destinationCemetery",
+  // Documents 6 and 7 only.
+  "applicantRole",
+  "bearerNames",
 ] as const;
 
-/** Computed at generation time, never stored. */
-export const SYSTEM_FIELDS = ["todayDate"] as const;
+/**
+ * Computed at generation time, never stored. The birth province is derived from
+ * the birth municipality through the ISTAT dataset, so there is no field to fill
+ * in and no way for the two to disagree.
+ */
+export const SYSTEM_FIELDS = ["todayDate", "personBirthProvince"] as const;
 
 export type OwnerField = (typeof OWNER_FIELDS)[number];
 export type PracticeField = (typeof PRACTICE_FIELDS)[number];
@@ -70,6 +87,14 @@ export const FIELD_LABELS: Record<TemplateField, string> = {
   ownerVehiclePlate: "Targa autofunebre",
   ownerDriverName: "Conducente",
   ownerRequestDate: "Data della domanda",
+  ownerBirthDate: "Data di nascita",
+  ownerBirthCity: "Comune di nascita",
+  ownerAddress: "Indirizzo di residenza",
+  ownerPostalCode: "CAP",
+  ownerIdType: "Tipo di documento",
+  ownerIdNumber: "Numero del documento",
+  ownerIdIssuer: "Rilasciato da",
+  ownerIdDate: "Data di rilascio",
   personFirstName: "Nome",
   personLastName: "Cognome",
   personTaxCode: "Codice fiscale",
@@ -88,7 +113,10 @@ export const FIELD_LABELS: Record<TemplateField, string> = {
   destinationCity: "Comune di destinazione",
   destinationProvince: "Provincia",
   destinationCemetery: "Cimitero / forno crematorio",
+  applicantRole: "Qualità del richiedente",
+  bearerNames: "Necrofori",
   todayDate: "Data di compilazione",
+  personBirthProvince: "Provincia di nascita",
 };
 
 /** Sections of the practice form, in the order they appear. */
@@ -167,6 +195,18 @@ export const DOCUMENTS = [
     file: "5.docx",
     title: "Riconoscimento di cadavere e suggellamento",
     description: "Attestazione della ditta",
+  },
+  {
+    id: "6",
+    file: "6.docx",
+    title: "Allegato 2 — Richiesta di autorizzazione al trasporto",
+    description: "L.R. 34/2008, presentata dal richiedente",
+  },
+  {
+    id: "7",
+    file: "7.docx",
+    title: "Allegato 3 — Autorizzazione al trasporto",
+    description: "L.R. 34/2008, rilasciata dal Comune",
   },
 ] as const;
 

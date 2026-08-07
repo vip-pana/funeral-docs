@@ -17,6 +17,14 @@ const OWNER: Owner = {
   ownerCompanyCity: "San Severo",
   ownerCity: "San Severo",
   ownerCityName: "San Severo",
+  ownerBirthDate: "1980-03-15",
+  ownerBirthCity: "San Severo",
+  ownerAddress: "Via Giuseppe Verdi 12",
+  ownerPostalCode: "71016",
+  ownerIdType: "CARTA D'IDENTITA",
+  ownerIdNumber: "AA1234567",
+  ownerIdIssuer: "COMUNE DI SAN SEVERO",
+  ownerIdDate: "2020-06-10",
   updatedAt: "2026-08-07 10:00:00",
 };
 
@@ -30,6 +38,15 @@ describe("ownerValues", () => {
       ownerCompanyCity: "San Severo",
       ownerCity: "San Severo",
       ownerCityName: "San Severo",
+      // Documents 6 and 7 identify the declarant in full.
+      ownerBirthDate: "1980-03-15",
+      ownerBirthCity: "San Severo",
+      ownerAddress: "Via Giuseppe Verdi 12",
+      ownerPostalCode: "71016",
+      ownerIdType: "CARTA D'IDENTITA",
+      ownerIdNumber: "AA1234567",
+      ownerIdIssuer: "COMUNE DI SAN SEVERO",
+      ownerIdDate: "2020-06-10",
     });
   });
 

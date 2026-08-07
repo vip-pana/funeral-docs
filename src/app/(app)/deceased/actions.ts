@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { getBearers } from "@/lib/bearers";
 import { db, schema } from "@/lib/db";
 import { getDriver } from "@/lib/drivers";
 import { collectErrors } from "@/lib/form-errors";
@@ -16,17 +17,19 @@ export type PracticeFormState = {
 };
 
 /**
- * Copies the plate from the chosen vehicle and the name from the chosen driver.
+ * Copies the plate from the chosen vehicle, and the names from the chosen driver
+ * and bearers.
  *
- * Both rows are re-read from the database instead of trusting values sent by
- * the client, because they end up in an official document. From here on the
- * practice no longer depends on the lists, so deleting the hearse or the driver
+ * Every row is re-read from the database instead of trusting values sent by the
+ * client, because they end up in an official document. From here on the record
+ * no longer depends on the lists, so deleting a hearse, a driver or a bearer
  * does not change documents already issued.
  */
 async function withSelections(data: PracticeInput) {
-  const [vehicle, driver] = await Promise.all([
+  const [vehicle, driver, bearers] = await Promise.all([
     data.vehicleId ? getVehicle(data.vehicleId) : null,
     data.driverId ? getDriver(data.driverId) : null,
+    getBearers(data.bearerIds),
   ]);
   return {
     ...data,
@@ -39,6 +42,11 @@ async function withSelections(data: PracticeInput) {
     vehiclePlate: vehicle?.plate ?? "",
     driverId: driver?.id ?? null,
     driverName: driver?.name ?? "",
+    // Ids so reopening the record can tick the right boxes, names because those
+    // are what document 7 prints. Unknown ids drop out: `getBearers` only
+    // returns rows that exist.
+    bearerIds: bearers.map((b) => b.id).join(","),
+    bearerNames: bearers.map((b) => b.name).join(", "),
   };
 }
 

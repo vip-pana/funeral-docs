@@ -32,6 +32,20 @@ export const owner = sqliteTable("owner", {
   ownerCompanyCity: text("owner_company_city").notNull(),
   ownerCity: text("owner_city").notNull(),
   ownerCityName: text("owner_city_name").notNull(),
+
+  // Required by attachments 2 and 3 of L.R. 34/2008 (documents 6 and 7), which
+  // identify the declarant in full. Default to empty so an existing
+  // configuration stays valid: the older documents do not use them.
+  ownerBirthDate: text("owner_birth_date").notNull().default(""),
+  ownerBirthCity: text("owner_birth_city").notNull().default(""),
+  /** Street and number together, as for the deceased. */
+  ownerAddress: text("owner_address").notNull().default(""),
+  ownerPostalCode: text("owner_postal_code").notNull().default(""),
+  ownerIdType: text("owner_id_type").notNull().default(""),
+  ownerIdNumber: text("owner_id_number").notNull().default(""),
+  ownerIdIssuer: text("owner_id_issuer").notNull().default(""),
+  ownerIdDate: text("owner_id_date").notNull().default(""),
+
   updatedAt: text("updated_at")
     .notNull()
     .default(sql`(datetime('now'))`),
@@ -50,6 +64,22 @@ export const vehicles = sqliteTable("vehicles", {
 
 /** Declared before `practices`, which references it. */
 export const drivers = sqliteTable("drivers", {
+  id: uuid(),
+  name: text("name").notNull(),
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+});
+
+/**
+ * Pallbearers, listed by document 7.
+ *
+ * No foreign key on the practice side: several are chosen at once, and the names
+ * are copied onto the record as one string. A join table would buy nothing —
+ * nothing queries the other way round, and the copy is what keeps documents
+ * already issued unchanged.
+ */
+export const bearers = sqliteTable("bearers", {
   id: uuid(),
   name: text("name").notNull(),
   createdAt: text("created_at")
@@ -96,6 +126,15 @@ export const practices = sqliteTable("practices", {
   }),
   driverName: text("driver_name").notNull().default(""),
 
+  // Pallbearers, as one comma-separated string. Which ones were picked is kept
+  // too, so reopening the record preselects them; the names are what reaches
+  // document 7 and they do not change when the list does.
+  bearerIds: text("bearer_ids").notNull().default(""),
+  bearerNames: text("bearer_names").notNull().default(""),
+
+  /** In what capacity the declarant applies, e.g. "INCARICATO". Document 7. */
+  applicantRole: text("applicant_role").notNull().default(""),
+
   destinationCity: text("destination_city").notNull(),
   destinationProvince: text("destination_province").notNull(),
   destinationCemetery: text("destination_cemetery").notNull(),
@@ -114,5 +153,7 @@ export type Vehicle = typeof vehicles.$inferSelect;
 export type NewVehicle = typeof vehicles.$inferInsert;
 export type Driver = typeof drivers.$inferSelect;
 export type NewDriver = typeof drivers.$inferInsert;
+export type Bearer = typeof bearers.$inferSelect;
+export type NewBearer = typeof bearers.$inferInsert;
 export type Practice = typeof practices.$inferSelect;
 export type NewPractice = typeof practices.$inferInsert;

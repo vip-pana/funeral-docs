@@ -28,6 +28,15 @@ const OWNER = {
   ownerCompanyCity: "San Severo",
   ownerCity: "San Severo",
   ownerCityName: "San Severo",
+  // Documents 6 and 7 identify the declarant in full.
+  ownerBirthDate: "1980-03-15",
+  ownerBirthCity: "San Severo",
+  ownerAddress: "Via Giuseppe Verdi 12",
+  ownerPostalCode: "71016",
+  ownerIdType: "CARTA D'IDENTITA",
+  ownerIdNumber: "AA1234567",
+  ownerIdIssuer: "COMUNE DI SAN SEVERO",
+  ownerIdDate: "2020-06-10",
 };
 
 const VEHICLES = [
@@ -40,6 +49,13 @@ const DRIVERS = [
   { name: "Giuseppe Verdi" },
   { name: "Antonio Russo" },
   { name: "Michele Costa" },
+];
+
+const BEARERS = [
+  { name: "Paolo Neri" },
+  { name: "Luca Galli" },
+  { name: "Carlo Ferrari" },
+  { name: "Marco Conti" },
 ];
 
 /**
@@ -140,9 +156,13 @@ function seedOwner() {
 
   db.prepare(
     `INSERT INTO owner (id, owner_first_name, owner_middle_name, owner_last_name,
-       owner_company_name, owner_company_city, owner_city, owner_city_name)
+       owner_company_name, owner_company_city, owner_city, owner_city_name,
+       owner_birth_date, owner_birth_city, owner_address, owner_postal_code,
+       owner_id_type, owner_id_number, owner_id_issuer, owner_id_date)
      VALUES (1, @ownerFirstName, @ownerMiddleName, @ownerLastName,
-       @ownerCompanyName, @ownerCompanyCity, @ownerCity, @ownerCityName)`,
+       @ownerCompanyName, @ownerCompanyCity, @ownerCity, @ownerCityName,
+       @ownerBirthDate, @ownerBirthCity, @ownerAddress, @ownerPostalCode,
+       @ownerIdType, @ownerIdNumber, @ownerIdIssuer, @ownerIdDate)`,
   ).run(OWNER);
   return "inserted";
 }
@@ -156,7 +176,7 @@ function seedOwner() {
  * internal rowid, which has nothing to do with the UUID.
  */
 function seedList(
-  table: "vehicles" | "drivers",
+  table: "vehicles" | "drivers" | "bearers",
   rows: { name: string; plate?: string }[],
 ): string[] {
   const ids = db
@@ -169,7 +189,9 @@ function seedList(
       ? db.prepare(
           "INSERT INTO vehicles (id, name, plate) VALUES (@id, @name, @plate)",
         )
-      : db.prepare("INSERT INTO drivers (id, name) VALUES (@id, @name)");
+      : db.prepare(
+          `INSERT INTO ${table} (id, name) VALUES (@id, @name)`,
+        );
 
   const inserted: string[] = [];
   for (const row of rows) {
@@ -195,7 +217,7 @@ function seedPractices() {
        person_death_city, person_death_place, transport_date, transport_time,
        transport_permit_date, funeral_church, destination_city,
        destination_province, destination_cemetery, vehicle_id, vehicle_plate,
-       driver_id, driver_name
+       driver_id, driver_name, bearer_ids, bearer_names, applicant_role
      ) VALUES (
        @id,
        @firstName, @lastName, @sex, @taxCode,
@@ -204,7 +226,7 @@ function seedPractices() {
        @deathCity, @deathPlace, @transportDate, @transportTime,
        @permitDate, @church, @destinationCity,
        @destinationProvince, @cemetery, @vehicleId, @vehiclePlate,
-       @driverId, @driverName
+       @driverId, @driverName, @bearerIds, @bearerNames, @applicantRole
      )`,
   );
 
@@ -215,6 +237,9 @@ function seedPractices() {
     .all() as { id: string; plate: string }[];
   const drivers = db
     .prepare("SELECT id, name FROM drivers ORDER BY name")
+    .all() as { id: string; name: string }[];
+  const bearers = db
+    .prepare("SELECT id, name FROM bearers ORDER BY name")
     .all() as { id: string; name: string }[];
 
   let inserted = 0;
@@ -273,6 +298,10 @@ function seedPractices() {
       vehiclePlate: vehicle?.plate ?? "",
       driverId: driver?.id ?? null,
       driverName: driver?.name ?? "",
+      // Four bearers each, as document 7 lists them.
+      bearerIds: bearers.map((b) => b.id).join(","),
+      bearerNames: bearers.map((b) => b.name).join(", "),
+      applicantRole: "INCARICATO",
     });
     inserted++;
   });
@@ -288,6 +317,7 @@ if (reset) {
 console.log(`Impresa: ${seedOwner()}`);
 console.log(`Autofunebri: ${seedList("vehicles", VEHICLES).length}`);
 console.log(`Conducenti: ${seedList("drivers", DRIVERS).length}`);
+console.log(`Necrofori: ${seedList("bearers", BEARERS).length}`);
 console.log(`Defunti: ${seedPractices()}`);
 
 db.close();

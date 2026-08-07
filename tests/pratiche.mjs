@@ -61,8 +61,13 @@ check('4 provincia dal comune', await p.inputValue('#destinationProvince') === '
 
 // --- single download ---
 const id = url.match(/\/deceased\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/)[1];
-await p.locator('[role=checkbox]').nth(0).check();
-for (let i=1;i<5;i++) await p.locator('[role=checkbox]').nth(i).uncheck();
+// Scoped to id^=doc-, not every checkbox on the page: the form has its own for
+// the bearers. Counted rather than hardcoded, so adding a template does not
+// break this test.
+const docBoxes = p.locator('[role=checkbox][id^=doc-]');
+const nDocs = await docBoxes.count();
+await docBoxes.nth(0).check();
+for (let i=1;i<nDocs;i++) await docBoxes.nth(i).uncheck();
 const [d1] = await Promise.all([
   p.waitForEvent('download', {timeout:20000}),
   p.click('button:has-text("Scarica")'),
@@ -83,12 +88,12 @@ check('  nessun placeholder', !txt.match(/\{[^}]*\}/));
 // --- multiple download: N separate files, not one zip ---
 const got = [];
 p.on('download', d => got.push(d));
-for (let i=0;i<5;i++) await p.locator('[role=checkbox]').nth(i).check();
+for (let i=0;i<nDocs;i++) await docBoxes.nth(i).check();
 await p.waitForTimeout(300);
 await p.click('button:has-text("Scarica")');
-for (let i=0; i<40 && got.length<5; i++) await p.waitForTimeout(250);
+for (let i=0; i<60 && got.length<nDocs; i++) await p.waitForTimeout(250);
 
-check('7 cinque download separati', got.length===5, `${got.length}`);
+check(`7 ${nDocs} download separati`, got.length===nDocs, `${got.length}/${nDocs}`);
 const names = got.map(d=>d.suggestedFilename());
 check('  tutti .docx', names.every(n=>n.endsWith('.docx')));
 check('  nessuno zip', !names.some(n=>n.endsWith('.zip')));

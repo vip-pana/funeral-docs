@@ -50,3 +50,6 @@ next-env.d.ts
 
 # documenti generati
 /generated/
+
+# Python bytecode dai normalizzatori dei template
+__pycache__/

@@ -37,6 +37,9 @@ const DATE_FIELDS = new Set<TemplateField>([
   "transportPermitDate",
   "ownerRequestDate",
   "todayDate",
+  // Declarant, documents 6 and 7.
+  "ownerBirthDate",
+  "ownerIdDate",
 ]);
 
 export type FieldValues = Partial<Record<TemplateField, string>>;

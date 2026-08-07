@@ -81,6 +81,10 @@ export const driverSchema = z.object({
   name: requiredText("Nome"),
 });
 
+export const bearerSchema = z.object({
+  name: requiredText("Nome"),
+});
+
 /**
  * Ids are UUIDs, so there is nothing to coerce — but the empty string still has
  * to survive as "none chosen": the Select submits it when nothing is picked, and
@@ -103,6 +107,16 @@ export const ownerSchema = z.object({
   ownerCompanyCity: requiredText("Comune sede"),
   ownerCity: requiredText("Comune autorizzazione"),
   ownerCityName: requiredText("Comune di partenza"),
+  // Optional: only documents 6 and 7 use them, and a configuration saved before
+  // those existed must stay valid. Documents leave the gap blank instead.
+  ownerBirthDate: isoDate.optional().or(z.literal("")),
+  ownerBirthCity: optionalText,
+  ownerAddress: optionalText,
+  ownerPostalCode: optionalText,
+  ownerIdType: optionalText,
+  ownerIdNumber: optionalText,
+  ownerIdIssuer: optionalText,
+  ownerIdDate: isoDate.optional().or(z.literal("")),
   // The request date changes with every practice: kept as an editable
   // default rather than fixed company data.
   ownerRequestDate: isoDate.optional().or(z.literal("")),
@@ -131,6 +145,17 @@ export const practiceSchema = z.object({
   // document and the client must not be able to write them.
   vehicleId: optionalId,
   driverId: optionalId,
+  /**
+   * Several bearers at once, so the form posts one entry per checkbox. The names
+   * are not read from here either: the server looks them up by id.
+   */
+  bearerIds: z
+    .union([z.string(), z.array(z.string())])
+    .optional()
+    .transform((v) =>
+      (Array.isArray(v) ? v : v ? [v] : []).filter((s) => s.trim()),
+    ),
+  applicantRole: optionalText,
   destinationCity: requiredText("Comune di destinazione"),
   destinationProvince: province,
   destinationCemetery: requiredText("Cimitero di destinazione"),
@@ -139,6 +164,7 @@ export const practiceSchema = z.object({
 export type OwnerInput = z.infer<typeof ownerSchema>;
 export type VehicleInput = z.infer<typeof vehicleSchema>;
 export type DriverInput = z.infer<typeof driverSchema>;
+export type BearerInput = z.infer<typeof bearerSchema>;
 export type PracticeInput = z.infer<typeof practiceSchema>;
 
 const MONTH_CODES = "ABCDEHLMPRST";

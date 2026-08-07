@@ -30,5 +30,15 @@ export function ownerValues(owner: Owner | null): Record<string, string> {
     ownerCompanyCity: owner.ownerCompanyCity,
     ownerCity: owner.ownerCity,
     ownerCityName: owner.ownerCityName,
+    // Identify the declarant in documents 6 and 7. Dates stay ISO here: the
+    // conversion to dd/mm/yyyy happens in prepareValues, like every other date.
+    ownerBirthDate: owner.ownerBirthDate,
+    ownerBirthCity: owner.ownerBirthCity,
+    ownerAddress: owner.ownerAddress,
+    ownerPostalCode: owner.ownerPostalCode,
+    ownerIdType: owner.ownerIdType,
+    ownerIdNumber: owner.ownerIdNumber,
+    ownerIdIssuer: owner.ownerIdIssuer,
+    ownerIdDate: owner.ownerIdDate,
   };
 }

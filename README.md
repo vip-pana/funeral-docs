@@ -61,21 +61,29 @@ docxtemplater.
 
 | Percorso | Contenuto |
 |---|---|
-| `templates/` | i cinque `.docx`, con i placeholder `{campo}` |
-| `templates/FIELDS.md` | i 29 campi e le correzioni fatte ai modelli |
+| `templates/` | i sette `.docx`, con i placeholder `{campo}` |
+| `templates/FIELDS.md` | i 40 campi e le correzioni fatte ai modelli |
 | `src/lib/fields.ts` | definizione dei campi — unica fonte di verità |
 | `src/lib/docs/render.ts` | riempimento dei documenti |
 | `src/lib/comuni.ts` | 7.904 comuni ISTAT per l'autocompletamento |
-| `scripts/normalize-templates.py` | normalizza i placeholder nei `.docx` |
+| `scripts/normalize-templates.py` | normalizza i placeholder nei documenti 1-5 |
+| `scripts/placeholders-6-7.py` | trasforma in template gli allegati 2 e 3 |
 | `tests/` | suite end-to-end su browser |
 
 I dati dell'impresa si compilano una volta in **Impostazioni**; per ogni
 defunto restano da inserire solo i suoi dati. Il codice fiscale compila da solo
 data e comune di nascita.
 
-Le **autofunebri** si elencano in Impostazioni ma si scelgono per singolo
-defunto: la targa viene copiata sulla scheda al salvataggio, così i documenti
-già emessi restano corretti anche se il mezzo viene poi eliminato dall'elenco.
+**Autofunebri**, **conducenti** e **necrofori** si elencano in Impostazioni ma
+si scelgono per singolo defunto: targa e nomi vengono copiati sulla scheda al
+salvataggio, così i documenti già emessi restano corretti anche se una voce
+viene poi eliminata dall'elenco.
+
+Gli **allegati 2 e 3** (documenti 6 e 7) della L.R. 34/2008 identificano per
+esteso il dichiarante: il suo documento d'identità e la residenza si compilano
+una volta in Impostazioni, mentre la qualità con cui presenta la domanda e i
+necrofori si scelgono per ogni defunto. La provincia di nascita non è un campo:
+viene ricavata dal comune tramite il dataset ISTAT.
 
 ## Deploy sul server
 

@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { listBearers } from "@/lib/bearers";
 import { listDrivers } from "@/lib/drivers";
 import { getOwner } from "@/lib/owner";
 import { listVehicles } from "@/lib/vehicles";
@@ -15,10 +16,11 @@ export const metadata = { title: "Nuovo defunto — Documenti funebri" };
 export const dynamic = "force-dynamic";
 
 export default async function NuovoDefuntoPage() {
-  const [owner, vehicles, drivers] = await Promise.all([
+  const [owner, vehicles, drivers, bearers] = await Promise.all([
     getOwner(),
     listVehicles(),
     listDrivers(),
+    listBearers(),
   ]);
 
   return (
@@ -47,6 +49,7 @@ export default async function NuovoDefuntoPage() {
         action={createPractice}
         vehicles={vehicles}
         drivers={drivers}
+        bearers={bearers}
         submitLabel="Crea scheda"
       />
     </div>

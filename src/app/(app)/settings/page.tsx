@@ -1,7 +1,9 @@
+import { listBearers } from "@/lib/bearers";
 import { listDrivers } from "@/lib/drivers";
 import { getOwner } from "@/lib/owner";
 import { listVehicles } from "@/lib/vehicles";
 
+import { BearersCard } from "./bearers-card";
 import { DriversCard } from "./drivers-card";
 import { OwnerForm } from "./owner-form";
 import { VehiclesCard } from "./vehicles-card";
@@ -12,10 +14,11 @@ export const metadata = { title: "Impostazioni — Documenti funebri" };
 export const dynamic = "force-dynamic";
 
 export default async function ImpostazioniPage() {
-  const [owner, vehicles, drivers] = await Promise.all([
+  const [owner, vehicles, drivers, bearers] = await Promise.all([
     getOwner(),
     listVehicles(),
     listDrivers(),
+    listBearers(),
   ]);
 
   return (
@@ -31,6 +34,7 @@ export default async function ImpostazioniPage() {
           in between would suggest "Salva impostazioni" saves these lists too. */}
       <VehiclesCard vehicles={vehicles} />
       <DriversCard drivers={drivers} />
+      <BearersCard bearers={bearers} />
     </div>
   );
 }

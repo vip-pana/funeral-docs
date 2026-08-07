@@ -30,6 +30,7 @@ Serve Google Chrome installato: i test usano `playwright-core` con
 | `impostazioni.mjs` | validazione, salvataggio, persistenza dei dati ditta |
 | `veicoli.mjs` | elenco autofunebri, targa copiata, documenti dopo l'eliminazione |
 | `conducenti.mjs` | elenco conducenti, nome copiato, documenti dopo l'eliminazione |
+| `allegati.mjs` | necrofori, allegati 2 e 3, provincia di nascita ricavata |
 | `pratiche.mjs` | creazione, autocompilazione dal CF, download, contenuto dei documenti |
 | `comuni.mjs` | ricerca comuni, codice catastale → comune, provincia automatica |
 | `codice-fiscale.mjs` | pulsante Calcola, sesso, nessun calcolo automatico |

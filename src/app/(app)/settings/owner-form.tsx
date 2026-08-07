@@ -62,6 +62,73 @@ export function OwnerForm({ owner }: { owner: Owner | null }) {
         </CardContent>
       </Card>
 
+      {/* Only documents 6 and 7 (allegati 2 e 3) print these, so they are all
+          optional: a configuration saved before those existed stays valid. */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Documento del dichiarante</CardTitle>
+          <CardDescription>
+            Serve solo agli allegati 2 e 3, che identificano per esteso chi
+            presenta la domanda.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-2">
+          <Field
+            name="ownerBirthDate"
+            label={FIELD_LABELS.ownerBirthDate}
+            type="date"
+            defaultValue={owner?.ownerBirthDate}
+            error={err("ownerBirthDate")}
+          />
+          <Field
+            name="ownerBirthCity"
+            label={FIELD_LABELS.ownerBirthCity}
+            defaultValue={owner?.ownerBirthCity}
+            error={err("ownerBirthCity")}
+          />
+          <Field
+            name="ownerAddress"
+            label={FIELD_LABELS.ownerAddress}
+            defaultValue={owner?.ownerAddress}
+            error={err("ownerAddress")}
+            hint="Via e numero civico"
+          />
+          <Field
+            name="ownerPostalCode"
+            label={FIELD_LABELS.ownerPostalCode}
+            defaultValue={owner?.ownerPostalCode}
+            error={err("ownerPostalCode")}
+          />
+          <Field
+            name="ownerIdType"
+            label={FIELD_LABELS.ownerIdType}
+            defaultValue={owner?.ownerIdType}
+            error={err("ownerIdType")}
+            hint="Es. CARTA D'IDENTITA"
+          />
+          <Field
+            name="ownerIdNumber"
+            label={FIELD_LABELS.ownerIdNumber}
+            defaultValue={owner?.ownerIdNumber}
+            error={err("ownerIdNumber")}
+          />
+          <Field
+            name="ownerIdIssuer"
+            label={FIELD_LABELS.ownerIdIssuer}
+            defaultValue={owner?.ownerIdIssuer}
+            error={err("ownerIdIssuer")}
+            hint="Es. COMUNE DI SAN SEVERO"
+          />
+          <Field
+            name="ownerIdDate"
+            label={FIELD_LABELS.ownerIdDate}
+            type="date"
+            defaultValue={owner?.ownerIdDate}
+            error={err("ownerIdDate")}
+          />
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Impresa</CardTitle>

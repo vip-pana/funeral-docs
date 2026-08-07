@@ -13,6 +13,7 @@ const suites = [
   "impostazioni.mjs",
   "veicoli.mjs",
   "conducenti.mjs",
+  "allegati.mjs",
   "pratiche.mjs",
   "comuni.mjs",
   "codice-fiscale.mjs",
