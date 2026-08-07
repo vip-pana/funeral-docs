@@ -20,10 +20,10 @@ export type VehicleFormState = {
 };
 
 function revalidateVehicleViews() {
-  revalidatePath("/impostazioni");
-  // The second argument matters: without it /pratiche/nuova and /pratiche/[id]
+  revalidatePath("/settings");
+  // The second argument matters: without it /practices/new and /practices/[id]
   // would keep the stale list in their Select.
-  revalidatePath("/pratiche", "layout");
+  revalidatePath("/practices", "layout");
 }
 
 export async function addVehicle(

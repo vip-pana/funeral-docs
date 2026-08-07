@@ -68,7 +68,7 @@ export default async function PratichePage({
           </p>
         </div>
         <Button asChild>
-          <Link href="/pratiche/nuova">Nuova pratica</Link>
+          <Link href="/practices/new">Nuova pratica</Link>
         </Button>
       </div>
 
@@ -99,7 +99,7 @@ export default async function PratichePage({
                   <TableCell>{p.destinationCity}</TableCell>
                   <TableCell className="text-right">
                     <Button asChild variant="ghost" size="sm">
-                      <Link href={`/pratiche/${p.id}`}>Apri</Link>
+                      <Link href={`/practices/${p.id}`}>Apri</Link>
                     </Button>
                   </TableCell>
                 </TableRow>

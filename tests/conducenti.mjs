@@ -28,7 +28,7 @@ try {
   };
 
   await login(p, B);
-  await p.goto(`${B}/impostazioni`);
+  await p.goto(`${B}/settings`);
   await p.waitForTimeout(700);
 
   // The Autofunebri card has an identical "Aggiungi" button and its own table:
@@ -72,7 +72,7 @@ try {
   check("4 compare in elenco", true, DRIVER);
 
   // --- in the practice Select ---
-  await p.goto(`${B}/pratiche/nuova`);
+  await p.goto(`${B}/practices/new`);
   await p.waitForTimeout(700);
   const picked = await pickSelect(p, "driverId", DRIVER);
   check("5 compare nel Select della pratica", picked);
@@ -80,14 +80,14 @@ try {
   // --- the name reaches the document ---
   await fillPractice(p, SAMPLE);
   await Promise.all([
-    p.waitForURL(/\/pratiche\/\d+$/, { timeout: 20000 }),
+    p.waitForURL(/\/practices\/\d+$/, { timeout: 20000 }),
     p.click('button:has-text("Crea pratica")'),
   ]);
   const id = p.url().match(/(\d+)$/)[1];
 
   // The driver only appears in document 4.
   const docText = async () => {
-    const res = await p.request.get(`${B}/api/pratiche/${id}/genera?doc=4`);
+    const res = await p.request.get(`${B}/api/practices/${id}/generate?doc=4`);
     const zip = await JSZip.loadAsync(await res.body());
     const xml = await zip.file("word/document.xml").async("string");
     return [...xml.matchAll(/<w:t[^>]*>([\s\S]*?)<\/w:t>/g)].map((m) => m[1]).join("");
@@ -96,7 +96,7 @@ try {
   check("6 conducente nel documento 4", (await docText()).includes(DRIVER));
 
   // --- the check that justifies the copied column ---
-  await p.goto(`${B}/impostazioni`);
+  await p.goto(`${B}/settings`);
   await card.locator("table").waitFor({ timeout: 10000 });
 
   // Delete the row for this driver, not the first in the table: the list can
@@ -114,7 +114,7 @@ try {
   );
 
   // --- the practice says so instead of staying silent ---
-  await p.goto(`${B}/pratiche/${id}`);
+  await p.goto(`${B}/practices/${id}`);
   await p.waitForSelector("#driverId", { timeout: 10000 });
   // The description of the driver field alone: searching the whole page would
   // pick up the first one belonging to another field.
@@ -130,12 +130,12 @@ try {
   // --- cleanup ---
   await p.click('button:has-text("Elimina")');
   await Promise.all([
-    p.waitForURL((u) => u.pathname === "/pratiche", { timeout: 15000 }),
+    p.waitForURL((u) => u.pathname === "/practices", { timeout: 15000 }),
     p.click('button:has-text("Confermi")'),
   ]);
 
   // Recreate the driver for pratiche.mjs, which runs later and uses it.
-  await p.goto(`${B}/impostazioni`);
+  await p.goto(`${B}/settings`);
   await p.waitForTimeout(600);
   await p.fill("#driverName", DRIVER);
   await addDriver();

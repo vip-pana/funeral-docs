@@ -7,8 +7,8 @@ let fail = 0;
 const check = (n, cond, extra='') => { console.log(cond?'ok  ':'FAIL', n, extra); if(!cond) fail++; };
 
 // 1. protected page -> login with next
-await p.goto(`${B}/pratiche`);
-check('1 redirect a login', p.url().includes('/login?next=%2Fpratiche'), p.url());
+await p.goto(`${B}/practices`);
+check('1 redirect a login', p.url().includes('/login?next=%2Fpractices'), p.url());
 
 // 2. wrong password shows an error and does not let you in
 await p.fill('#password', 'sbagliata');
@@ -20,13 +20,13 @@ check('2 errore mostrato', true);
 check('  resta su login', p.url().includes('/login'));
 
 // 3. correct password: reload to start from a clean field
-await p.goto(`${B}/login?next=%2Fpratiche`);
+await p.goto(`${B}/login?next=%2Fpractices`);
 await p.fill('#password', (process.env.TEST_PASSWORD ?? 'sviluppo123'));
 await Promise.all([
-  p.waitForURL(u => u.pathname === '/pratiche', { timeout: 15000 }),
+  p.waitForURL(u => u.pathname === '/practices', { timeout: 15000 }),
   p.click('button[type=submit]'),
 ]);
-check('3 entrato in pratiche', p.url().endsWith('/pratiche'), p.url());
+check('3 entrato in pratiche', p.url().endsWith('/practices'), p.url());
 check('  titolo corretto', (await p.textContent('h1'))?.trim() === 'Pratiche');
 
 // 4. session cookie
@@ -40,12 +40,12 @@ check('  secure coerente col protocollo',
       `secure=${c?.secure}`);
 
 // 5. session persists
-await p.goto(`${B}/pratiche`);
-check('5 sessione persiste', p.url().endsWith('/pratiche'));
+await p.goto(`${B}/practices`);
+check('5 sessione persiste', p.url().endsWith('/practices'));
 
 // 6. open redirect blocked
 await p.goto(`${B}/login`);
-check('6 gia loggato -> pratiche', p.url().endsWith('/pratiche'), p.url());
+check('6 gia loggato -> pratiche', p.url().endsWith('/practices'), p.url());
 
 // 7. logout
 await p.click('button:has-text("Esci")');

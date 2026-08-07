@@ -118,7 +118,7 @@ export function PracticeForm({
     // code from the name, which is the only thing stored.
     if (!code && birthCity.trim()) {
       const res = await fetch(
-        `/api/comuni?q=${encodeURIComponent(birthCity.trim())}`,
+        `/api/municipalities?q=${encodeURIComponent(birthCity.trim())}`,
       );
       if (res.ok) {
         const found: { nome: string; codice: string }[] = await res.json();
@@ -175,7 +175,9 @@ export function PracticeForm({
     setSex(parsed.isFemale ? "F" : "M");
 
     if (!birthCity) {
-      const res = await fetch(`/api/comuni?codice=${parsed.cadastralCode}`);
+      const res = await fetch(
+        `/api/municipalities?codice=${parsed.cadastralCode}`,
+      );
       if (res.ok) {
         const comune = await res.json();
         setBirthCity(comune.nome);

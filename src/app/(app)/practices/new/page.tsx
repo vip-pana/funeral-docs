@@ -37,7 +37,7 @@ export default async function NuovaPraticaPage() {
           <AlertDescription>
             <p>I documenti generati resterebbero senza i dati della ditta.</p>
             <Button asChild variant="outline" size="sm" className="mt-2">
-              <Link href="/impostazioni">Compila le impostazioni</Link>
+              <Link href="/settings">Compila le impostazioni</Link>
             </Button>
           </AlertDescription>
         </Alert>

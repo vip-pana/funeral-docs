@@ -33,7 +33,7 @@ export function SearchBox({ initial }: { initial: string }) {
       const next = new URLSearchParams(params);
       if (value.trim()) next.set("q", value.trim());
       else next.delete("q");
-      router.replace(`/pratiche?${next}`);
+      router.replace(`/practices?${next}`);
     }, 250);
 
     return () => clearTimeout(timer);

@@ -45,6 +45,6 @@ export async function saveOwner(
       },
     });
 
-  revalidatePath("/impostazioni");
+  revalidatePath("/settings");
   return { ok: true, message: "Impostazioni salvate." };
 }

@@ -9,8 +9,8 @@ try {
 
   await p.goto(`${B}/login`);
   await p.fill('#password', process.env.TEST_PASSWORD ?? 'sviluppo123');
-  await Promise.all([p.waitForURL(/pratiche/,{timeout:15000}), p.click('button[type=submit]')]);
-  await p.goto(`${B}/pratiche/nuova`);
+  await Promise.all([p.waitForURL(/practices/,{timeout:15000}), p.click('button[type=submit]')]);
+  await p.goto(`${B}/practices/new`);
   await p.waitForTimeout(900);
 
   const btn = p.locator('button:has-text("Calcola")');
@@ -62,7 +62,7 @@ try {
   await pickComune(p,'personResidenceCity','San Severo');
   await pickComune(p,'personDeathCity','San Severo');
   await pickComune(p,'destinationCity','Foggia');
-  await Promise.all([p.waitForURL(/\/pratiche\/\d+$/,{timeout:20000}),
+  await Promise.all([p.waitForURL(/\/practices\/\d+$/,{timeout:20000}),
                      p.click('button:has-text("Crea pratica")')]);
   await p.reload();
   await p.waitForTimeout(900);
@@ -79,7 +79,7 @@ try {
 
   // cleanup
   await p.click('button:has-text("Elimina")');
-  await Promise.all([p.waitForURL(u=>u.pathname==='/pratiche',{timeout:15000}),
+  await Promise.all([p.waitForURL(u=>u.pathname==='/practices',{timeout:15000}),
                      p.click('button:has-text("Confermi")')]);
 
   console.log(fail?`\n=== ${fail} FALLITI ===`:'\n=== TUTTI OK ===');

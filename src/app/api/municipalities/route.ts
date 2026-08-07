@@ -5,8 +5,8 @@ import { comuneByCode, searchComuni } from "@/lib/comuni";
 /**
  * Municipality lookup: search by name or resolve a cadastral code.
  *
- *   GET /api/comuni?q=fogg       -> list of suggestions
- *   GET /api/comuni?codice=D643  -> the single municipality (or 404)
+ *   GET /api/municipalities?q=fogg       -> list of suggestions
+ *   GET /api/municipalities?codice=D643  -> the single municipality (or 404)
  *
  * The full list weighs ~200 KB: keeping it on the server avoids shipping it on
  * every page load. Access is already filtered by the middleware.

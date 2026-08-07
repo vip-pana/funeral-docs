@@ -9,8 +9,8 @@ import { getOwner, ownerValues } from "@/lib/owner";
 /**
  * Generates one document of a practice.
  *
- *   GET /api/pratiche/12/genera?doc=3   -> document 3 as .docx
- *   GET /api/pratiche/12/genera         -> the first document
+ *   GET /api/practices/12/generate?doc=3   -> document 3 as .docx
+ *   GET /api/practices/12/generate         -> the first document
  *
  * One file per request: the page asks for several in sequence, so each
  * document arrives as a separate .docx instead of inside an archive that has

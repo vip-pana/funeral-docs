@@ -18,7 +18,7 @@ export const OWNER_FIELDS = [
   // comes from the company any more: they are the hearse and the driver picked
   // in the individual practice. Renaming them here without renaming them in
   // the .docx would leave a hole in the printed documents.
-  // See src/app/api/pratiche/[id]/genera/route.ts
+  // See src/app/api/practices/[id]/generate/route.ts
   "ownerVehiclePlate",
   "ownerDriverName",
   "ownerRequestDate",

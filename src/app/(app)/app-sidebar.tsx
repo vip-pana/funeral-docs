@@ -19,8 +19,8 @@ import {
 import { logout } from "@/app/login/actions";
 
 const LINKS = [
-  { href: "/pratiche", label: "Pratiche", icon: FileTextIcon },
-  { href: "/impostazioni", label: "Impostazioni", icon: SettingsIcon },
+  { href: "/practices", label: "Pratiche", icon: FileTextIcon },
+  { href: "/settings", label: "Impostazioni", icon: SettingsIcon },
 ] as const;
 
 export function AppSidebar() {
@@ -42,7 +42,7 @@ export function AppSidebar() {
                 <SidebarMenuItem key={href}>
                   <SidebarMenuButton
                     asChild
-                    // Subpages count too: on /pratiche/12 the "Pratiche" entry
+                    // Subpages count too: on /practices/12 the "Pratiche" entry
                     // must stay highlighted.
                     isActive={pathname === href || pathname.startsWith(`${href}/`)}
                     tooltip={label}

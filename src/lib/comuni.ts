@@ -4,7 +4,7 @@ import raw from "./data/comuni.json";
  * Italian municipalities, stored compactly as `[name, province, cadastralCode]`.
  *
  * The file weighs ~200 KB: it stays on the server and is queried through
- * `/api/comuni` rather than shipping in every page bundle.
+ * `/api/municipalities` rather than shipping in every page bundle.
  *
  * Source: https://github.com/matteocontrini/comuni-json (ISTAT data).
  */

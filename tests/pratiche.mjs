@@ -14,10 +14,10 @@ const check = (n,c,x='') => { console.log(c?'ok  ':'FAIL', n, x); if(!c) fail++;
 // login
 await p.goto(`${B}/login`);
 await p.fill('#password',(process.env.TEST_PASSWORD ?? 'sviluppo123'));
-await Promise.all([p.waitForURL(/pratiche/,{timeout:15000}), p.click('button[type=submit]')]);
+await Promise.all([p.waitForURL(/practices/,{timeout:15000}), p.click('button[type=submit]')]);
 
 // --- new practice ---
-await p.goto(`${B}/pratiche/nuova`);
+await p.goto(`${B}/practices/new`);
 check('1 form nuova pratica', (await p.textContent('h1'))?.includes('Nuova'));
 
 // autofill from the tax code: type it, then move the focus away
@@ -46,13 +46,13 @@ await fillPractice(p, v);
 const hasVehicle = await pickSelect(p, 'vehicleId', 'FG123AB');
 const hasDriver = await pickSelect(p, 'driverId', 'Giuseppe Verdi');
 await Promise.all([
-  p.waitForURL(/\/pratiche\/\d+$/, { timeout: 15000 }),
+  p.waitForURL(/\/practices\/\d+$/, { timeout: 15000 }),
   p.click('button:has-text("Crea pratica")'),
 ]);
 check('3b autofunebre selezionata', hasVehicle, hasVehicle ? '' : 'nessun veicolo in elenco');
 check('3c conducente selezionato', hasDriver, hasDriver ? '' : 'nessun conducente in elenco');
 const url = p.url();
-check('3 creata e aperta', /\/pratiche\/\d+$/.test(url), url);
+check('3 creata e aperta', /\/practices\/\d+$/.test(url), url);
 check('  intestazione', (await p.textContent('h1'))?.includes('Rossi'));
 
 // normalised province
@@ -116,15 +116,15 @@ await p.reload();
 check('8 modifica persiste', await p.inputValue('#personDeathPlace') === 'Abitazione');
 
 // --- list ---
-await p.goto(`${B}/pratiche`);
+await p.goto(`${B}/practices`);
 check('9 compare in elenco', (await p.textContent('body')).includes('Rossi'));
 
 // --- validation ---
-await p.goto(`${B}/pratiche/nuova`);
+await p.goto(`${B}/practices/new`);
 await p.click('button:has-text("Crea pratica")');
 await p.waitForFunction(()=>document.querySelectorAll('[role=alert]').length>3,null,{timeout:12000});
 check('10 validazione blocca vuoto', true);
-check('  resta su nuova', p.url().includes('/nuova'));
+check('  resta su nuova', p.url().includes('/practices/new'));
 
 // invalid tax code rejected
 await p.fill('#personTaxCode','ABC');
@@ -134,9 +134,9 @@ check('11 CF invalido non compila', await p.inputValue('#personBirthDate') === '
 
 // Clean up the practice created here: otherwise every run leaves one behind
 // and the list fills with identical duplicates.
-await p.goto(`${B}/pratiche/${id}`);
+await p.goto(`${B}/practices/${id}`);
 await p.click('button:has-text("Elimina")');
-await Promise.all([p.waitForURL(u=>u.pathname==='/pratiche',{timeout:15000}),
+await Promise.all([p.waitForURL(u=>u.pathname==='/practices',{timeout:15000}),
                    p.click('button:has-text("Confermi")')]);
 
 await b.close();

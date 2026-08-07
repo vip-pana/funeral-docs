@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils";
 /**
  * Searchable municipality picker.
  *
- * The full list stays on the server (~200 KB): results come from `/api/comuni`
+ * The full list stays on the server (~200 KB): results come from `/api/municipalities`
  * while typing. The field stays free-form — a municipality not in the list can
  * still be confirmed, because rejecting it would block the work over data the
  * app happens not to know.
@@ -82,9 +82,10 @@ export function ComuneField({
     const controller = new AbortController();
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/comuni?q=${encodeURIComponent(query)}`, {
-          signal: controller.signal,
-        });
+        const res = await fetch(
+          `/api/municipalities?q=${encodeURIComponent(query)}`,
+          { signal: controller.signal },
+        );
         if (res.ok) setOptions(await res.json());
       } catch {
         // Request aborted or network down: typing still works.

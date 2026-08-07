@@ -55,7 +55,7 @@ export function GeneratePanel({ practiceId }: { practiceId: number }) {
     try {
       for (const doc of chosen) {
         const res = await fetch(
-          `/api/pratiche/${practiceId}/genera?doc=${doc.id}`,
+          `/api/practices/${practiceId}/generate?doc=${doc.id}`,
         );
 
         if (!res.ok) {

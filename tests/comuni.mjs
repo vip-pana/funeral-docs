@@ -9,28 +9,28 @@ let fail=0; const check=(n,c,x='')=>{console.log(c?'ok  ':'FAIL',n,x); if(!c)fai
 
 await p.goto(`${B}/login`);
 await p.fill('#password', PW);
-await Promise.all([p.waitForURL(/pratiche/,{timeout:15000}), p.click('button[type=submit]')]);
+await Promise.all([p.waitForURL(/practices/,{timeout:15000}), p.click('button[type=submit]')]);
 
 // --- comuni API ---
-let r = await p.request.get(`${B}/api/comuni?q=fogg`);
+let r = await p.request.get(`${B}/api/municipalities?q=fogg`);
 let j = await r.json();
 check('1 ricerca comuni', r.ok() && j.some(c=>c.nome==='Foggia'), `${j.length} risultati`);
 
-r = await p.request.get(`${B}/api/comuni?codice=D643`);
+r = await p.request.get(`${B}/api/municipalities?codice=D643`);
 j = await r.json();
 check('2 codice catastale -> comune', r.ok() && j.nome==='Foggia' && j.provincia==='FG', JSON.stringify(j));
 
-r = await p.request.get(`${B}/api/comuni?codice=ZZZZ`);
+r = await p.request.get(`${B}/api/municipalities?codice=ZZZZ`);
 check('3 codice ignoto -> 404', r.status()===404, String(r.status()));
 
-r = await p.request.get(`${B}/api/comuni?q=f`);
+r = await p.request.get(`${B}/api/municipalities?q=f`);
 check('4 query troppo corta -> vuoto', (await r.json()).length===0);
 
 // --- autofill from the tax code ---
-await p.goto(`${B}/pratiche/nuova`);
+await p.goto(`${B}/practices/new`);
 await p.fill('#personTaxCode','RSSMRA40C12D643D');
 await p.locator('#personLastName').focus();
-// The municipality comes from an /api/comuni call: wait for the value.
+// The municipality comes from an /api/municipalities call: wait for the value.
 await p.waitForFunction(
   () => document.querySelector('input[name=personBirthCity]')?.value === 'Foggia',
   null, { timeout: 8000 }).catch(()=>{});

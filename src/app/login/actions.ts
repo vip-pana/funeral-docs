@@ -24,7 +24,7 @@ export async function login(
 ): Promise<LoginState> {
   const started = Date.now();
   const password = String(formData.get("password") ?? "");
-  const next = String(formData.get("next") ?? "/pratiche");
+  const next = String(formData.get("next") ?? "/practices");
 
   const ok = password.length > 0 && (await verifyPassword(password));
 
@@ -53,7 +53,7 @@ export async function login(
 
   // Internal paths only: an absolute `next` would turn the login into an open
   // redirect to an external site.
-  redirect(next.startsWith("/") && !next.startsWith("//") ? next : "/pratiche");
+  redirect(next.startsWith("/") && !next.startsWith("//") ? next : "/practices");
 }
 
 export async function logout() {
