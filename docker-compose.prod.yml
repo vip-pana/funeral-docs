@@ -4,24 +4,59 @@
 #   docker compose -f docker-compose.prod.yml up -d --build
 #
 services:
+  # Nodo Tailscale dedicato a questa app: si registra nella tailnet col suo
+  # hostname e ottiene il suo certificato, cosi' l'indirizzo e'
+  # https://funeral-docs.<tailnet>.ts.net — un nome per applicazione invece di
+  # una porta sul nome della macchina.
+  #
+  # `app` gira dentro questo stack di rete (network_mode: service:tailscale):
+  # per il resto della tailnet i due container sono lo stesso nodo, e serve
+  # raggiunge l'app su 127.0.0.1:3000 senza che sia esposta altrove — nemmeno
+  # sul loopback dell'host.
+  tailscale:
+    image: tailscale/tailscale:latest
+    hostname: funeral-docs
+    restart: unless-stopped
+    environment:
+      # Quotato: il `:` dentro il messaggio di errore verrebbe letto dal parser
+      # YAML come separatore di una mappa annidata.
+      TS_AUTHKEY: "${TS_AUTHKEY:?TS_AUTHKEY mancante nel .env, genera una auth key reusable}"
+      TS_STATE_DIR: /var/lib/tailscale
+      # Pubblica la :443 con certificato valido, proxando all'app.
+      TS_SERVE_CONFIG: /config/serve.json
+    volumes:
+      # L'identita' del nodo. Senza, ogni ricreazione del container si
+      # registrerebbe come nodo nuovo e il nome diventerebbe funeral-docs-1,
+      # funeral-docs-2, e cosi' via.
+      - tailscale-state:/var/lib/tailscale
+      - ./docker/tailscale:/config:ro
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - net_admin
+    healthcheck:
+      test: ["CMD", "tailscale", "status"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
   app:
     build:
       context: .
       target: runner
     restart: unless-stopped
-    ports:
-      # Mai 0.0.0.0: pubblicherebbe l'app a tutta la rete locale, vanificando
-      # la scelta di tenerla dentro Tailscale.
-      #
-      # Il default `127.0.0.1` e' quello giusto quando davanti c'e'
-      # `tailscale serve` (vedi DECISIONI-APERTE.md): serve raggiunge l'app su
-      # loopback e la pubblica in https sulla :443, cosi' il container non e'
-      # esposto direttamente nemmeno dentro la tailnet.
-      #
-      # Senza serve, BIND_ADDRESS va messo all'indirizzo tailnet della macchina
-      # (`tailscale ip -4`, un 100.x.y.z): il traffico da Tailscale atterra su
-      # quell'interfaccia e un binding su loopback lo rifiuterebbe.
-      - "${BIND_ADDRESS:-127.0.0.1}:${PORT:-3000}:3000"
+    # Nessun `ports`: l'app non ha uno stack di rete proprio, usa quello del
+    # sidecar. Quello pubblica la :443 sulla tailnet attraverso serve, quindi
+    # l'app non e' raggiungibile sull'host.
+    #
+    # Senza il sidecar servirebbe invece pubblicare la porta e mettere
+    # BIND_ADDRESS all'indirizzo tailnet della macchina (`tailscale ip -4`):
+    # il traffico da Tailscale atterra su quell'interfaccia, non su loopback.
+    network_mode: service:tailscale
+    depends_on:
+      tailscale:
+        condition: service_started
     volumes:
       # Il database. La directory host deve esistere gia': l'entrypoint si
       # rifiuta di partire se il mount non e' andato a buon fine, invece di
@@ -41,9 +76,14 @@ services:
       COOKIE_SECURE: "${COOKIE_SECURE:-false}"
     healthcheck:
       # La pagina di login risponde senza sessione: se il server muore mentre
-      # il container resta vivo, questo lo segnala.
+      # il container resta vivo, questo lo segnala. L'indirizzo resta loopback
+      # anche col sidecar: i due container condividono lo stack di rete.
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 20s
+
+volumes:
+  # Identita' del nodo Tailscale: va conservata tra le ricreazioni.
+  tailscale-state:
