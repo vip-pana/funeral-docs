@@ -13,10 +13,14 @@ services:
       # Mai 0.0.0.0: pubblicherebbe l'app a tutta la rete locale, vanificando
       # la scelta di tenerla dentro Tailscale.
       #
-      # BIND_ADDRESS va impostato all'indirizzo tailnet della macchina
-      # (`tailscale ip -4`, un 100.x.y.z). Il traffico che arriva da Tailscale
-      # atterra su quell'interfaccia, non su loopback: un binding su 127.0.0.1
-      # lo rifiuterebbe.
+      # Il default `127.0.0.1` e' quello giusto quando davanti c'e'
+      # `tailscale serve` (vedi DECISIONI-APERTE.md): serve raggiunge l'app su
+      # loopback e la pubblica in https sulla :443, cosi' il container non e'
+      # esposto direttamente nemmeno dentro la tailnet.
+      #
+      # Senza serve, BIND_ADDRESS va messo all'indirizzo tailnet della macchina
+      # (`tailscale ip -4`, un 100.x.y.z): il traffico da Tailscale atterra su
+      # quell'interfaccia e un binding su loopback lo rifiuterebbe.
       - "${BIND_ADDRESS:-127.0.0.1}:${PORT:-3000}:3000"
     volumes:
       # Il database. La directory host deve esistere gia': l'entrypoint si
@@ -29,10 +33,11 @@ services:
       NODE_ENV: production
       DATABASE_PATH: /data/funeral.db
       NEXT_TELEMETRY_DISABLED: "1"
-      # Su Tailscale si accede in http a un indirizzo 100.x.y.z: il browser non
-      # concede a un IP l'eccezione che fa per localhost, quindi un cookie
-      # `secure` non verrebbe memorizzato e l'accesso sarebbe impossibile.
-      # Da rimettere a true solo dietro un reverse proxy con https.
+      # Con `tailscale serve` davanti si accede a un nome con certificato
+      # valido, quindi il cookie `secure` viene memorizzato: va tenuto a true.
+      # Accedendo invece in http a un 100.x.y.z il browser non concede a un IP
+      # l'eccezione che fa per localhost, il cookie non verrebbe memorizzato e
+      # l'accesso sarebbe impossibile: li' serve false.
       COOKIE_SECURE: "${COOKIE_SECURE:-false}"
     healthcheck:
       # La pagina di login risponde senza sessione: se il server muore mentre

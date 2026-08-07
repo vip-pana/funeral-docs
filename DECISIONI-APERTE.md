@@ -2,21 +2,32 @@
 
 Cose rimandate durante lo sviluppo. Da riprendere prima del deploy sul serverino.
 
-## 0. Docker — FATTO
+## 0. Docker e deploy — FATTO
 
-Funziona in locale: `docker compose -f docker-compose.prod.yml up -d --build`,
-tutte le 6 suite passano contro il container, i dati sopravvivono al riavvio.
-Immagine ~543 MB. Istruzioni nel README.
+In produzione su **Victus**, raggiungibile dalla tailnet a
+**<https://victus.tail134f9a.ts.net>**.
 
-Resta da fare **solo per il serverino**:
+Il container ascolta **solo su loopback** (`BIND_ADDRESS=127.0.0.1`) e l'unico
+ingresso è `tailscale serve`, che fa da reverse proxy sulla :443 con un
+certificato Let's Encrypt. Due conseguenze volute: l'app non è esposta
+direttamente nemmeno dentro la tailnet, e `COOKIE_SECURE=true` — in http su un
+indirizzo `100.x.y.z` il browser non memorizzava il cookie di sessione, che
+quindi viaggiava senza il flag.
 
-- `BIND_ADDRESS` all'indirizzo tailnet (`tailscale ip -4`, un 100.x.y.z). Il
-  default è `127.0.0.1`, che da un'altra macchina non risponde.
-- Il `.env` va creato sul server: hash e secret suoi, non quelli di sviluppo.
-- `COOKIE_SECURE=false` è già il default in produzione — necessario perché
-  l'accesso via Tailscale è in http e il browser non concede a un IP
-  l'eccezione che fa per `localhost`. Da rimettere a `true` solo dietro un
-  reverse proxy https.
+Se un giorno si torna ad accedere in http, `COOKIE_SECURE` va rimesso a `false`
+o l'accesso diventa impossibile.
+
+```bash
+# sul server, una volta sola
+sudo tailscale serve --bg 3000
+
+# aggiornamenti
+cd ~/funeral-docs && git pull && docker compose -f docker-compose.prod.yml up -d --build
+```
+
+Il codice arriva da un clone del repo privato via **deploy key di sola
+lettura** (`~/.ssh/id_ed25519_funeral`, host alias `github-funeral`): vale per
+quel solo repository e non può scrivere.
 
 ## 1. Templates: volume o dentro l'immagine?
 

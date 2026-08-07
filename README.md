@@ -97,5 +97,16 @@ viene ricavata dal comune tramite il dataset ISTAT.
 
 ## Deploy sul server
 
-Vedi `DECISIONI-APERTE.md`: `BIND_ADDRESS` sull'indirizzo Tailscale, backup e
-cifratura del disco sono ancora da sistemare.
+In produzione su **Victus**: <https://victus.tail134f9a.ts.net>, raggiungibile
+solo da dentro la tailnet.
+
+```bash
+cd ~/funeral-docs
+git pull
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+Il container ascolta solo su `127.0.0.1`; davanti c'è `tailscale serve`, che
+espone la :443 con certificato Let's Encrypt. Dettagli e prima configurazione
+in `DECISIONI-APERTE.md`, dove restano aperti **backup del database** e
+**cifratura del disco**.
