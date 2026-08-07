@@ -40,14 +40,17 @@ const v = {
   destinationCemetery:'Cimitero Comunale',
 };
 await fillPractice(p, v);
-// The hearse is left behind by veicoli.mjs, which runs first: without it the
-// plate would not reach the document and the check below would be pointless.
+// Hearse and driver are left behind by veicoli.mjs and conducenti.mjs, which
+// run first: without them plate and name would not reach the document and the
+// checks below would be pointless.
 const hasVehicle = await pickSelect(p, 'vehicleId', 'FG123AB');
+const hasDriver = await pickSelect(p, 'driverId', 'Giuseppe Verdi');
 await Promise.all([
   p.waitForURL(/\/pratiche\/\d+$/, { timeout: 15000 }),
   p.click('button:has-text("Crea pratica")'),
 ]);
 check('3b autofunebre selezionata', hasVehicle, hasVehicle ? '' : 'nessun veicolo in elenco');
+check('3c conducente selezionato', hasDriver, hasDriver ? '' : 'nessun conducente in elenco');
 const url = p.url();
 check('3 creata e aperta', /\/pratiche\/\d+$/.test(url), url);
 check('  intestazione', (await p.textContent('h1'))?.includes('Rossi'));
@@ -100,7 +103,7 @@ const t4 = [...(await z4.file('word/document.xml').async('string'))
   .matchAll(/<w:t[^>]*>([\s\S]*?)<\/w:t>/g)].map(m=>m[1]).join('');
 check('  doc4 dati ditta', t4.includes('Rossi'));
 check('  doc4 targa autofunebre', t4.includes('FG123AB'), t4.match(/[A-Z]{2}\d{3}[A-Z]{2}/)?.[0] ?? 'assente');
-check('  doc4 conducente', t4.includes('Giuseppe Verdi') || t4.includes('Mario Bianchi'), '');
+check('  doc4 conducente', t4.includes('Giuseppe Verdi'), '');
 check('  doc4 codice fiscale', t4.includes('RSSMRA40C12D643D'));
 check('  doc4 nessun placeholder', !t4.match(/\{[^}]*\}/));
 

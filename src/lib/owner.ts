@@ -16,8 +16,9 @@ export async function getOwner(): Promise<Owner | null> {
 }
 
 /**
- * The plate is deliberately absent: it depends on the hearse picked in the
- * individual practice, not on the company configuration.
+ * The plate and the driver name are deliberately absent: they depend on the
+ * hearse and the driver picked in the individual practice, not on the company
+ * configuration.
  */
 export function ownerValues(owner: Owner | null): Record<string, string> {
   if (!owner) return {};
@@ -29,6 +30,5 @@ export function ownerValues(owner: Owner | null): Record<string, string> {
     ownerCompanyCity: owner.ownerCompanyCity,
     ownerCity: owner.ownerCity,
     ownerCityName: owner.ownerCityName,
-    ownerDriverName: owner.ownerDriverName,
   };
 }

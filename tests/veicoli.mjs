@@ -30,6 +30,12 @@ try {
 
   const plateText = async () => (await p.textContent("body")) ?? "";
 
+  // The Conducenti card has an identical "Aggiungi" button and its own table:
+  // everything here is scoped to the hearse card, otherwise the selectors would
+  // be ambiguous.
+  const card = p.locator('[data-slot=card]:has(#plate)');
+  const addVehicle = () => card.getByRole("button", { name: "Aggiungi" }).click();
+
   await login(p, B);
   await p.goto(`${B}/impostazioni`);
   await p.waitForTimeout(700);
@@ -39,7 +45,7 @@ try {
   // Remove hearses left by previous runs: the suite recreates one at the end,
   // and without this cleanup they would pile up.
   for (let i = 0; i < 10; i++) {
-    const stale = p.locator("tr", { hasText: PLATE }).first();
+    const stale = card.locator("tr", { hasText: PLATE }).first();
     if (!(await stale.count())) break;
     await stale.getByRole("button", { name: "Elimina" }).click();
     await stale.getByRole("button", { name: "Confermi?" }).click();
@@ -47,7 +53,7 @@ try {
   }
 
   // --- validation ---
-  await p.click('button:has-text("Aggiungi")');
+  await addVehicle();
   await p.waitForFunction(
     () => document.querySelectorAll('[role=alert]').length > 0,
     null,
@@ -58,20 +64,16 @@ try {
   // --- adding ---
   await p.fill("#name", NAME);
   await p.fill("#plate", PLATE.toLowerCase());
-  await p.click('button:has-text("Aggiungi")');
+  await addVehicle();
   await p.waitForFunction(
     () => [...document.querySelectorAll("[data-sonner-toast]")]
-      .some((t) => t.textContent?.includes("aggiunta")),
+      .some((t) => t.textContent?.includes("Autofunebre aggiunta")),
     null,
     { timeout: 12000 },
   );
   check("3 aggiunta con conferma", true);
 
-  await p.waitForFunction(
-    (plate) => document.querySelector("table")?.textContent?.includes(plate),
-    PLATE,
-    { timeout: 8000 },
-  );
+  await card.locator("table", { hasText: PLATE }).waitFor({ timeout: 8000 });
   check("4 targa normalizzata maiuscola", true, PLATE);
 
   // --- in the practice Select ---
@@ -104,21 +106,17 @@ try {
 
   // --- the check that justifies the copied column ---
   await p.goto(`${B}/impostazioni`);
-  await p.waitForSelector("table", { timeout: 10000 });
+  await card.locator("table").waitFor({ timeout: 10000 });
 
   // Delete the row for this plate, not the first in the table: the list can
   // hold vehicles left by previous runs.
-  const row = p.locator("tr", { hasText: PLATE });
+  const row = card.locator("tr", { hasText: PLATE });
   await row.getByRole("button", { name: "Elimina" }).click();
   await row.getByRole("button", { name: "Confermi?" }).click();
 
   // Look for the plate in the table, not the body: it stays written in the add
   // form's field until React clears it.
-  await p.waitForFunction(
-    (plate) => !document.querySelector("table")?.textContent?.includes(plate),
-    PLATE,
-    { timeout: 10000 },
-  );
+  await row.waitFor({ state: "detached", timeout: 10000 });
   check("7 autofunebre eliminata", true);
 
   check(
@@ -153,12 +151,8 @@ try {
   await p.waitForTimeout(600);
   await p.fill("#name", NAME);
   await p.fill("#plate", PLATE);
-  await p.click('button:has-text("Aggiungi")');
-  await p.waitForFunction(
-    (plate) => document.querySelector("table")?.textContent?.includes(plate),
-    PLATE,
-    { timeout: 10000 },
-  );
+  await addVehicle();
+  await card.locator("table", { hasText: PLATE }).waitFor({ timeout: 10000 });
 
   console.log(fail ? `\n=== ${fail} FALLITI ===` : "\n=== TUTTI OK ===");
   if (fail) process.exitCode = 1;

@@ -1,6 +1,8 @@
+import { listDrivers } from "@/lib/drivers";
 import { getOwner } from "@/lib/owner";
 import { listVehicles } from "@/lib/vehicles";
 
+import { DriversCard } from "./drivers-card";
 import { OwnerForm } from "./owner-form";
 import { VehiclesCard } from "./vehicles-card";
 
@@ -10,7 +12,11 @@ export const metadata = { title: "Impostazioni — Documenti funebri" };
 export const dynamic = "force-dynamic";
 
 export default async function ImpostazioniPage() {
-  const [owner, vehicles] = await Promise.all([getOwner(), listVehicles()]);
+  const [owner, vehicles, drivers] = await Promise.all([
+    getOwner(),
+    listVehicles(),
+    listDrivers(),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -21,9 +27,10 @@ export default async function ImpostazioniPage() {
         </p>
       </div>
       <OwnerForm owner={owner} />
-      {/* After the company form, which has its own save button: placing it in
-          between would suggest "Salva impostazioni" saves the vehicles too. */}
+      {/* After the company form, which has its own save button: placing them
+          in between would suggest "Salva impostazioni" saves these lists too. */}
       <VehiclesCard vehicles={vehicles} />
+      <DriversCard drivers={drivers} />
     </div>
   );
 }

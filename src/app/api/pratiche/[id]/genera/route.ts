@@ -52,11 +52,13 @@ export async function GET(
   const values = {
     ...practice,
     ...ownerValues(await getOwner()),
-    // The template placeholder is still called {ownerVehiclePlate}, but the
-    // value is the plate copied onto the practice at save time. It sits after
-    // both spreads because the later assignment wins: this is the only source
-    // of the plate, and what makes a months-old practice reprintable.
+    // The template placeholders are still called {ownerVehiclePlate} and
+    // {ownerDriverName}, but the values are the ones copied onto the practice at
+    // save time. They sit after both spreads because the later assignment wins:
+    // this is their only source, and what makes a months-old practice
+    // reprintable.
     ownerVehiclePlate: practice.vehiclePlate,
+    ownerDriverName: practice.driverName,
     // The compilation date is today's, not the one from when it was saved.
     todayDate: new Date().toISOString().slice(0, 10),
     // The request carries the transport date: that is when it is submitted.

@@ -32,6 +32,7 @@ Rigenerabile con `python3 scripts/normalize-templates.py` (parte da `_backup/`).
 | `transportTime` | Ora di partenza (hh:mm) | 3,4 |
 | `transportPermitDate` | Data dell'autorizzazione al trasporto | 4 |
 | `ownerVehiclePlate` | Targa dell'autofunebre scelta nella pratica | 2,3,4 |
+| `ownerDriverName` | Nome del conducente scelto nella pratica | 4 |
 | `funeralChurch` | Chiesa per la sosta / esequie | 4 |
 
 ## Destinazione
@@ -44,10 +45,11 @@ Rigenerabile con `python3 scripts/normalize-templates.py` (parte da `_backup/`).
 
 ## Impresa funebre — dati fissi, da salvare una volta sola
 
-> `ownerVehiclePlate` non è più qui: il nome resta `owner*` perché è il
-> placeholder dentro i `.docx`, ma il valore arriva dall'autofunebre scelta
-> nella singola pratica (tabella `vehicles`). Rinominarlo in `fields.ts` senza
-> rinominarlo nei template lascerebbe un buco nei documenti stampati.
+> `ownerVehiclePlate` e `ownerDriverName` non sono più qui: i nomi restano
+> `owner*` perché sono i placeholder dentro i `.docx`, ma i valori arrivano
+> dall'autofunebre e dal conducente scelti nella singola pratica (tabelle
+> `vehicles` e `drivers`). Rinominarli in `fields.ts` senza rinominarli nei
+> template lascerebbe un buco nei documenti stampati.
 
 | Campo | Descrizione | Doc |
 |---|---|---|
@@ -58,7 +60,6 @@ Rigenerabile con `python3 scripts/normalize-templates.py` (parte da `_backup/`).
 | `ownerCompanyCity` | Comune sede della ditta | 4 |
 | `ownerCity` | Comune che rilascia l'autorizzazione | 3,5 |
 | `ownerCityName` | Comune di partenza del trasporto | 2 |
-| `ownerDriverName` | Nome del conducente | 4 |
 | `ownerRequestDate` | Data di presentazione della domanda | 2 |
 
 ## Sistema

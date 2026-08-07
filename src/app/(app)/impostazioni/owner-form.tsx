@@ -96,21 +96,6 @@ export function OwnerForm({ owner }: { owner: Owner | null }) {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Trasporto</CardTitle>
-          <CardDescription>Chi guida l&apos;autofunebre.</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
-          <Field
-            name="ownerDriverName"
-            label={FIELD_LABELS.ownerDriverName}
-            defaultValue={owner?.ownerDriverName}
-            error={err("ownerDriverName")}
-          />
-        </CardContent>
-      </Card>
-
       <div className="flex justify-end">
         <Button type="submit" disabled={pending}>
           {pending ? "Salvataggio…" : "Salva impostazioni"}

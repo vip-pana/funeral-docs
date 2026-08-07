@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { db, schema } from "@/lib/db";
+import { getDriver } from "@/lib/drivers";
 import { practiceSchema, type PracticeInput } from "@/lib/validation";
 import { getVehicle } from "@/lib/vehicles";
 
@@ -14,15 +15,18 @@ export type PracticeFormState = {
 };
 
 /**
- * Copies the plate from the chosen vehicle.
+ * Copies the plate from the chosen vehicle and the name from the chosen driver.
  *
- * The vehicle is re-read from the database instead of trusting a value sent by
- * the client, because the plate ends up in an official document. From here on
- * the practice no longer depends on the list, so deleting the hearse does not
- * change documents already issued.
+ * Both rows are re-read from the database instead of trusting values sent by
+ * the client, because they end up in an official document. From here on the
+ * practice no longer depends on the lists, so deleting the hearse or the driver
+ * does not change documents already issued.
  */
-async function withVehiclePlate(data: PracticeInput) {
-  const vehicle = data.vehicleId ? await getVehicle(data.vehicleId) : null;
+async function withSelections(data: PracticeInput) {
+  const [vehicle, driver] = await Promise.all([
+    data.vehicleId ? getVehicle(data.vehicleId) : null,
+    data.driverId ? getDriver(data.driverId) : null,
+  ]);
   return {
     ...data,
     // A non-existent id becomes null: passing it through would violate the
@@ -32,6 +36,8 @@ async function withVehiclePlate(data: PracticeInput) {
     // Changing it updates the plate, otherwise the field would be misleading:
     // you edit it and nothing happens.
     vehiclePlate: vehicle?.plate ?? "",
+    driverId: driver?.id ?? null,
+    driverName: driver?.name ?? "",
   };
 }
 
@@ -61,7 +67,7 @@ export async function createPractice(
 
   const [row] = await db
     .insert(schema.practices)
-    .values(await withVehiclePlate(parsed.data))
+    .values(await withSelections(parsed.data))
     .returning({ id: schema.practices.id });
 
   revalidatePath("/pratiche");
@@ -87,7 +93,7 @@ export async function updatePractice(
   await db
     .update(schema.practices)
     .set({
-      ...(await withVehiclePlate(parsed.data)),
+      ...(await withSelections(parsed.data)),
       updatedAt: new Date().toISOString().slice(0, 19).replace("T", " "),
     })
     .where(eq(schema.practices.id, id));

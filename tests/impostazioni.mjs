@@ -16,8 +16,8 @@ check('1 pagina aperta', (await p.textContent('h1'))?.includes('Impostazioni'));
 
 // Submit with empty fields. They have to be cleared by hand: if the company is
 // already configured the form arrives prefilled and the submit would be valid.
-// Scoped to this form only: the Autofunebri card has its own fields, which
-// "Salva impostazioni" does not touch.
+// Scoped to this form only: the Autofunebri and Conducenti cards have their own
+// fields, which "Salva impostazioni" does not touch.
 const ownerForm = 'form:has(button:has-text("Salva impostazioni"))';
 for (const el of await p.$$(`${ownerForm} input:not([type=hidden])`)) await el.fill('');
 await p.click('button:has-text("Salva impostazioni")');
@@ -32,7 +32,6 @@ const vals = {
   ownerFirstName:'Mario', ownerMiddleName:'F.', ownerLastName:'Rossi',
   ownerCompanyName:'OO.FF. Rossi Mario', ownerCompanyCity:'San Severo',
   ownerCity:'San Severo', ownerCityName:'San Severo',
-  ownerDriverName:`Giuseppe Bianchi ${Date.now() % 1000}`,
 };
 for (const [k,v] of Object.entries(vals)) await p.fill(`#${k}`, v);
 await p.click('button:has-text("Salva impostazioni")');

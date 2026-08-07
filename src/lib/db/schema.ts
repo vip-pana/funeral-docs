@@ -20,7 +20,6 @@ export const owner = sqliteTable("owner", {
   ownerCompanyCity: text("owner_company_city").notNull(),
   ownerCity: text("owner_city").notNull(),
   ownerCityName: text("owner_city_name").notNull(),
-  ownerDriverName: text("owner_driver_name").notNull(),
   updatedAt: text("updated_at")
     .notNull()
     .default(sql`(datetime('now'))`),
@@ -32,6 +31,15 @@ export const vehicles = sqliteTable("vehicles", {
   /** Free-form description to recognise the vehicle, e.g. "Mercedes Vito". */
   name: text("name").notNull(),
   plate: text("plate").notNull(),
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+});
+
+/** Declared before `practices`, which references it. */
+export const drivers = sqliteTable("drivers", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
   createdAt: text("created_at")
     .notNull()
     .default(sql`(datetime('now'))`),
@@ -69,6 +77,13 @@ export const practices = sqliteTable("practices", {
   }),
   vehiclePlate: text("vehicle_plate").notNull().default(""),
 
+  // Same split as the vehicle above: the reference nulls itself out if the
+  // driver is deleted, the name is copied so documents already issued keep it.
+  driverId: integer("driver_id").references(() => drivers.id, {
+    onDelete: "set null",
+  }),
+  driverName: text("driver_name").notNull().default(""),
+
   destinationCity: text("destination_city").notNull(),
   destinationProvince: text("destination_province").notNull(),
   destinationCemetery: text("destination_cemetery").notNull(),
@@ -85,5 +100,7 @@ export type Owner = typeof owner.$inferSelect;
 export type NewOwner = typeof owner.$inferInsert;
 export type Vehicle = typeof vehicles.$inferSelect;
 export type NewVehicle = typeof vehicles.$inferInsert;
+export type Driver = typeof drivers.$inferSelect;
+export type NewDriver = typeof drivers.$inferInsert;
 export type Practice = typeof practices.$inferSelect;
 export type NewPractice = typeof practices.$inferInsert;

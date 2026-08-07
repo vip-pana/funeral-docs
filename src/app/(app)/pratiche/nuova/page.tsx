@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { listDrivers } from "@/lib/drivers";
 import { getOwner } from "@/lib/owner";
 import { listVehicles } from "@/lib/vehicles";
 
@@ -14,7 +15,11 @@ export const metadata = { title: "Nuova pratica — Documenti funebri" };
 export const dynamic = "force-dynamic";
 
 export default async function NuovaPraticaPage() {
-  const [owner, vehicles] = await Promise.all([getOwner(), listVehicles()]);
+  const [owner, vehicles, drivers] = await Promise.all([
+    getOwner(),
+    listVehicles(),
+    listDrivers(),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -41,6 +46,7 @@ export default async function NuovaPraticaPage() {
       <PracticeForm
         action={createPractice}
         vehicles={vehicles}
+        drivers={drivers}
         submitLabel="Crea pratica"
       />
     </div>

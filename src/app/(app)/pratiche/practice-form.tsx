@@ -25,7 +25,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { Practice, Vehicle } from "@/lib/db/schema";
+import type { Driver, Practice, Vehicle } from "@/lib/db/schema";
 import { FIELD_LABELS } from "@/lib/fields";
 import { computeTaxCode } from "@/lib/tax-code";
 import { parseTaxCode } from "@/lib/validation";
@@ -41,11 +41,13 @@ export function PracticeForm({
   action,
   practice,
   vehicles,
+  drivers,
   submitLabel,
 }: {
   action: Action;
   practice?: Practice;
   vehicles: Vehicle[];
+  drivers: Driver[];
   submitLabel: string;
 }) {
   const [state, formAction, pending] = useActionState<PracticeFormState, FormData>(
@@ -73,10 +75,19 @@ export function PracticeForm({
     practice?.vehicleId ? String(practice.vehicleId) : "",
   );
 
+  const [driverId, setDriverId] = useState(
+    practice?.driverId ? String(practice.driverId) : "",
+  );
+
   // The vehicle may have been deleted after saving: the practice keeps the
   // plate, but the list no longer has an entry to select.
   const missingVehicle = Boolean(
     practice?.vehiclePlate && !vehicles.some((v) => String(v.id) === vehicleId),
+  );
+
+  // Same for the driver, which keeps the copied name.
+  const missingDriver = Boolean(
+    practice?.driverName && !drivers.some((d) => String(d.id) === driverId),
   );
 
   useEffect(() => {
@@ -385,6 +396,30 @@ export function PracticeForm({
                 : vehicles.length === 0
                   ? "Nessuna autofunebre configurata: aggiungila in Impostazioni."
                   : "La targa finisce nei documenti 2, 3 e 4"}
+            </FieldDescription>
+          </FieldRoot>
+          <FieldRoot>
+            <FieldLabel htmlFor="driverId">Conducente</FieldLabel>
+            {/* Same as the hearse above: no "none" entry, the placeholder
+                covers it. */}
+            <Select name="driverId" value={driverId} onValueChange={setDriverId}>
+              <SelectTrigger id="driverId" className="w-full">
+                <SelectValue placeholder="Nessuno" />
+              </SelectTrigger>
+              <SelectContent>
+                {drivers.map((d) => (
+                  <SelectItem key={d.id} value={String(d.id)}>
+                    {d.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FieldDescription>
+              {missingDriver
+                ? `Conducente non piu' in elenco. Nome registrato: ${practice?.driverName}`
+                : drivers.length === 0
+                  ? "Nessun conducente configurato: aggiungilo in Impostazioni."
+                  : "Il nome finisce nel documento 4"}
             </FieldDescription>
           </FieldRoot>
         </CardContent>

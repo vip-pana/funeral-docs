@@ -13,11 +13,12 @@ export const OWNER_FIELDS = [
   "ownerCompanyCity",
   "ownerCity",
   "ownerCityName",
-  // Keeps the `owner*` name because that is the placeholder inside 2.docx,
-  // 3.docx and 4.docx, but the value no longer comes from the company: it is
-  // the hearse plate picked in the individual practice. Renaming it here
-  // without renaming it in the .docx would leave a hole in the printed
-  // documents. See src/app/api/pratiche/[id]/genera/route.ts
+  // Both keep the `owner*` name because that is the placeholder inside the
+  // .docx files (the plate in 2, 3 and 4; the driver in 4), but neither value
+  // comes from the company any more: they are the hearse and the driver picked
+  // in the individual practice. Renaming them here without renaming them in
+  // the .docx would leave a hole in the printed documents.
+  // See src/app/api/pratiche/[id]/genera/route.ts
   "ownerVehiclePlate",
   "ownerDriverName",
   "ownerRequestDate",

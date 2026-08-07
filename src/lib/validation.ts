@@ -56,12 +56,16 @@ export const vehicleSchema = z.object({
   plate,
 });
 
+export const driverSchema = z.object({
+  name: requiredText("Nome"),
+});
+
 /**
  * The Select submits an empty string when nothing is picked, and that means
- * "no hearse". Branch order matters: `z.coerce.number()` turns "" into 0,
+ * "none chosen". Branch order matters: `z.coerce.number()` turns "" into 0,
  * which fails `.positive()` and falls through to the second branch.
  */
-const optionalVehicleId = z.coerce
+const optionalId = z.coerce
   .number()
   .int()
   .positive()
@@ -76,7 +80,6 @@ export const ownerSchema = z.object({
   ownerCompanyCity: requiredText("Comune sede"),
   ownerCity: requiredText("Comune autorizzazione"),
   ownerCityName: requiredText("Comune di partenza"),
-  ownerDriverName: requiredText("Conducente"),
   // The request date changes with every practice: kept as an editable
   // default rather than fixed company data.
   ownerRequestDate: isoDate.optional().or(z.literal("")),
@@ -100,10 +103,11 @@ export const practiceSchema = z.object({
   transportTime: time,
   transportPermitDate: isoDate,
   funeralChurch: optionalText,
-  // The plate does not come from the form: the server copies it from the
-  // vehicle, because it ends up in an official document and the client must
-  // not be able to write it.
-  vehicleId: optionalVehicleId,
+  // Neither the plate nor the driver name comes from the form: the server
+  // copies them from the selected rows, because they end up in an official
+  // document and the client must not be able to write them.
+  vehicleId: optionalId,
+  driverId: optionalId,
   destinationCity: requiredText("Comune di destinazione"),
   destinationProvince: province,
   destinationCemetery: requiredText("Cimitero di destinazione"),
@@ -111,6 +115,7 @@ export const practiceSchema = z.object({
 
 export type OwnerInput = z.infer<typeof ownerSchema>;
 export type VehicleInput = z.infer<typeof vehicleSchema>;
+export type DriverInput = z.infer<typeof driverSchema>;
 export type PracticeInput = z.infer<typeof practiceSchema>;
 
 const MONTH_CODES = "ABCDEHLMPRST";
