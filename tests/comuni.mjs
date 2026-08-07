@@ -9,7 +9,7 @@ let fail=0; const check=(n,c,x='')=>{console.log(c?'ok  ':'FAIL',n,x); if(!c)fai
 
 await p.goto(`${B}/login`);
 await p.fill('#password', PW);
-await Promise.all([p.waitForURL(/practices/,{timeout:15000}), p.click('button[type=submit]')]);
+await Promise.all([p.waitForURL(/deceased/,{timeout:15000}), p.click('button[type=submit]')]);
 
 // --- comuni API ---
 let r = await p.request.get(`${B}/api/municipalities?q=fogg`);
@@ -27,7 +27,7 @@ r = await p.request.get(`${B}/api/municipalities?q=f`);
 check('4 query troppo corta -> vuoto', (await r.json()).length===0);
 
 // --- autofill from the tax code ---
-await p.goto(`${B}/practices/new`);
+await p.goto(`${B}/deceased/new`);
 await p.fill('#personTaxCode','RSSMRA40C12D643D');
 await p.locator('#personLastName').focus();
 // The municipality comes from an /api/municipalities call: wait for the value.

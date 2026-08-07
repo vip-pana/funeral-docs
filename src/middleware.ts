@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
 
   if (pathname === "/login") {
     if (authenticated) {
-      return NextResponse.redirect(new URL("/practices", request.url));
+      return NextResponse.redirect(new URL("/deceased", request.url));
     }
     return NextResponse.next();
   }

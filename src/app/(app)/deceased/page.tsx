@@ -16,16 +16,16 @@ import { formatDate } from "@/lib/docs/render";
 
 import { SearchBox } from "./search-box";
 
-export const metadata = { title: "Pratiche — Documenti funebri" };
+export const metadata = { title: "Defunti — Documenti funebri" };
 
 /**
- * The list comes from the database and changes on every saved practice.
+ * The list comes from the database and changes on every saved record.
  * Without this Next prerenders it at build time and production would forever
  * serve the list frozen at that moment.
  */
 export const dynamic = "force-dynamic";
 
-export default async function PratichePage({
+export default async function DefuntiPage({
   searchParams,
 }: {
   searchParams: Promise<{ q?: string }>;
@@ -56,19 +56,19 @@ export default async function PratichePage({
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold">Pratiche</h1>
+          <h1 className="text-2xl font-semibold">Defunti</h1>
           <p className="text-muted-foreground text-sm">
             {/* Whole words, not stem + ending: concatenating a stem with a
                 suffix already produced a wrong plural once. */}
             {query
               ? `${rows.length} ${rows.length === 1 ? "risultato" : "risultati"} per «${query}».`
               : rows.length === 0
-                ? "Nessuna pratica registrata."
-                : `${rows.length} ${rows.length === 1 ? "pratica" : "pratiche"}.`}
+                ? "Nessun defunto registrato."
+                : `${rows.length} ${rows.length === 1 ? "defunto" : "defunti"}.`}
           </p>
         </div>
         <Button asChild>
-          <Link href="/practices/new">Nuova pratica</Link>
+          <Link href="/deceased/new">Nuovo defunto</Link>
         </Button>
       </div>
 
@@ -81,7 +81,9 @@ export default async function PratichePage({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Defunto</TableHead>
+                {/* Not "Defunto": the page is already titled that, and the
+                    column holds the name. */}
+                <TableHead>Nominativo</TableHead>
                 <TableHead>Decesso</TableHead>
                 <TableHead>Trasporto</TableHead>
                 <TableHead>Destinazione</TableHead>
@@ -99,7 +101,7 @@ export default async function PratichePage({
                   <TableCell>{p.destinationCity}</TableCell>
                   <TableCell className="text-right">
                     <Button asChild variant="ghost" size="sm">
-                      <Link href={`/practices/${p.id}`}>Apri</Link>
+                      <Link href={`/deceased/${p.id}`}>Apri</Link>
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -110,7 +112,7 @@ export default async function PratichePage({
       ) : (
         query && (
           <p className="text-muted-foreground py-8 text-center text-sm">
-            Nessuna pratica corrisponde alla ricerca.
+            Nessun defunto corrisponde alla ricerca.
           </p>
         )
       )}

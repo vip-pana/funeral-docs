@@ -31,8 +31,8 @@ Rigenerabile con `python3 scripts/normalize-templates.py` (parte da `_backup/`).
 | `transportDate` | Data del trasporto | 3,4 |
 | `transportTime` | Ora di partenza (hh:mm) | 3,4 |
 | `transportPermitDate` | Data dell'autorizzazione al trasporto | 4 |
-| `ownerVehiclePlate` | Targa dell'autofunebre scelta nella pratica | 2,3,4 |
-| `ownerDriverName` | Nome del conducente scelto nella pratica | 4 |
+| `ownerVehiclePlate` | Targa dell'autofunebre scelta per il defunto | 2,3,4 |
+| `ownerDriverName` | Nome del conducente scelto per il defunto | 4 |
 | `funeralChurch` | Chiesa per la sosta / esequie | 4 |
 
 ## Destinazione
@@ -47,7 +47,7 @@ Rigenerabile con `python3 scripts/normalize-templates.py` (parte da `_backup/`).
 
 > `ownerVehiclePlate` e `ownerDriverName` non sono più qui: i nomi restano
 > `owner*` perché sono i placeholder dentro i `.docx`, ma i valori arrivano
-> dall'autofunebre e dal conducente scelti nella singola pratica (tabelle
+> dall'autofunebre e dal conducente scelti per il singolo defunto (tabelle
 > `vehicles` e `drivers`). Rinominarli in `fields.ts` senza rinominarli nei
 > template lascerebbe un buco nei documenti stampati.
 

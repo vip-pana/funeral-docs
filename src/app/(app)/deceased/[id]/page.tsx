@@ -42,7 +42,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function PraticaPage({
+export default async function DefuntoPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -66,7 +66,7 @@ export default async function PraticaPage({
             {practice.personLastName} {practice.personFirstName}
           </h1>
           <p className="text-muted-foreground text-sm">
-            Pratica n. {practice.id}
+            Scheda n. {practice.id}
           </p>
         </div>
         <DeleteButton practiceId={practice.id} />

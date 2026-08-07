@@ -21,9 +21,9 @@ export type DriverFormState = {
 
 function revalidateDriverViews() {
   revalidatePath("/settings");
-  // The second argument matters: without it /practices/new and /practices/[id]
+  // The second argument matters: without it /deceased/new and /deceased/[id]
   // would keep the stale list in their Select.
-  revalidatePath("/practices", "layout");
+  revalidatePath("/deceased", "layout");
 }
 
 export async function addDriver(

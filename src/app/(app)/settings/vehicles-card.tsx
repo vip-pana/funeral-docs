@@ -50,7 +50,7 @@ export function VehiclesCard({ vehicles }: { vehicles: Vehicle[] }) {
       <CardHeader>
         <CardTitle>Autofunebri</CardTitle>
         <CardDescription>
-          I mezzi dell&apos;impresa: in ogni pratica scegli quale usare, e la
+          I mezzi dell&apos;impresa: per ogni defunto scegli quale usare, e la
           targa finisce nei documenti.
         </CardDescription>
       </CardHeader>
@@ -82,7 +82,7 @@ export function VehiclesCard({ vehicles }: { vehicles: Vehicle[] }) {
         ) : (
           <p className="text-muted-foreground text-sm">
             Nessuna autofunebre configurata. Aggiungine una qui sotto: potrai
-            poi sceglierla in ogni pratica.
+            poi sceglierla per ogni defunto.
           </p>
         )}
 

@@ -36,14 +36,14 @@ check("  secondo clic la rinasconde", (await p.getAttribute("#password", "type")
 check("  il valore non si perde", (await p.inputValue("#password")) === PW);
 
 // --- sidebar ---
-await Promise.all([p.waitForURL(/practices/, { timeout: 15000 }), p.click('button[type=submit]')]);
+await Promise.all([p.waitForURL(/deceased/, { timeout: 15000 }), p.click('button[type=submit]')]);
 await p.waitForTimeout(500);
 
 check("3 sidebar presente", await p.isVisible('[data-slot="sidebar"], [data-sidebar="sidebar"]'));
 check("  nessuna navbar orizzontale", !(await p.isVisible("header nav")));
 
 const activeHref = await p.getAttribute('[data-active="true"] a, a[data-active="true"]', "href").catch(() => null);
-check("4 voce attiva su Pratiche", activeHref === "/practices", String(activeHref));
+check("4 voce attiva su Defunti", activeHref === "/deceased", String(activeHref));
 
 await p.goto(`${B}/settings`);
 await p.waitForTimeout(400);
@@ -51,13 +51,13 @@ const active2 = await p.getAttribute('[data-active="true"] a, a[data-active="tru
 check("  voce attiva su Impostazioni", active2 === "/settings", String(active2));
 
 // the subpage keeps the parent entry active
-await p.goto(`${B}/practices/new`);
+await p.goto(`${B}/deceased/new`);
 await p.waitForTimeout(400);
 const active3 = await p.getAttribute('[data-active="true"] a, a[data-active="true"]', "href").catch(() => null);
-check("  sottopagina mantiene Pratiche", active3 === "/practices", String(active3));
+check("  sottopagina mantiene Defunti", active3 === "/deceased", String(active3));
 
 // --- collapse persists ---
-await p.goto(`${B}/practices`);
+await p.goto(`${B}/deceased`);
 await p.click('button[data-sidebar="trigger"]');
 await p.waitForTimeout(600);
 check("5 cookie salvato", (await ctx.cookies()).some((c) => c.name === "sidebar_state" && c.value === "false"));

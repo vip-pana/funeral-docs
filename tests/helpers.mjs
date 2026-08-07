@@ -80,7 +80,7 @@ export async function login(page, base) {
   await page.goto(`${base}/login`);
   await page.fill("#password", process.env.TEST_PASSWORD ?? "sviluppo123");
   await Promise.all([
-    page.waitForURL(/practices/, { timeout: 15000 }),
+    page.waitForURL(/deceased/, { timeout: 15000 }),
     page.click('button[type=submit]'),
   ]);
 }

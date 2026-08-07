@@ -61,10 +61,10 @@ export async function createPractice(
     .values(await withSelections(parsed.data))
     .returning({ id: schema.practices.id });
 
-  revalidatePath("/practices");
+  revalidatePath("/deceased");
   // Outside any try/catch: redirect() signals by throwing an exception that
   // Next intercepts, and a catch around it would mistake that for an error.
-  redirect(`/practices/${row.id}`);
+  redirect(`/deceased/${row.id}`);
 }
 
 export async function updatePractice(
@@ -89,13 +89,13 @@ export async function updatePractice(
     })
     .where(eq(schema.practices.id, id));
 
-  revalidatePath("/practices");
-  revalidatePath(`/practices/${id}`);
-  return { message: "Pratica aggiornata." };
+  revalidatePath("/deceased");
+  revalidatePath(`/deceased/${id}`);
+  return { message: "Defunto aggiornato." };
 }
 
 export async function deletePractice(id: number) {
   await db.delete(schema.practices).where(eq(schema.practices.id, id));
-  revalidatePath("/practices");
-  redirect("/practices");
+  revalidatePath("/deceased");
+  redirect("/deceased");
 }

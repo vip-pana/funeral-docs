@@ -266,13 +266,13 @@ function seedPractices() {
 
 if (reset) {
   const removed = db.prepare("DELETE FROM practices").run();
-  console.log(`Pratiche eliminate: ${removed.changes}`);
+  console.log(`Defunti eliminati: ${removed.changes}`);
 }
 
 console.log(`Impresa: ${seedOwner()}`);
 console.log(`Autofunebri: ${seedList("vehicles", VEHICLES).length}`);
 console.log(`Conducenti: ${seedList("drivers", DRIVERS).length}`);
-console.log(`Pratiche: ${seedPractices()}`);
+console.log(`Defunti: ${seedPractices()}`);
 
 db.close();
 console.log(`\nDati di esempio pronti in ${file}`);

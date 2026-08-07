@@ -9,7 +9,7 @@ const check = (n, c, x='') => { console.log(c?'ok  ':'FAIL', n, x); if(!c) fail+
 
 await p.goto(`${B}/login`);
 await p.fill('#password',(process.env.TEST_PASSWORD ?? 'sviluppo123'));
-await Promise.all([p.waitForURL(/practices/,{timeout:15000}), p.click('button[type=submit]')]);
+await Promise.all([p.waitForURL(/deceased/,{timeout:15000}), p.click('button[type=submit]')]);
 
 await p.goto(`${B}/settings`);
 check('1 pagina aperta', (await p.textContent('h1'))?.includes('Impostazioni'));

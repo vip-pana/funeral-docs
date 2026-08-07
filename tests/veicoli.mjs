@@ -77,12 +77,12 @@ try {
   check("4 targa normalizzata maiuscola", true, PLATE);
 
   // --- in the practice Select ---
-  await p.goto(`${B}/practices/new`);
+  await p.goto(`${B}/deceased/new`);
   await p.waitForTimeout(700);
   await p.click("#vehicleId");
   await p.waitForSelector("[role=option]", { timeout: 8000 });
   const options = await p.$$eval("[role=option]", (els) => els.map((e) => e.textContent));
-  check("5 compare nel Select della pratica", options.some((o) => o?.includes(PLATE)),
+  check("5 compare nel Select del defunto", options.some((o) => o?.includes(PLATE)),
     JSON.stringify(options));
   await p.click(`[role=option]:has-text("${PLATE}")`);
   await p.waitForTimeout(300);
@@ -90,13 +90,13 @@ try {
   // --- the plate reaches the document ---
   await fillPractice(p, SAMPLE);
   await Promise.all([
-    p.waitForURL(/\/practices\/\d+$/, { timeout: 20000 }),
-    p.click('button:has-text("Crea pratica")'),
+    p.waitForURL(/\/deceased\/\d+$/, { timeout: 20000 }),
+    p.click('button:has-text("Crea scheda")'),
   ]);
   const id = p.url().match(/(\d+)$/)[1];
 
   const docText = async () => {
-    const res = await p.request.get(`${B}/api/practices/${id}/generate?doc=2`);
+    const res = await p.request.get(`${B}/api/deceased/${id}/generate?doc=2`);
     const zip = await JSZip.loadAsync(await res.body());
     const xml = await zip.file("word/document.xml").async("string");
     return [...xml.matchAll(/<w:t[^>]*>([\s\S]*?)<\/w:t>/g)].map((m) => m[1]).join("");
@@ -122,11 +122,11 @@ try {
   check(
     "8 la targa resta nel documento",
     (await docText()).includes(PLATE),
-    "se fallisce, la copia sulla pratica non funziona",
+    "se fallisce, la copia sulla scheda non funziona",
   );
 
   // --- the practice says so instead of staying silent ---
-  await p.goto(`${B}/practices/${id}`);
+  await p.goto(`${B}/deceased/${id}`);
   await p.waitForSelector("#vehicleId", { timeout: 10000 });
   // The description of the hearse field alone: searching the whole page would
   // pick up the first one belonging to another field.
@@ -142,7 +142,7 @@ try {
   // --- cleanup ---
   await p.click('button:has-text("Elimina")');
   await Promise.all([
-    p.waitForURL((u) => u.pathname === "/practices", { timeout: 15000 }),
+    p.waitForURL((u) => u.pathname === "/deceased", { timeout: 15000 }),
     p.click('button:has-text("Confermi")'),
   ]);
 

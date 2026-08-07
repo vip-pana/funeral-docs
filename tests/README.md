@@ -39,5 +39,5 @@ Serve Google Chrome installato: i test usano `playwright-core` con
 ## Nota
 
 I test scrivono sul database configurato in `.env`: eseguirli su
-`DATABASE_PATH` di produzione creerebbe pratiche finte fra quelle reali.
+`DATABASE_PATH` di produzione creerebbe schede finte fra quelle reali.
 `pratiche.mjs` e `impostazioni.mjs` lasciano dietro di sé i dati che creano.

@@ -33,7 +33,7 @@ export function SearchBox({ initial }: { initial: string }) {
       const next = new URLSearchParams(params);
       if (value.trim()) next.set("q", value.trim());
       else next.delete("q");
-      router.replace(`/practices?${next}`);
+      router.replace(`/deceased?${next}`);
     }, 250);
 
     return () => clearTimeout(timer);
@@ -47,7 +47,7 @@ export function SearchBox({ initial }: { initial: string }) {
       <InputGroupInput
         id="q"
         type="search"
-        aria-label="Cerca fra le pratiche"
+        aria-label="Cerca fra i defunti"
         placeholder="Cerca per cognome, nome, codice fiscale, comune…"
         value={value}
         onChange={(e) => setValue(e.target.value)}

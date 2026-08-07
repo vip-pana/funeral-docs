@@ -10,11 +10,11 @@ import { listVehicles } from "@/lib/vehicles";
 import { createPractice } from "../actions";
 import { PracticeForm } from "../practice-form";
 
-export const metadata = { title: "Nuova pratica — Documenti funebri" };
+export const metadata = { title: "Nuovo defunto — Documenti funebri" };
 
 export const dynamic = "force-dynamic";
 
-export default async function NuovaPraticaPage() {
+export default async function NuovoDefuntoPage() {
   const [owner, vehicles, drivers] = await Promise.all([
     getOwner(),
     listVehicles(),
@@ -24,7 +24,7 @@ export default async function NuovaPraticaPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Nuova pratica</h1>
+        <h1 className="text-2xl font-semibold">Nuovo defunto</h1>
         <p className="text-muted-foreground text-sm">
           I dati dell&apos;impresa vengono presi dalle impostazioni.
         </p>
@@ -47,7 +47,7 @@ export default async function NuovaPraticaPage() {
         action={createPractice}
         vehicles={vehicles}
         drivers={drivers}
-        submitLabel="Crea pratica"
+        submitLabel="Crea scheda"
       />
     </div>
   );

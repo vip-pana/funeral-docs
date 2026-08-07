@@ -49,7 +49,7 @@ pnpm dev
 | `pnpm auth:hash '<password>'` | genera l'hash per `AUTH_PASSWORD_HASH` |
 | `pnpm db:generate` | crea una migrazione dallo schema |
 | `pnpm db:migrate` | applica le migrazioni |
-| `pnpm db:seed` | dati di esempio; `--reset` rifà le pratiche da zero |
+| `pnpm db:seed` | dati di esempio; `--reset` rifà le schede da zero |
 | `pnpm check:templates` | verifica che i `.docx` e `fields.ts` coincidano |
 | `pnpm test` | test unitari della logica pura |
 | `pnpm test:e2e` | suite end-to-end (serve un'istanza in ascolto) |
@@ -69,13 +69,13 @@ docxtemplater.
 | `scripts/normalize-templates.py` | normalizza i placeholder nei `.docx` |
 | `tests/` | suite end-to-end su browser |
 
-I dati dell'impresa si compilano una volta in **Impostazioni**; ogni pratica
-richiede solo i campi del defunto. Il codice fiscale compila da solo data e
-comune di nascita.
+I dati dell'impresa si compilano una volta in **Impostazioni**; per ogni
+defunto restano da inserire solo i suoi dati. Il codice fiscale compila da solo
+data e comune di nascita.
 
-Le **autofunebri** si elencano in Impostazioni ma si scelgono per pratica: la
-targa viene copiata sulla pratica al salvataggio, così i documenti già emessi
-restano corretti anche se il mezzo viene poi eliminato dall'elenco.
+Le **autofunebri** si elencano in Impostazioni ma si scelgono per singolo
+defunto: la targa viene copiata sulla scheda al salvataggio, così i documenti
+già emessi restano corretti anche se il mezzo viene poi eliminato dall'elenco.
 
 ## Deploy sul server
 

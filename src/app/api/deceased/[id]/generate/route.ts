@@ -9,8 +9,8 @@ import { getOwner, ownerValues } from "@/lib/owner";
 /**
  * Generates one document of a practice.
  *
- *   GET /api/practices/12/generate?doc=3   -> document 3 as .docx
- *   GET /api/practices/12/generate         -> the first document
+ *   GET /api/deceased/12/generate?doc=3   -> document 3 as .docx
+ *   GET /api/deceased/12/generate         -> the first document
  *
  * One file per request: the page asks for several in sequence, so each
  * document arrives as a separate .docx instead of inside an archive that has
@@ -34,7 +34,7 @@ export async function GET(
     .limit(1);
 
   if (!practice) {
-    return NextResponse.json({ error: "Pratica non trovata" }, { status: 404 });
+    return NextResponse.json({ error: "Defunto non trovato" }, { status: 404 });
   }
 
   const requested = request.nextUrl.searchParams.get("doc") ?? DOCUMENTS[0].id;

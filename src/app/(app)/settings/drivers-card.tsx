@@ -50,7 +50,7 @@ export function DriversCard({ drivers }: { drivers: Driver[] }) {
       <CardHeader>
         <CardTitle>Conducenti</CardTitle>
         <CardDescription>
-          Chi guida l&apos;autofunebre: in ogni pratica scegli chi ha condotto
+          Chi guida l&apos;autofunebre: per ogni defunto scegli chi ha condotto
           il trasporto, e il nome finisce nel documento 4.
         </CardDescription>
       </CardHeader>
@@ -80,7 +80,7 @@ export function DriversCard({ drivers }: { drivers: Driver[] }) {
         ) : (
           <p className="text-muted-foreground text-sm">
             Nessun conducente configurato. Aggiungine uno qui sotto: potrai poi
-            sceglierlo in ogni pratica.
+            sceglierlo per ogni defunto.
           </p>
         )}
 
