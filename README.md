@@ -36,6 +36,7 @@ template non ci sono: meglio non partire che partire su un archivio vuoto.
 ```bash
 pnpm install
 pnpm db:migrate
+pnpm db:seed     # facoltativo: dati di esempio con cui vedere l'app piena
 pnpm dev
 ```
 
@@ -48,7 +49,9 @@ pnpm dev
 | `pnpm auth:hash '<password>'` | genera l'hash per `AUTH_PASSWORD_HASH` |
 | `pnpm db:generate` | crea una migrazione dallo schema |
 | `pnpm db:migrate` | applica le migrazioni |
+| `pnpm db:seed` | dati di esempio; `--reset` rifà le pratiche da zero |
 | `pnpm check:templates` | verifica che i `.docx` e `fields.ts` coincidano |
+| `pnpm test` | test unitari della logica pura |
 | `pnpm test:e2e` | suite end-to-end (serve un'istanza in ascolto) |
 
 ## Come è fatto
