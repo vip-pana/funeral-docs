@@ -8,8 +8,20 @@ import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
  */
 
 /**
+ * Primary keys are UUIDs rather than a counter: a sequential id in the URL
+ * tells anyone how many records exist and lets them be walked one by one.
+ *
+ * `$defaultFn` runs in JavaScript before the INSERT, so the id is known in
+ * advance and `.returning({ id })` still works. It emits no DEFAULT clause in
+ * the DDL, so raw SQL (the migration, scripts/seed.ts) has to supply its own.
+ */
+const uuid = () => text("id").primaryKey().$defaultFn(() => crypto.randomUUID());
+
+/**
  * Single-row table: `id` is always 1, so saving again updates the existing row
- * instead of piling up parallel configurations.
+ * instead of piling up parallel configurations. Deliberately not a UUID — it is
+ * a sentinel, not an identity, and the upsert in settings/actions.ts needs a
+ * constant to conflict on.
  */
 export const owner = sqliteTable("owner", {
   id: integer("id").primaryKey().default(1),
@@ -27,7 +39,7 @@ export const owner = sqliteTable("owner", {
 
 /** Declared before `practices`, which references it. */
 export const vehicles = sqliteTable("vehicles", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+  id: uuid(),
   /** Free-form description to recognise the vehicle, e.g. "Mercedes Vito". */
   name: text("name").notNull(),
   plate: text("plate").notNull(),
@@ -38,7 +50,7 @@ export const vehicles = sqliteTable("vehicles", {
 
 /** Declared before `practices`, which references it. */
 export const drivers = sqliteTable("drivers", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+  id: uuid(),
   name: text("name").notNull(),
   createdAt: text("created_at")
     .notNull()
@@ -46,7 +58,7 @@ export const drivers = sqliteTable("drivers", {
 });
 
 export const practices = sqliteTable("practices", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+  id: uuid(),
 
   personFirstName: text("person_first_name").notNull(),
   personLastName: text("person_last_name").notNull(),
@@ -72,14 +84,14 @@ export const practices = sqliteTable("practices", {
   // The reference records which vehicle was used and nulls itself out if that
   // vehicle is deleted; the plate is copied because documents already issued
   // must not change when the hearse list does.
-  vehicleId: integer("vehicle_id").references(() => vehicles.id, {
+  vehicleId: text("vehicle_id").references(() => vehicles.id, {
     onDelete: "set null",
   }),
   vehiclePlate: text("vehicle_plate").notNull().default(""),
 
   // Same split as the vehicle above: the reference nulls itself out if the
   // driver is deleted, the name is copied so documents already issued keep it.
-  driverId: integer("driver_id").references(() => drivers.id, {
+  driverId: text("driver_id").references(() => drivers.id, {
     onDelete: "set null",
   }),
   driverName: text("driver_name").notNull().default(""),

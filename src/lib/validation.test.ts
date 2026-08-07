@@ -237,26 +237,35 @@ describe("practiceSchema", () => {
 
   /**
    * The Selects submit an empty string when nothing is picked, and that has to
-   * survive as "none chosen" rather than becoming the id 0.
+   * survive as "none chosen" rather than reaching the database.
    */
   describe("vehicleId and driverId", () => {
+    const UUID = "80801b37-00c8-413c-8df3-eab61984f30c";
+
     it("turns an empty string into undefined", () => {
       const result = parse({ vehicleId: "", driverId: "" });
       expect(result.success && result.data.vehicleId).toBeUndefined();
       expect(result.success && result.data.driverId).toBeUndefined();
     });
 
-    it("coerces the id to a number", () => {
-      const result = parse({ vehicleId: "3", driverId: "7" });
-      expect(result.success && result.data.vehicleId).toBe(3);
-      expect(result.success && result.data.driverId).toBe(7);
+    it("keeps a uuid as it is", () => {
+      const result = parse({ vehicleId: UUID, driverId: UUID });
+      expect(result.success && result.data.vehicleId).toBe(UUID);
+      expect(result.success && result.data.driverId).toBe(UUID);
     });
 
-    it("rejects an id that is not a positive integer", () => {
-      expect(parse({ vehicleId: "0" }).success).toBe(false);
-      expect(parse({ vehicleId: "-2" }).success).toBe(false);
-      expect(parse({ vehicleId: "2.5" }).success).toBe(false);
-      expect(parse({ vehicleId: "abc" }).success).toBe(false);
+    it("treats a blank field as nothing chosen", () => {
+      const result = parse({ vehicleId: "   " });
+      expect(result.success && result.data.vehicleId).toBeUndefined();
+    });
+
+    /**
+     * The shape is not validated here: the server re-reads the row and nulls an
+     * id that matches nothing, so a garbage value never reaches the column.
+     */
+    it("accepts an id that is not a uuid, for the server to reject", () => {
+      const result = parse({ vehicleId: "abc" });
+      expect(result.success && result.data.vehicleId).toBe("abc");
     });
   });
 });

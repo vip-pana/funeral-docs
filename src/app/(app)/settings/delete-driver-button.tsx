@@ -10,7 +10,7 @@ import { deleteDriver } from "./driver-actions";
  * Removal cannot be undone: the first click asks for confirmation, the second
  * performs it. Practices that used the driver keep the name anyway.
  */
-export function DeleteDriverButton({ driverId }: { driverId: number }) {
+export function DeleteDriverButton({ driverId }: { driverId: string }) {
   const [confirming, setConfirming] = useState(false);
 
   if (!confirming) {

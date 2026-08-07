@@ -10,7 +10,7 @@ import { deleteVehicle } from "./vehicle-actions";
  * Removal cannot be undone: the first click asks for confirmation, the second
  * performs it. Practices that used the vehicle keep the plate anyway.
  */
-export function DeleteVehicleButton({ vehicleId }: { vehicleId: number }) {
+export function DeleteVehicleButton({ vehicleId }: { vehicleId: string }) {
   const [confirming, setConfirming] = useState(false);
 
   if (!confirming) {

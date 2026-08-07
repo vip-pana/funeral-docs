@@ -82,16 +82,18 @@ export const driverSchema = z.object({
 });
 
 /**
- * The Select submits an empty string when nothing is picked, and that means
- * "none chosen". Branch order matters: `z.coerce.number()` turns "" into 0,
- * which fails `.positive()` and falls through to the second branch.
+ * Ids are UUIDs, so there is nothing to coerce — but the empty string still has
+ * to survive as "none chosen": the Select submits it when nothing is picked, and
+ * validating the shape would report an error on a field left blank on purpose.
+ *
+ * No `.uuid()` either: the server re-reads the row anyway and turns an id that
+ * matches nothing into null (see `withSelections`).
  */
-const optionalId = z.coerce
-  .number()
-  .int()
-  .positive()
+const optionalId = z
+  .string()
+  .trim()
   .optional()
-  .or(z.literal("").transform(() => undefined));
+  .transform((v) => v || undefined);
 
 export const ownerSchema = z.object({
   ownerFirstName: requiredText("Nome"),

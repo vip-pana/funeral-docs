@@ -19,19 +19,21 @@ const seed = {personFirstName:'Api',personLastName:'Prova',personTaxCode:'RSSMRA
  personDeathCity:'San Severo',personDeathPlace:'Ospedale',transportDate:'2026-08-03',
  transportTime:'08:00',transportPermitDate:'2026-08-02',destinationCity:'Foggia',destinationCemetery:'Comunale'};
 await fillPractice(p, seed);
-await Promise.all([p.waitForURL(/\/deceased\/\d+$/,{timeout:15000}),
+await Promise.all([p.waitForURL(/\/deceased\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,{timeout:15000}),
                    p.click('button:has-text("Crea scheda")')]);
-const ID = p.url().match(/(\d+)$/)[1];
+const ID = p.url().match(/\/deceased\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/)[1];
 const call = async (u) => {
   const r = await p.request.get(`${B}${u}`);
   return { status: r.status(), type: r.headers()['content-type'], body: await r.text().catch(()=>'')};
 };
 
-let r = await call('/api/deceased/99999/generate');
-check('defunto inesistente -> 404', r.status===404, String(r.status));
+// The id is a UUID: there is no shape to validate, so an id that matches no row
+// is "not found" whether it is well formed or not.
+let r = await call('/api/deceased/00000000-0000-4000-8000-000000000000/generate');
+check('uuid inesistente -> 404', r.status===404, String(r.status));
 
 r = await call('/api/deceased/abc/generate');
-check('id non numerico -> 400', r.status===400, String(r.status));
+check('id malformato -> 404', r.status===404, String(r.status));
 
 r = await call(`/api/deceased/${ID}/generate?doc=9`);
 check('documento inesistente -> 400', r.status===400, String(r.status));

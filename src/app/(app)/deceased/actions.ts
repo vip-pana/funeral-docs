@@ -68,7 +68,7 @@ export async function createPractice(
 }
 
 export async function updatePractice(
-  id: number,
+  id: string,
   _prev: PracticeFormState,
   formData: FormData,
 ): Promise<PracticeFormState> {
@@ -94,7 +94,7 @@ export async function updatePractice(
   return { message: "Defunto aggiornato." };
 }
 
-export async function deletePractice(id: number) {
+export async function deletePractice(id: string) {
   await db.delete(schema.practices).where(eq(schema.practices.id, id));
   revalidatePath("/deceased");
   redirect("/deceased");

@@ -50,7 +50,7 @@ export async function addDriver(
   return { ok: true, message: "Conducente aggiunto." };
 }
 
-export async function deleteDriver(id: number) {
+export async function deleteDriver(id: string) {
   // Practices that used them keep the copied name: the reference nulls itself
   // out (ON DELETE SET NULL) and the documents stay unchanged.
   await db.delete(schema.drivers).where(eq(schema.drivers.id, id));

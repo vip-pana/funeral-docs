@@ -80,10 +80,10 @@ try {
   // --- the name reaches the document ---
   await fillPractice(p, SAMPLE);
   await Promise.all([
-    p.waitForURL(/\/deceased\/\d+$/, { timeout: 20000 }),
+    p.waitForURL(/\/deceased\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/, { timeout: 20000 }),
     p.click('button:has-text("Crea scheda")'),
   ]);
-  const id = p.url().match(/(\d+)$/)[1];
+  const id = p.url().match(/\/deceased\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/)[1];
 
   // The driver only appears in document 4.
   const docText = async () => {

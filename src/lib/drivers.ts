@@ -7,7 +7,7 @@ export async function listDrivers(): Promise<Driver[]> {
   return db.select().from(schema.drivers).orderBy(asc(schema.drivers.name));
 }
 
-export async function getDriver(id: number): Promise<Driver | null> {
+export async function getDriver(id: string): Promise<Driver | null> {
   const [row] = await db
     .select()
     .from(schema.drivers)

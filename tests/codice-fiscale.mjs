@@ -62,7 +62,7 @@ try {
   await pickComune(p,'personResidenceCity','San Severo');
   await pickComune(p,'personDeathCity','San Severo');
   await pickComune(p,'destinationCity','Foggia');
-  await Promise.all([p.waitForURL(/\/deceased\/\d+$/,{timeout:20000}),
+  await Promise.all([p.waitForURL(/\/deceased\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,{timeout:20000}),
                      p.click('button:has-text("Crea scheda")')]);
   await p.reload();
   await p.waitForTimeout(900);

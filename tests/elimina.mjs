@@ -17,8 +17,8 @@ const v={personFirstName:'Elimina',personLastName:'Prova',personTaxCode:'RSSMRA4
  personDeathCity:'San Severo',personDeathPlace:'Ospedale',transportDate:'2026-08-03',
  transportTime:'08:00',transportPermitDate:'2026-08-02',destinationCity:'Foggia',destinationCemetery:'Comunale'};
 await fillPractice(p, v);
-await Promise.all([p.waitForURL(/\/deceased\/\d+$/,{timeout:15000}), p.click('button:has-text("Crea scheda")')]);
-const id = p.url().match(/(\d+)$/)[1];
+await Promise.all([p.waitForURL(/\/deceased\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,{timeout:15000}), p.click('button:has-text("Crea scheda")')]);
+const id = p.url().match(/\/deceased\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/)[1];
 
 // first click: asks for confirmation, does not delete
 await p.click('button:has-text("Elimina")');

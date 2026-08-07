@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/field";
 import { DOCUMENTS, type DocumentId } from "@/lib/fields";
 
-export function GeneratePanel({ practiceId }: { practiceId: number }) {
+export function GeneratePanel({ practiceId }: { practiceId: string }) {
   const [selected, setSelected] = useState<Set<DocumentId>>(
     () => new Set(DOCUMENTS.map((d) => d.id)),
   );

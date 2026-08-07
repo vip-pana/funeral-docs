@@ -9,8 +9,8 @@ import { getOwner, ownerValues } from "@/lib/owner";
 /**
  * Generates one document of a practice.
  *
- *   GET /api/deceased/12/generate?doc=3   -> document 3 as .docx
- *   GET /api/deceased/12/generate         -> the first document
+ *   GET /api/deceased/<uuid>/generate?doc=3   -> document 3 as .docx
+ *   GET /api/deceased/<uuid>/generate         -> the first document
  *
  * One file per request: the page asks for several in sequence, so each
  * document arrives as a separate .docx instead of inside an archive that has
@@ -21,16 +21,13 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const practiceId = Number(id);
 
-  if (!Number.isInteger(practiceId)) {
-    return NextResponse.json({ error: "Id non valido" }, { status: 400 });
-  }
-
+  // No shape check on the id: a UUID goes to the query as it arrives, and
+  // anything that matches no row is a 404 below — same answer the page gives.
   const [practice] = await db
     .select()
     .from(schema.practices)
-    .where(eq(schema.practices.id, practiceId))
+    .where(eq(schema.practices.id, id))
     .limit(1);
 
   if (!practice) {

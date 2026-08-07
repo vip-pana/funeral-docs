@@ -51,7 +51,7 @@ export async function addVehicle(
   return { ok: true, message: "Autofunebre aggiunta." };
 }
 
-export async function deleteVehicle(id: number) {
+export async function deleteVehicle(id: string) {
   // Practices that used it keep the copied plate: the reference nulls itself
   // out (ON DELETE SET NULL) and the documents stay unchanged.
   await db.delete(schema.vehicles).where(eq(schema.vehicles.id, id));

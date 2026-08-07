@@ -72,22 +72,22 @@ export function PracticeForm({
   );
   const [province, setProvince] = useState(practice?.destinationProvince ?? "");
   const [vehicleId, setVehicleId] = useState(
-    practice?.vehicleId ? String(practice.vehicleId) : "",
+    practice?.vehicleId ?? "",
   );
 
   const [driverId, setDriverId] = useState(
-    practice?.driverId ? String(practice.driverId) : "",
+    practice?.driverId ?? "",
   );
 
   // The vehicle may have been deleted after saving: the practice keeps the
   // plate, but the list no longer has an entry to select.
   const missingVehicle = Boolean(
-    practice?.vehiclePlate && !vehicles.some((v) => String(v.id) === vehicleId),
+    practice?.vehiclePlate && !vehicles.some((v) => v.id === vehicleId),
   );
 
   // Same for the driver, which keeps the copied name.
   const missingDriver = Boolean(
-    practice?.driverName && !drivers.some((d) => String(d.id) === driverId),
+    practice?.driverName && !drivers.some((d) => d.id === driverId),
   );
 
   useEffect(() => {
@@ -382,7 +382,7 @@ export function PracticeForm({
               </SelectTrigger>
               <SelectContent>
                 {vehicles.map((v) => (
-                  <SelectItem key={v.id} value={String(v.id)}>
+                  <SelectItem key={v.id} value={v.id}>
                     {v.name} — {v.plate}
                   </SelectItem>
                 ))}
@@ -410,7 +410,7 @@ export function PracticeForm({
               </SelectTrigger>
               <SelectContent>
                 {drivers.map((d) => (
-                  <SelectItem key={d.id} value={String(d.id)}>
+                  <SelectItem key={d.id} value={d.id}>
                     {d.name}
                   </SelectItem>
                 ))}

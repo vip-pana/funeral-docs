@@ -147,24 +147,35 @@ function seedOwner() {
   return "inserted";
 }
 
-/** Adds the sample rows only when the list is empty, and returns the ids. */
+/**
+ * Adds the sample rows only when the list is empty, and returns the ids.
+ *
+ * The id is generated here: this script talks to SQLite directly, so it does not
+ * go through the schema's `$defaultFn` and would otherwise insert a null id.
+ * `lastInsertRowid` is no help either — on a text primary key it returns the
+ * internal rowid, which has nothing to do with the UUID.
+ */
 function seedList(
   table: "vehicles" | "drivers",
   rows: { name: string; plate?: string }[],
-): number[] {
+): string[] {
   const ids = db
-    .prepare(`SELECT id FROM ${table} ORDER BY id`)
-    .all() as { id: number }[];
+    .prepare(`SELECT id FROM ${table} ORDER BY name`)
+    .all() as { id: string }[];
   if (ids.length) return ids.map((r) => r.id);
 
   const insert =
     table === "vehicles"
-      ? db.prepare("INSERT INTO vehicles (name, plate) VALUES (@name, @plate)")
-      : db.prepare("INSERT INTO drivers (name) VALUES (@name)");
+      ? db.prepare(
+          "INSERT INTO vehicles (id, name, plate) VALUES (@id, @name, @plate)",
+        )
+      : db.prepare("INSERT INTO drivers (id, name) VALUES (@id, @name)");
 
-  const inserted: number[] = [];
+  const inserted: string[] = [];
   for (const row of rows) {
-    inserted.push(Number(insert.run(row).lastInsertRowid));
+    const id = crypto.randomUUID();
+    insert.run({ ...row, id });
+    inserted.push(id);
   }
   return inserted;
 }
@@ -177,6 +188,7 @@ function seedPractices() {
 
   const insert = db.prepare(
     `INSERT INTO practices (
+       id,
        person_first_name, person_last_name, person_sex, person_tax_code,
        person_birth_date, person_birth_city, person_residence_city,
        person_residence_address, person_death_date, person_death_time,
@@ -185,6 +197,7 @@ function seedPractices() {
        destination_province, destination_cemetery, vehicle_id, vehicle_plate,
        driver_id, driver_name
      ) VALUES (
+       @id,
        @firstName, @lastName, @sex, @taxCode,
        @birthDate, @birthCity, @residenceCity,
        @residenceAddress, @deathDate, @deathTime,
@@ -195,12 +208,14 @@ function seedPractices() {
      )`,
   );
 
+  // Ordered by name, not by id: a UUID sorts arbitrarily, and the rotation
+  // below promises the same pairings on every run.
   const vehicles = db
-    .prepare("SELECT id, plate FROM vehicles ORDER BY id")
-    .all() as { id: number; plate: string }[];
+    .prepare("SELECT id, plate FROM vehicles ORDER BY name")
+    .all() as { id: string; plate: string }[];
   const drivers = db
-    .prepare("SELECT id, name FROM drivers ORDER BY id")
-    .all() as { id: number; name: string }[];
+    .prepare("SELECT id, name FROM drivers ORDER BY name")
+    .all() as { id: string; name: string }[];
 
   let inserted = 0;
   PEOPLE.forEach((p, index) => {
@@ -234,6 +249,7 @@ function seedPractices() {
     const driver = drivers[index % drivers.length];
 
     insert.run({
+      id: crypto.randomUUID(),
       firstName: p.firstName,
       lastName: p.lastName,
       sex: p.isFemale ? "F" : "M",

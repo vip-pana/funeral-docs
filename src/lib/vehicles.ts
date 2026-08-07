@@ -7,7 +7,7 @@ export async function listVehicles(): Promise<Vehicle[]> {
   return db.select().from(schema.vehicles).orderBy(asc(schema.vehicles.name));
 }
 
-export async function getVehicle(id: number): Promise<Vehicle | null> {
+export async function getVehicle(id: string): Promise<Vehicle | null> {
   const [row] = await db
     .select()
     .from(schema.vehicles)

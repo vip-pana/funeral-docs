@@ -46,13 +46,13 @@ await fillPractice(p, v);
 const hasVehicle = await pickSelect(p, 'vehicleId', 'FG123AB');
 const hasDriver = await pickSelect(p, 'driverId', 'Giuseppe Verdi');
 await Promise.all([
-  p.waitForURL(/\/deceased\/\d+$/, { timeout: 15000 }),
+  p.waitForURL(/\/deceased\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/, { timeout: 15000 }),
   p.click('button:has-text("Crea scheda")'),
 ]);
 check('3b autofunebre selezionata', hasVehicle, hasVehicle ? '' : 'nessun veicolo in elenco');
 check('3c conducente selezionato', hasDriver, hasDriver ? '' : 'nessun conducente in elenco');
 const url = p.url();
-check('3 creata e aperta', /\/deceased\/\d+$/.test(url), url);
+check('3 creata e aperta', /\/deceased\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(url), url);
 check('  intestazione', (await p.textContent('h1'))?.includes('Rossi'));
 
 // normalised province
@@ -60,7 +60,7 @@ check('4 provincia dal comune', await p.inputValue('#destinationProvince') === '
       await p.inputValue('#destinationProvince'));
 
 // --- single download ---
-const id = url.match(/(\d+)$/)[1];
+const id = url.match(/\/deceased\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/)[1];
 await p.locator('[role=checkbox]').nth(0).check();
 for (let i=1;i<5;i++) await p.locator('[role=checkbox]').nth(i).uncheck();
 const [d1] = await Promise.all([

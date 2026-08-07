@@ -10,7 +10,7 @@ import { deletePractice } from "../actions";
  * Deletion cannot be undone: the first click asks for confirmation, the second
  * performs it.
  */
-export function DeleteButton({ practiceId }: { practiceId: number }) {
+export function DeleteButton({ practiceId }: { practiceId: string }) {
   const [confirming, setConfirming] = useState(false);
 
   if (!confirming) {
