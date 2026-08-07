@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { deleteVehicle } from "./vehicle-actions";
 
 /**
- * La rimozione non si annulla: il primo clic chiede conferma, il secondo
- * esegue. Le pratiche che usavano il mezzo tengono comunque la targa.
+ * Removal cannot be undone: the first click asks for confirmation, the second
+ * performs it. Practices that used the vehicle keep the plate anyway.
  */
 export function DeleteVehicleButton({ vehicleId }: { vehicleId: number }) {
   const [confirming, setConfirming] = useState(false);
@@ -34,7 +34,7 @@ export function DeleteVehicleButton({ vehicleId }: { vehicleId: number }) {
       >
         Annulla
       </Button>
-      {/* Testo corto: sta in una cella di tabella, non in un'intestazione. */}
+      {/* Short label: this sits in a table cell, not a heading. */}
       <Button type="submit" variant="destructive" size="sm">
         Confermi?
       </Button>

@@ -11,8 +11,8 @@ import {
 } from "@/lib/auth";
 
 /**
- * Ritardo minimo su ogni tentativo. Non e' un rate limiter completo, ma su una
- * rete privata basta a rendere impraticabile provare password in sequenza.
+ * Minimum delay per attempt. Not a full rate limiter, but on a private network
+ * it is enough to make trying passwords in sequence impractical.
  */
 const MIN_ATTEMPT_MS = 500;
 
@@ -39,11 +39,11 @@ export async function login(
   store.set(SESSION_COOKIE, await createSession(), {
     httpOnly: true,
     sameSite: "lax",
-    // Un cookie `secure` viaggia solo su https. Il browser fa un'eccezione per
-    // localhost, ma non per un indirizzo Tailscale (100.x.y.z): li' l'app e'
-    // raggiungibile in http e il cookie non verrebbe memorizzato affatto,
-    // rendendo impossibile l'accesso. COOKIE_SECURE=false copre quel caso;
-    // la riservatezza la garantisce comunque la rete privata.
+    // A `secure` cookie only travels over https. Browsers make an exception
+    // for localhost but not for a Tailscale address (100.x.y.z): there the app
+    // is reachable over http and the cookie would not be stored at all, making
+    // login impossible. COOKIE_SECURE=false covers that case; confidentiality
+    // still comes from the private network.
     secure: process.env.COOKIE_SECURE
       ? process.env.COOKIE_SECURE === "true"
       : process.env.NODE_ENV === "production",
@@ -51,8 +51,8 @@ export async function login(
     maxAge: SESSION_MAX_AGE,
   });
 
-  // Solo percorsi interni: un `next` assoluto trasformerebbe il login in un
-  // redirect aperto verso l'esterno.
+  // Internal paths only: an absolute `next` would turn the login into an open
+  // redirect to an external site.
   redirect(next.startsWith("/") && !next.startsWith("//") ? next : "/pratiche");
 }
 

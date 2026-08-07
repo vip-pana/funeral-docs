@@ -4,13 +4,13 @@ import JSZip from "jszip";
 import { fillPractice, login, SAMPLE } from "./helpers.mjs";
 
 /**
- * Elenco autofunebri e targa copiata sulla pratica.
+ * Hearse list and the plate copied onto the practice.
  *
- * Il controllo centrale e' il 7: eliminata l'autofunebre, la targa deve
- * restare nei documenti gia' emessi. E' la ragione per cui la pratica
- * conserva una copia della targa invece del solo riferimento.
+ * Check 7 is the central one: once the hearse is deleted, the plate must stay
+ * in documents already issued. That is the reason the practice keeps a copy of
+ * the plate rather than just the reference.
  *
- * Gira prima di pratiche.mjs, che riusa il veicolo lasciato qui.
+ * Runs before pratiche.mjs, which reuses the vehicle left here.
  */
 
 const B = process.env.BASE_URL ?? "http://localhost:3000";
@@ -36,8 +36,8 @@ try {
 
   check("1 card Autofunebri presente", (await plateText()).includes("Autofunebri"));
 
-  // Rimuove le autofunebri lasciate da esecuzioni precedenti: la suite ne
-  // ricrea una in coda, e senza pulizia se ne accumulerebbero.
+  // Remove hearses left by previous runs: the suite recreates one at the end,
+  // and without this cleanup they would pile up.
   for (let i = 0; i < 10; i++) {
     const stale = p.locator("tr", { hasText: PLATE }).first();
     if (!(await stale.count())) break;
@@ -46,7 +46,7 @@ try {
     await p.waitForTimeout(600);
   }
 
-  // --- validazione ---
+  // --- validation ---
   await p.click('button:has-text("Aggiungi")');
   await p.waitForFunction(
     () => document.querySelectorAll('[role=alert]').length > 0,
@@ -55,7 +55,7 @@ try {
   );
   check("2 aggiunta rifiutata a campi vuoti", true);
 
-  // --- aggiunta ---
+  // --- adding ---
   await p.fill("#name", NAME);
   await p.fill("#plate", PLATE.toLowerCase());
   await p.click('button:has-text("Aggiungi")');
@@ -74,7 +74,7 @@ try {
   );
   check("4 targa normalizzata maiuscola", true, PLATE);
 
-  // --- nel Select della pratica ---
+  // --- in the practice Select ---
   await p.goto(`${B}/pratiche/nuova`);
   await p.waitForTimeout(700);
   await p.click("#vehicleId");
@@ -85,7 +85,7 @@ try {
   await p.click(`[role=option]:has-text("${PLATE}")`);
   await p.waitForTimeout(300);
 
-  // --- la targa arriva nel documento ---
+  // --- the plate reaches the document ---
   await fillPractice(p, SAMPLE);
   await Promise.all([
     p.waitForURL(/\/pratiche\/\d+$/, { timeout: 20000 }),
@@ -102,18 +102,18 @@ try {
 
   check("6 targa nel documento 2", (await docText()).includes(PLATE));
 
-  // --- il controllo che giustifica la colonna copiata ---
+  // --- the check that justifies the copied column ---
   await p.goto(`${B}/impostazioni`);
   await p.waitForSelector("table", { timeout: 10000 });
 
-  // Elimina la riga di questa targa, non la prima della tabella: l'elenco puo'
-  // contenere mezzi lasciati da esecuzioni precedenti.
+  // Delete the row for this plate, not the first in the table: the list can
+  // hold vehicles left by previous runs.
   const row = p.locator("tr", { hasText: PLATE });
   await row.getByRole("button", { name: "Elimina" }).click();
   await row.getByRole("button", { name: "Confermi?" }).click();
 
-  // La targa va cercata nella tabella, non nel body: resta scritta nel campo
-  // del form di aggiunta finche' React non lo azzera.
+  // Look for the plate in the table, not the body: it stays written in the add
+  // form's field until React clears it.
   await p.waitForFunction(
     (plate) => !document.querySelector("table")?.textContent?.includes(plate),
     PLATE,
@@ -127,11 +127,11 @@ try {
     "se fallisce, la copia sulla pratica non funziona",
   );
 
-  // --- la pratica lo dichiara invece di tacere ---
+  // --- the practice says so instead of staying silent ---
   await p.goto(`${B}/pratiche/${id}`);
   await p.waitForSelector("#vehicleId", { timeout: 10000 });
-  // La descrizione del solo campo autofunebre: cercarla nell'intera pagina
-  // prenderebbe la prima di un altro campo.
+  // The description of the hearse field alone: searching the whole page would
+  // pick up the first one belonging to another field.
   const hint = await p
     .locator('[data-slot=field]:has(#vehicleId) [data-slot=field-description]')
     .textContent();
@@ -141,14 +141,14 @@ try {
     hint ?? "(nessuna descrizione)",
   );
 
-  // --- pulizia ---
+  // --- cleanup ---
   await p.click('button:has-text("Elimina")');
   await Promise.all([
     p.waitForURL((u) => u.pathname === "/pratiche", { timeout: 15000 }),
     p.click('button:has-text("Confermi")'),
   ]);
 
-  // Ricrea l'autofunebre per pratiche.mjs, che gira dopo e la usa.
+  // Recreate the hearse for pratiche.mjs, which runs later and uses it.
   await p.goto(`${B}/impostazioni`);
   await p.waitForTimeout(600);
   await p.fill("#name", NAME);

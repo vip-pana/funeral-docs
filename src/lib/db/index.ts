@@ -6,15 +6,15 @@ import { dirname } from "node:path";
 import * as schema from "./schema";
 
 /**
- * Connessione SQLite condivisa, aperta alla prima query.
+ * Shared SQLite connection, opened on the first query.
  *
- * L'apertura non puo' avvenire all'import: durante `next build` i moduli delle
- * pagine vengono caricati per l'analisi statica, ma il database non esiste
- * ancora — nel container arriva da un volume montato a runtime. Aprirlo li'
- * faceva fallire il build con "Failed to collect page data".
+ * It cannot be opened at import time: during `next build` page modules are
+ * loaded for static analysis, but the database does not exist yet — in the
+ * container it comes from a volume mounted at runtime. Opening it there made
+ * the build fail with "Failed to collect page data".
  *
- * In sviluppo Next ricarica i moduli a ogni modifica: la cache sul global
- * evita che ogni ricarica apra una connessione in piu' sullo stesso file.
+ * In development Next reloads modules on every change: caching on the global
+ * keeps each reload from opening another connection to the same file.
  */
 
 const DEFAULT_PATH = "./data/funeral.db";
@@ -24,15 +24,15 @@ type Db = ReturnType<typeof createDb>;
 function createDb() {
   const file = process.env.DATABASE_PATH ?? DEFAULT_PATH;
 
-  // In produzione il percorso e' un volume montato: se manca, e' un errore di
-  // deploy e va segnalato, non aggirato creando un database vuoto che
-  // sembrerebbe semplicemente nuovo.
+  // In production the path is a mounted volume: if it is missing that is a
+  // deploy error and must surface, not be papered over by creating an empty
+  // database that would just look new.
   if (process.env.NODE_ENV !== "production") {
     mkdirSync(dirname(file), { recursive: true });
   }
 
   const sqlite = new Database(file);
-  // WAL: letture e scritture non si bloccano a vicenda.
+  // WAL: reads and writes do not block each other.
   sqlite.pragma("journal_mode = WAL");
   sqlite.pragma("foreign_keys = ON");
 
@@ -47,8 +47,8 @@ export function getDb(): Db {
 }
 
 /**
- * Si usa come un'istanza normale (`db.select()...`), ma la connessione si apre
- * al primo accesso a una proprieta', non quando il modulo viene importato.
+ * Used like a normal instance (`db.select()...`), but the connection opens on
+ * the first property access rather than when the module is imported.
  */
 export const db = new Proxy({} as Db, {
   get(_target, prop, receiver) {

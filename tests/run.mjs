@@ -1,6 +1,6 @@
 /**
- * Esegue tutte le suite in sequenza e riassume l'esito.
- * Richiede un'istanza gia' in ascolto (vedi tests/README.md).
+ * Runs every suite in sequence and summarises the outcome.
+ * Requires an instance already listening (see tests/README.md).
  */
 import { spawn } from "node:child_process";
 import { dirname, join } from "node:path";

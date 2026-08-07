@@ -35,8 +35,8 @@ export function VehiclesCard({ vehicles }: { vehicles: Vehicle[] }) {
   useEffect(() => {
     if (state.ok) {
       toast.success(state.message ?? "Salvato.");
-      // Senza il reset la riga appena inserita resta scritta nel form e
-      // invita a un secondo inserimento identico.
+      // Without the reset the row just inserted stays in the form and invites
+      // an identical second entry.
       formRef.current?.reset();
     } else if (state.message) {
       toast.error(state.message);
@@ -86,8 +86,8 @@ export function VehiclesCard({ vehicles }: { vehicles: Vehicle[] }) {
           </p>
         )}
 
-        {/* Form separato da quello dei dati ditta: i form annidati non sono
-            validi in HTML e il browser scarta quello interno. */}
+        {/* Separate from the company-data form: nested forms are invalid HTML
+            and the browser drops the inner one. */}
         <form
           ref={formRef}
           action={formAction}
@@ -110,7 +110,7 @@ export function VehiclesCard({ vehicles }: { vehicles: Vehicle[] }) {
             type="submit"
             variant="outline"
             disabled={pending}
-            // Scende all'altezza dell'input, saltando l'etichetta sopra.
+            // Drops down to the input's height, clearing the label above.
             className="mt-[calc(--spacing(6)+2px)] shrink-0"
           >
             {pending ? "Aggiunta…" : "Aggiungi"}

@@ -27,15 +27,12 @@ import type { Comune } from "@/lib/comuni";
 import { cn } from "@/lib/utils";
 
 /**
- * Selezione di un comune, con ricerca.
+ * Searchable municipality picker.
  *
- * L'elenco completo sta sul server (~200 KB): i risultati arrivano da
- * `/api/comuni` mentre si digita. Il campo resta libero — un comune non in
- * elenco si conferma comunque, perche' rifiutarlo bloccherebbe il lavoro per
- * un dato che l'app non conosce.
- *
- * Il valore viaggia in un input nascosto: il pulsante del popover non fa parte
- * della FormData.
+ * The full list stays on the server (~200 KB): results come from `/api/comuni`
+ * while typing. The field stays free-form — a municipality not in the list can
+ * still be confirmed, because rejecting it would block the work over data the
+ * app happens not to know.
  */
 export function ComuneField({
   name,
@@ -50,16 +47,16 @@ export function ComuneField({
   name: string;
   label: string;
   defaultValue?: string;
-  /** Passare value+onChange per pilotare il campo dall'esterno. */
+  /** Pass value+onChange to drive the field from the outside. */
   value?: string;
   onChange?: (value: string) => void;
   error?: string;
   hint?: string;
-  /** Chiamato quando viene scelto un comune dell'elenco. */
+  /** Called when a municipality is picked from the list. */
   onPick?: (comune: Comune) => void;
 }) {
-  // L'id coincide col nome del campo: la <label> punta a un elemento
-  // prevedibile e il pulsante resta indirizzabile dall'esterno.
+  // The id matches the field name so the <label> points at a predictable
+  // element and the button stays addressable from outside (tests included).
   const id = name;
   const [internal, setInternal] = useState(defaultValue ?? "");
   const [open, setOpen] = useState(false);
@@ -67,7 +64,7 @@ export function ComuneField({
   const [options, setOptions] = useState<Comune[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Controllato se il genitore fornisce un valore, altrimenti autonomo.
+  // Controlled when the parent supplies a value, self-managing otherwise.
   const value = controlled ?? internal;
   const setValue = (v: string) => {
     if (controlled === undefined) setInternal(v);
@@ -81,7 +78,7 @@ export function ComuneField({
     }
 
     setLoading(true);
-    // Attesa breve: senza, ogni tasto premuto sarebbe una richiesta.
+    // Debounce: without it every keystroke would be a request.
     const controller = new AbortController();
     const timer = setTimeout(async () => {
       try {
@@ -90,7 +87,7 @@ export function ComuneField({
         });
         if (res.ok) setOptions(await res.json());
       } catch {
-        // Richiesta annullata o rete assente: si puo' comunque digitare.
+        // Request aborted or network down: typing still works.
       } finally {
         setLoading(false);
       }
@@ -109,7 +106,7 @@ export function ComuneField({
     setQuery("");
   }
 
-  /** Conferma il testo digitato anche se non corrisponde a nessun comune. */
+  /** Accepts the typed text even if it matches no municipality. */
   function acceptTyped() {
     const typed = query.trim();
     if (!typed) return;
@@ -125,8 +122,8 @@ export function ComuneField({
     <FieldRoot data-invalid={error ? true : undefined}>
       <FieldLabel htmlFor={id}>{label}</FieldLabel>
 
-      {/* Il valore vero per la FormData: il trigger e' un <button>, e i
-          pulsanti non entrano nell'invio del form. */}
+      {/* The actual value for the FormData: the trigger is a <button>, and
+          buttons are not part of a form submission. */}
       <input type="hidden" name={name} value={value} />
 
       <Popover open={open} onOpenChange={setOpen}>
@@ -152,15 +149,15 @@ export function ComuneField({
           className="w-(--radix-popover-trigger-width) p-0"
           align="start"
         >
-          {/* I risultati arrivano gia' filtrati dal server: il filtro interno
-              di cmdk li scarterebbe una seconda volta. */}
+          {/* Results arrive already filtered by the server: cmdk's own filter
+              would discard them a second time. */}
           <Command shouldFilter={false}>
             <CommandInput
               placeholder="Cerca un comune…"
               value={query}
               onValueChange={setQuery}
               onKeyDown={(e) => {
-                // Invio senza risultati: si tiene quello che e' stato scritto.
+                // Enter with no results: keep whatever was typed.
                 if (e.key === "Enter" && options.length === 0) {
                   e.preventDefault();
                   acceptTyped();

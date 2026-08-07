@@ -11,8 +11,8 @@ import {
 } from "@/components/ui/input-group";
 
 /**
- * Ricerca sull'elenco. Aggiorna la query string, cosi' il risultato resta in
- * cronologia e si puo' condividere o ricaricare.
+ * Drives the query string rather than local state, so a result stays in
+ * history and can be shared or reloaded.
  */
 export function SearchBox({ initial }: { initial: string }) {
   const router = useRouter();
@@ -21,14 +21,14 @@ export function SearchBox({ initial }: { initial: string }) {
   const first = useRef(true);
 
   useEffect(() => {
-    // Al primo render lo stato coincide gia' con l'URL: navigare qui
-    // rimpiazzerebbe la voce di cronologia senza motivo.
+    // On the first render the state already matches the URL: navigating here
+    // would replace the history entry for nothing.
     if (first.current) {
       first.current = false;
       return;
     }
 
-    // Attesa breve: senza, ogni tasto premuto sarebbe una query al database.
+    // Debounce: without it every keystroke would be a database query.
     const timer = setTimeout(() => {
       const next = new URLSearchParams(params);
       if (value.trim()) next.set("q", value.trim());

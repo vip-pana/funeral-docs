@@ -6,11 +6,11 @@ const p = await ctx.newPage();
 let fail = 0;
 const check = (n, cond, extra='') => { console.log(cond?'ok  ':'FAIL', n, extra); if(!cond) fail++; };
 
-// 1. pagina protetta -> login con next
+// 1. protected page -> login with next
 await p.goto(`${B}/pratiche`);
 check('1 redirect a login', p.url().includes('/login?next=%2Fpratiche'), p.url());
 
-// 2. password sbagliata mostra errore e non entra
+// 2. wrong password shows an error and does not let you in
 await p.fill('#password', 'sbagliata');
 await p.click('button[type=submit]');
 await p.waitForFunction(
@@ -19,7 +19,7 @@ await p.waitForFunction(
 check('2 errore mostrato', true);
 check('  resta su login', p.url().includes('/login'));
 
-// 3. password giusta: ricarico per partire da campo pulito
+// 3. correct password: reload to start from a clean field
 await p.goto(`${B}/login?next=%2Fpratiche`);
 await p.fill('#password', (process.env.TEST_PASSWORD ?? 'sviluppo123'));
 await Promise.all([
@@ -29,21 +29,21 @@ await Promise.all([
 check('3 entrato in pratiche', p.url().endsWith('/pratiche'), p.url());
 check('  titolo corretto', (await p.textContent('h1'))?.trim() === 'Pratiche');
 
-// 4. cookie di sessione
+// 4. session cookie
 const c = (await ctx.cookies()).find(c => c.name === 'funeral_session');
 check('4 cookie httpOnly', c?.httpOnly === true);
 check('  sameSite Lax', c?.sameSite === 'Lax', String(c?.sameSite));
-// `secure` dipende dall'ambiente: in produzione e' attivo, salvo
-// COOKIE_SECURE=false per l'accesso http via Tailscale.
+// `secure` depends on the environment: on in production, unless
+// COOKIE_SECURE=false for http access over Tailscale.
 check('  secure coerente col protocollo',
       B.startsWith('https') ? c?.secure === true : true,
       `secure=${c?.secure}`);
 
-// 5. sessione persiste
+// 5. session persists
 await p.goto(`${B}/pratiche`);
 check('5 sessione persiste', p.url().endsWith('/pratiche'));
 
-// 6. redirect open bloccato
+// 6. open redirect blocked
 await p.goto(`${B}/login`);
 check('6 gia loggato -> pratiche', p.url().endsWith('/pratiche'), p.url());
 

@@ -1,6 +1,6 @@
 /**
- * Applica le migrazioni Drizzle al database SQLite.
- * Eseguito all'avvio del container e a mano in sviluppo: `pnpm db:migrate`.
+ * Applies the Drizzle migrations to the SQLite database.
+ * Runs on container startup, and by hand in development: `pnpm db:migrate`.
  */
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";

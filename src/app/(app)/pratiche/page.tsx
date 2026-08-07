@@ -19,9 +19,9 @@ import { SearchBox } from "./search-box";
 export const metadata = { title: "Pratiche — Documenti funebri" };
 
 /**
- * L'elenco viene dal database e cambia a ogni pratica salvata: senza questa
- * riga Next lo prerenderizza al build e in produzione servirebbe per sempre la
- * lista congelata a quel momento.
+ * The list comes from the database and changes on every saved practice.
+ * Without this Next prerenders it at build time and production would forever
+ * serve the list frozen at that moment.
  */
 export const dynamic = "force-dynamic";
 
@@ -33,8 +33,8 @@ export default async function PratichePage({
   const { q } = await searchParams;
   const query = q?.trim() ?? "";
 
-  // LIKE con i caratteri jolly su entrambi i lati: cerca ovunque nel campo.
-  // Su un archivio di questa dimensione un indice non serve.
+  // LIKE with wildcards on both sides: matches anywhere in the field. At this
+  // archive size an index is not worth it.
   const pattern = `%${query}%`;
   const rows = await db
     .select()
@@ -58,9 +58,8 @@ export default async function PratichePage({
         <div>
           <h1 className="text-2xl font-semibold">Pratiche</h1>
           <p className="text-muted-foreground text-sm">
-            {/* Parole intere, non radice + desinenza: "pratic" + "a" darebbe
-                "pratica" ma "pratic" + "he" e' l'unica forma che regge, e la
-                concatenazione era gia' uscita sbagliata una volta. */}
+            {/* Whole words, not stem + ending: concatenating a stem with a
+                suffix already produced a wrong plural once. */}
             {query
               ? `${rows.length} ${rows.length === 1 ? "risultato" : "risultati"} per «${query}».`
               : rows.length === 0

@@ -14,23 +14,23 @@ export type PracticeFormState = {
 };
 
 /**
- * Copia la targa dal veicolo scelto.
+ * Copies the plate from the chosen vehicle.
  *
- * Il veicolo si rilegge dal database invece di fidarsi di un valore inviato
- * dal client: la targa finisce in un documento ufficiale. Da qui in poi la
- * pratica non dipende piu' dall'elenco, e cancellare l'autofunebre non cambia
- * i documenti gia' emessi.
+ * The vehicle is re-read from the database instead of trusting a value sent by
+ * the client, because the plate ends up in an official document. From here on
+ * the practice no longer depends on the list, so deleting the hearse does not
+ * change documents already issued.
  */
 async function withVehiclePlate(data: PracticeInput) {
   const vehicle = data.vehicleId ? await getVehicle(data.vehicleId) : null;
   return {
     ...data,
-    // Un id inesistente diventa null: passarlo com'e' violerebbe la chiave
-    // esterna e farebbe fallire l'inserimento con un errore grezzo.
+    // A non-existent id becomes null: passing it through would violate the
+    // foreign key and fail the insert with a raw error.
     vehicleId: vehicle?.id ?? null,
-    // Deselezionare il mezzo azzera la targa: l'utente sta dicendo "nessuna
-    // autofunebre". Cambiarlo la aggiorna, altrimenti il campo sarebbe
-    // ingannevole — lo modifichi e non succede nulla.
+    // Clearing the vehicle clears the plate — the user is saying "no hearse".
+    // Changing it updates the plate, otherwise the field would be misleading:
+    // you edit it and nothing happens.
     vehiclePlate: vehicle?.plate ?? "",
   };
 }
@@ -39,13 +39,13 @@ function collectErrors(issues: { path: PropertyKey[]; message: string }[]) {
   const errors: Record<string, string> = {};
   for (const issue of issues) {
     const key = String(issue.path[0]);
-    // Un solo messaggio per campo: il form ne mostra uno alla volta.
+    // One message per field: the form shows a single one at a time.
     errors[key] ??= issue.message;
   }
   return errors;
 }
 
-/** Crea una pratica e apre subito la sua pagina. */
+/** Creates a practice and opens its page straight away. */
 export async function createPractice(
   _prev: PracticeFormState,
   formData: FormData,
@@ -65,12 +65,11 @@ export async function createPractice(
     .returning({ id: schema.practices.id });
 
   revalidatePath("/pratiche");
-  // Fuori dal try/catch: redirect() segnala l'uscita lanciando un'eccezione
-  // che Next intercetta, e un catch attorno la scambierebbe per un errore.
+  // Outside any try/catch: redirect() signals by throwing an exception that
+  // Next intercepts, and a catch around it would mistake that for an error.
   redirect(`/pratiche/${row.id}`);
 }
 
-/** Aggiorna una pratica esistente. */
 export async function updatePractice(
   id: number,
   _prev: PracticeFormState,

@@ -13,8 +13,8 @@ export type OwnerFormState = {
 };
 
 /**
- * `ownerRequestDate` non fa parte della configurazione: cambia a ogni pratica,
- * quindi si compila li' e non qui.
+ * `ownerRequestDate` is not part of the configuration: it changes with every
+ * practice, so it is filled in there rather than here.
  */
 const settingsSchema = ownerSchema.omit({ ownerRequestDate: true });
 
@@ -28,7 +28,7 @@ export async function saveOwner(
     const errors: Record<string, string> = {};
     for (const issue of parsed.error.issues) {
       const key = String(issue.path[0]);
-      // Solo il primo errore per campo: il form ne mostra uno alla volta.
+      // One message per field: the form shows a single one at a time.
       errors[key] ??= issue.message;
     }
     return { errors, message: "Controlla i campi segnalati." };

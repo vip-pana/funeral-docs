@@ -50,8 +50,7 @@ export default async function PraticaPage({
   const practice = await loadPractice(id);
   const [owner, vehicles] = await Promise.all([getOwner(), listVehicles()]);
 
-  // L'action e' definita lato server: l'id viene legato qui, cosi' il client
-  // non puo' cambiarlo.
+  // The id is bound server-side so the client cannot change it.
   const action = updatePractice.bind(null, practice.id);
 
   return (

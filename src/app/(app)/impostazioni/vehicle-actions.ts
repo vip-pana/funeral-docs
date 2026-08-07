@@ -7,11 +7,9 @@ import { db, schema } from "@/lib/db";
 import { vehicleSchema } from "@/lib/validation";
 
 /**
- * Gestione dell'elenco autofunebri.
- *
- * File separato da `actions.ts`: il salvataggio e' indipendente da quello dei
- * dati della ditta, e uno stato `useActionState` condiviso farebbe comparire
- * gli errori di un form sull'altro.
+ * Kept separate from `actions.ts`: saving here is independent of saving the
+ * company data, and a shared `useActionState` would surface one form's errors
+ * on the other.
  */
 
 export type VehicleFormState = {
@@ -20,11 +18,10 @@ export type VehicleFormState = {
   message?: string;
 };
 
-/** Le pagine che mostrano l'elenco: Impostazioni e il Select delle pratiche. */
 function revalidateVehicleViews() {
   revalidatePath("/impostazioni");
-  // Il secondo argomento serve: senza, /pratiche/nuova e /pratiche/[id]
-  // resterebbero con l'elenco vecchio nel Select.
+  // The second argument matters: without it /pratiche/nuova and /pratiche/[id]
+  // would keep the stale list in their Select.
   revalidatePath("/pratiche", "layout");
 }
 
@@ -32,9 +29,9 @@ export async function addVehicle(
   _prev: VehicleFormState,
   formData: FormData,
 ): Promise<VehicleFormState> {
-  // Campi letti uno a uno invece che con Object.fromEntries: quello collassa i
-  // nomi omonimi tenendo solo l'ultimo, e si romperebbe in silenzio se un
-  // giorno il form diventasse multi-riga.
+  // Fields read one by one rather than via Object.fromEntries: that collapses
+  // repeated names to the last one, and would break silently if this form ever
+  // became multi-row.
   const parsed = vehicleSchema.safeParse({
     name: formData.get("name"),
     plate: formData.get("plate"),
@@ -44,7 +41,7 @@ export async function addVehicle(
     const errors: Record<string, string> = {};
     for (const issue of parsed.error.issues) {
       const key = String(issue.path[0]);
-      // Un solo messaggio per campo: il form ne mostra uno alla volta.
+      // One message per field: the form shows a single one at a time.
       errors[key] ??= issue.message;
     }
     return { errors, message: "Controlla i campi segnalati." };
@@ -57,8 +54,8 @@ export async function addVehicle(
 }
 
 export async function deleteVehicle(id: number) {
-  // Le pratiche che la usavano conservano la targa copiata: il riferimento si
-  // annulla da solo (ON DELETE SET NULL) e i documenti restano invariati.
+  // Practices that used it keep the copied plate: the reference nulls itself
+  // out (ON DELETE SET NULL) and the documents stay unchanged.
   await db.delete(schema.vehicles).where(eq(schema.vehicles.id, id));
   revalidateVehicleViews();
 }

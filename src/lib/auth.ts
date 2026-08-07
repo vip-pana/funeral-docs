@@ -2,11 +2,11 @@ import bcrypt from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
 
 /**
- * Autenticazione a password unica condivisa.
+ * Single shared password.
  *
- * Tailscale limita chi puo' raggiungere l'app; la password serve contro il
- * browser lasciato aperto su una postazione dell'ufficio. La sessione e' un JWT
- * firmato in un cookie httpOnly: nessuna tabella sessioni da mantenere.
+ * Tailscale limits who can reach the app; the password guards against a
+ * browser left open on an office machine. The session is a signed JWT in an
+ * httpOnly cookie, so there is no sessions table to maintain.
  */
 
 export const SESSION_COOKIE = "funeral_session";
@@ -14,8 +14,8 @@ const SESSION_DAYS = 30;
 
 function secret(): Uint8Array {
   const value = process.env.SESSION_SECRET;
-  // Un default silenzioso renderebbe le sessioni falsificabili da chiunque
-  // conosca il valore: meglio non partire affatto.
+  // A silent default would let anyone who knows the value forge sessions:
+  // better not to start at all.
   if (!value || value.length < 32) {
     throw new Error(
       "SESSION_SECRET mancante o troppo corta (minimo 32 caratteri). " +
@@ -32,8 +32,8 @@ export function passwordHash(): string {
       "AUTH_PASSWORD_HASH mancante. Generalo con: pnpm auth:hash <password>",
     );
   }
-  // Il parser .env espande `$xxx` come variabile: un hash non protetto da `\$`
-  // arriva qui troncato, e ogni accesso fallirebbe senza spiegazione.
+  // The .env parser expands `$xxx` as a variable: a hash not escaped with
+  // `\$` arrives here truncated, and every login would fail unexplained.
   if (!/^\$2[aby]\$\d{2}\$.{53}$/.test(hash)) {
     throw new Error(
       "AUTH_PASSWORD_HASH non e' un hash bcrypt valido. Nel .env ogni `$` va " +

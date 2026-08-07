@@ -14,10 +14,10 @@ await Promise.all([p.waitForURL(/pratiche/,{timeout:15000}), p.click('button[typ
 await p.goto(`${B}/impostazioni`);
 check('1 pagina aperta', (await p.textContent('h1'))?.includes('Impostazioni'));
 
-// Submit con i campi vuoti. Vanno svuotati a mano: se la ditta e' gia' stata
-// configurata il form arriva precompilato e l'invio sarebbe valido. Lo scope
-// e' ristretto a questo form: la card Autofunebri ha campi propri, che il
-// pulsante "Salva impostazioni" non tocca.
+// Submit with empty fields. They have to be cleared by hand: if the company is
+// already configured the form arrives prefilled and the submit would be valid.
+// Scoped to this form only: the Autofunebri card has its own fields, which
+// "Salva impostazioni" does not touch.
 const ownerForm = 'form:has(button:has-text("Salva impostazioni"))';
 for (const el of await p.$$(`${ownerForm} input:not([type=hidden])`)) await el.fill('');
 await p.click('button:has-text("Salva impostazioni")');
@@ -27,7 +27,7 @@ const nErr = await p.$$eval('[role=alert]', e=>e.length);
 const invalid = await p.$$eval('[aria-invalid="true"]', e=>e.length);
 check('2 validazione blocca vuoto', nErr >= 4, `${nErr} alert, ${invalid} campi invalidi`);
 
-// compilo tutto
+// fill everything in
 const vals = {
   ownerFirstName:'Mario', ownerMiddleName:'F.', ownerLastName:'Rossi',
   ownerCompanyName:'OO.FF. Rossi Mario', ownerCompanyCity:'San Severo',
@@ -42,7 +42,7 @@ await p.waitForFunction(
   null, { timeout: 12000 });
 check('3 toast di conferma', true);
 
-// ricarico: i valori persistono
+// reload: the values persist
 await p.reload();
 check('4 nome persiste', await p.inputValue('#ownerFirstName') === 'Mario');
 check('  ragione sociale', (await p.inputValue('#ownerCompanyName')).includes('Rossi'));

@@ -40,13 +40,11 @@ export function GeneratePanel({ practiceId }: { practiceId: number }) {
   const chosen = DOCUMENTS.filter((d) => selected.has(d.id));
 
   /**
-   * Scarica i documenti selezionati, ognuno come .docx separato.
-   *
-   * Ogni file viene prima scaricato con `fetch` e poi salvato da un blob
-   * locale. Puntare l'<a> direttamente all'API farebbe partire piu'
-   * navigazioni ravvicinate, e Chrome le tratta come "download multipli":
-   * chiede un permesso e, finche' non viene concesso, scarta tutto tranne il
-   * primo file. Con i blob la pagina non naviga mai e il blocco non scatta.
+   * Each file is fetched first and then saved from a local blob. Pointing the
+   * <a> straight at the API would fire several navigations in quick
+   * succession, which Chrome treats as "multiple downloads": it asks for
+   * permission and, until that is granted, drops everything but the first
+   * file. With blobs the page never navigates and the block never triggers.
    */
   async function handleDownload() {
     if (!chosen.length || downloading) return;
@@ -65,7 +63,7 @@ export function GeneratePanel({ practiceId }: { practiceId: number }) {
           continue;
         }
 
-        // Il nome vero e' nell'header Content-Disposition.
+        // The real name is in the Content-Disposition header.
         const disposition = res.headers.get("Content-Disposition") ?? "";
         const match = /filename="([^"]+)"/.exec(disposition);
         const fileName = match?.[1] ?? `documento-${doc.id}.docx`;
@@ -77,7 +75,7 @@ export function GeneratePanel({ practiceId }: { practiceId: number }) {
         document.body.appendChild(a);
         a.click();
         a.remove();
-        // Rilascia il blob: senza, la memoria resta occupata fino al reload.
+        // Release the blob: otherwise the memory stays held until reload.
         URL.revokeObjectURL(url);
         done++;
       }
@@ -108,8 +106,8 @@ export function GeneratePanel({ practiceId }: { practiceId: number }) {
       <CardContent className="space-y-4">
         <FieldGroup className="gap-2">
           {DOCUMENTS.map((doc) => (
-            // FieldLabel che avvolge un Field: shadcn lo rende una scheda
-            // selezionabile, evidenziata quando la casella e' spuntata.
+            // A FieldLabel wrapping a Field: shadcn renders it as a selectable
+            // card, highlighted when the checkbox is ticked.
             <FieldLabel key={doc.id} htmlFor={`doc-${doc.id}`}>
               <FieldRoot orientation="horizontal">
                 <Checkbox

@@ -10,8 +10,8 @@ await Promise.all([p.waitForURL(/pratiche/,{timeout:15000}), p.click('button[typ
 
 let fail=0; const check=(n,c,x='')=>{console.log(c?'ok  ':'FAIL',n,x); if(!c)fail++;};
 
-// La suite crea la pratica che le serve: dipendere da un id esistente la
-// renderebbe sensibile all'ordine di esecuzione e allo stato del database.
+// The suite creates the practice it needs: depending on an existing id would
+// make it sensitive to execution order and to database state.
 await p.goto(`${B}/pratiche/nuova`);
 const seed = {personFirstName:'Api',personLastName:'Prova',personTaxCode:'RSSMRA40C12D643D',
  personBirthDate:'1940-03-12',personBirthCity:'Foggia',personResidenceCity:'San Severo',
@@ -43,7 +43,7 @@ r = await call(`/api/pratiche/${ID}/genera`);
 check('nessun doc -> primo documento', r.status===200 && r.type?.includes('wordprocessingml'),
       `${r.status} ${r.type?.slice(0,40)}`);
 
-// ripulisce dietro di se'
+// clean up after itself
 await p.goto(`${B}/pratiche/${ID}`);
 await p.click('button:has-text("Elimina")');
 await Promise.all([p.waitForURL(u=>u.pathname==='/pratiche',{timeout:15000}),

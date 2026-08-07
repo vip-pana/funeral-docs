@@ -42,8 +42,8 @@ export function AppSidebar() {
                 <SidebarMenuItem key={href}>
                   <SidebarMenuButton
                     asChild
-                    // Anche le sottopagine contano: aprendo /pratiche/12 la
-                    // voce "Pratiche" deve restare evidenziata.
+                    // Subpages count too: on /pratiche/12 the "Pratiche" entry
+                    // must stay highlighted.
                     isActive={pathname === href || pathname.startsWith(`${href}/`)}
                     tooltip={label}
                   >
@@ -62,8 +62,8 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            {/* Il logout cancella il cookie lato server: deve restare un
-                invio di form, non un link. */}
+            {/* Logout clears the cookie server-side, so this has to stay a
+                form submission rather than a link. */}
             <form action={logout}>
               <SidebarMenuButton asChild tooltip="Esci">
                 <button type="submit" className="w-full">

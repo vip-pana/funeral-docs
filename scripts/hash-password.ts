@@ -1,10 +1,10 @@
 /**
- * Genera l'hash bcrypt da mettere in AUTH_PASSWORD_HASH.
+ * Generates the bcrypt hash to put in AUTH_PASSWORD_HASH.
  *
  *   pnpm auth:hash 'la-mia-password'
  *
- * La password in chiaro non viene mai scritta su disco: solo l'hash finisce
- * nel .env.
+ * The plaintext password is never written to disk: only the hash ends up in
+ * the .env.
  */
 import bcrypt from "bcryptjs";
 
@@ -23,9 +23,9 @@ if (password.length < 8) {
 const hash = bcrypt.hashSync(password, 12);
 
 /**
- * Il parser .env di Next espande `$xxx` come riferimento a variabile, anche
- * dentro apici singoli: un hash bcrypt incollato cosi' com'e' arriva troncato
- * al primo `$` e la password non corrisponde mai. Ogni `$` va preceduto da `\`.
+ * Next's .env parser expands `$xxx` as a variable reference, even inside
+ * single quotes: a bcrypt hash pasted as-is arrives truncated at the first `$`
+ * and the password never matches. Every `$` must be escaped with `\`.
  */
 const escaped = hash.replace(/\$/g, "\\$");
 

@@ -1,10 +1,10 @@
 /**
- * Verifica che i placeholder nei .docx e la lista in src/lib/fields.ts
- * coincidano.
+ * Checks that the placeholders in the .docx files and the list in
+ * src/lib/fields.ts match.
  *
- * Un campo rinominato solo da una parte non produce errori a runtime: il
- * documento esce con un buco al posto del dato. Questo controllo trasforma quel
- * silenzio in un fallimento.
+ * A field renamed on only one side raises no runtime error: the document just
+ * comes out with a hole where the data should be. This turns that silence into
+ * a failure.
  *
  *   pnpm check:templates
  */
@@ -25,16 +25,16 @@ function placeholdersOf(file: string): Set<string> {
     const entry = zip.file(part);
     if (!entry) continue;
     const xml = entry.asText();
-    // Solo il testo visibile: il resto dell'XML contiene graffe che non sono
-    // placeholder.
-    // `[\s\S]` invece del flag `s`: il testo puo' contenere a capo.
+    // Visible text only: the rest of the XML contains braces that are not
+    // placeholders. `[\s\S]` rather than the `s` flag because the text can
+    // contain newlines.
     const text = [...xml.matchAll(/<w:t[^>]*>([\s\S]*?)<\/w:t>/g)]
       .map((m) => m[1])
       .join("");
     for (const m of text.matchAll(/\{([^{}]+)\}/g)) found.add(m[1].trim());
 
-    // Le quadre erano la vecchia sintassi: se ne resta una, il template non e'
-    // stato normalizzato.
+    // Square brackets were the old syntax: any left behind means the template
+    // was never normalised.
     const legacy = text.match(/\[[^\[\]]{1,60}\]/g);
     if (legacy) {
       console.error(`  ${file} (${part}): sintassi vecchia rimasta ${legacy.join(", ")}`);

@@ -1,16 +1,16 @@
 /**
- * Calcolo del codice fiscale (DM 23/12/1976).
+ * Tax code computation (DM 23/12/1976).
  *
- * Serve a proporre un valore, non a sostituire il documento: il codice reale
- * puo' differire per omocodia, cioe' quando due persone producono lo stesso
- * codice e l'Agenzia delle Entrate ne assegna una variante. Il campo resta
- * quindi modificabile e la proposta va confrontata con la tessera sanitaria.
+ * This only proposes a value, it does not replace the document: the real code
+ * can differ through omocodia, when two people produce the same code and the
+ * tax office assigns a variant. The field therefore stays editable and the
+ * proposal must be checked against the health card.
  */
 
 const VOWELS = "AEIOU";
 const MONTH_CODES = "ABCDEHLMPRST";
 
-/** Peso di ogni carattere in posizione dispari (1ª, 3ª, …), come da decreto. */
+/** Weight of each character in odd positions (1st, 3rd, …), per the decree. */
 const ODD: Record<string, number> = {
   "0": 1, "1": 0, "2": 5, "3": 7, "4": 9, "5": 13, "6": 15, "7": 17, "8": 19, "9": 21,
   A: 1, B: 0, C: 5, D: 7, E: 9, F: 13, G: 15, H: 17, I: 19, J: 21, K: 2, L: 4,
@@ -18,7 +18,7 @@ const ODD: Record<string, number> = {
   X: 25, Y: 24, Z: 23,
 };
 
-/** In posizione pari il peso e' semplicemente la posizione nell'alfabeto. */
+/** In even positions the weight is just the position in the alphabet. */
 const EVEN: Record<string, number> = {
   "0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9,
   A: 0, B: 1, C: 2, D: 3, E: 4, F: 5, G: 6, H: 7, I: 8, J: 9, K: 10, L: 11,
@@ -28,7 +28,7 @@ const EVEN: Record<string, number> = {
 
 const CHECK_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-/** Toglie accenti, apostrofi e spazi: "D'Amico Però" -> "DAMICOPERO". */
+/** Strips accents, apostrophes and spaces: "D'Amico Però" -> "DAMICOPERO". */
 function normalize(text: string): string {
   return text
     .normalize("NFD")
@@ -38,8 +38,8 @@ function normalize(text: string): string {
 }
 
 /**
- * Tre lettere dal cognome: consonanti, poi vocali. Se non bastano si riempie
- * con X.
+ * Three letters from the surname: consonants first, then vowels, padded with
+ * X if there are not enough.
  */
 function surnameCode(surname: string): string {
   const s = normalize(surname);
@@ -49,8 +49,8 @@ function surnameCode(surname: string): string {
 }
 
 /**
- * Tre lettere dal nome. Con quattro o piu' consonanti si prendono la prima,
- * la terza e la quarta — non le prime tre.
+ * Three letters from the first name. With four or more consonants the rule
+ * takes the first, third and fourth — not the first three.
  */
 function firstNameCode(firstName: string): string {
   const s = normalize(firstName);
@@ -63,7 +63,7 @@ function firstNameCode(firstName: string): string {
   return (consonants.join("") + vowels.join("") + "XXX").slice(0, 3);
 }
 
-/** Anno (2 cifre), mese (lettera), giorno (+40 per le donne). */
+/** Year (2 digits), month (letter), day (+40 for women). */
 function birthCode(isoDate: string, isFemale: boolean): string | null {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDate.trim());
   if (!m) return null;
@@ -76,12 +76,12 @@ function birthCode(isoDate: string, isFemale: boolean): string | null {
   return year.slice(2) + MONTH_CODES[monthIndex] + String(dayNum).padStart(2, "0");
 }
 
-/** Carattere di controllo: somma pesata delle prime 15 posizioni, modulo 26. */
+/** Check character: weighted sum of the first 15 positions, modulo 26. */
 export function checkChar(code15: string): string {
   let sum = 0;
   for (let i = 0; i < 15; i++) {
     const c = code15[i];
-    // Le posizioni si contano da 1: l'indice 0 e' dispari.
+    // Positions are counted from 1, so index 0 is an odd position.
     sum += i % 2 === 0 ? ODD[c] : EVEN[c];
   }
   return CHECK_CHARS[sum % 26];
@@ -91,12 +91,12 @@ export type TaxCodeInput = {
   firstName: string;
   lastName: string;
   birthDate: string;
-  /** Codice catastale del comune di nascita (es. D643). */
+  /** Cadastral code of the birth municipality (e.g. D643). */
   cadastralCode: string;
   isFemale: boolean;
 };
 
-/** Restituisce il codice fiscale, o null se i dati non bastano. */
+/** Returns the tax code, or null when the data is not enough. */
 export function computeTaxCode({
   firstName,
   lastName,

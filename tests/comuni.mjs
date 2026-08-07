@@ -11,7 +11,7 @@ await p.goto(`${B}/login`);
 await p.fill('#password', PW);
 await Promise.all([p.waitForURL(/pratiche/,{timeout:15000}), p.click('button[type=submit]')]);
 
-// --- API comuni ---
+// --- comuni API ---
 let r = await p.request.get(`${B}/api/comuni?q=fogg`);
 let j = await r.json();
 check('1 ricerca comuni', r.ok() && j.some(c=>c.nome==='Foggia'), `${j.length} risultati`);
@@ -26,11 +26,11 @@ check('3 codice ignoto -> 404', r.status()===404, String(r.status()));
 r = await p.request.get(`${B}/api/comuni?q=f`);
 check('4 query troppo corta -> vuoto', (await r.json()).length===0);
 
-// --- autocompilazione dal CF ---
+// --- autofill from the tax code ---
 await p.goto(`${B}/pratiche/nuova`);
 await p.fill('#personTaxCode','RSSMRA40C12D643D');
 await p.locator('#personLastName').focus();
-// Il comune arriva da una chiamata a /api/comuni: si attende il valore.
+// The municipality comes from an /api/comuni call: wait for the value.
 await p.waitForFunction(
   () => document.querySelector('input[name=personBirthCity]')?.value === 'Foggia',
   null, { timeout: 8000 }).catch(()=>{});
@@ -39,13 +39,13 @@ check('6 comune nascita dal CF',
       await p.getAttribute('input[name=personBirthCity]','value')==='Foggia',
       await p.getAttribute('input[name=personBirthCity]','value'));
 
-// --- provincia dal comune scelto ---
+// --- province from the chosen municipality ---
 await pickComune(p, 'destinationCity', 'Milano');
 await p.waitForTimeout(400);
 check('7 provincia da destinazione', await p.inputValue('#destinationProvince')==='MI',
       await p.inputValue('#destinationProvince'));
 
-// --- il campo resta libero ---
+// --- the field stays free-form ---
 await pickComune(p, 'personResidenceCity', 'Borgo Inventato');
 check('8 comune libero accettato',
       await p.getAttribute('input[name=personResidenceCity]','value')==='Borgo Inventato',

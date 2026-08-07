@@ -1,20 +1,14 @@
 /**
- * Funzioni condivise dalle suite.
- */
-
-/**
- * Sceglie un comune dal combobox.
- *
- * Non e' un <input>: il trigger e' un pulsante che apre un popover con la
- * ricerca, quindi `fill()` sul campo fallisce.
+ * Not an <input>: the trigger is a button that opens a popover with the
+ * search, so `fill()` on the field fails.
  */
 export async function pickComune(page, fieldName, comune) {
   await page.click(`#${fieldName}`);
   await page.waitForSelector("[cmdk-input]", { timeout: 5000 });
   await page.fill("[cmdk-input]", comune);
 
-  // Attende un risultato; se non arriva, conferma il testo digitato (il campo
-  // accetta anche comuni non in elenco).
+  // Wait for a result; if none arrives, confirm the typed text (the field
+  // also accepts municipalities that are not in the list).
   const found = await page
     .waitForSelector("[cmdk-item]", { timeout: 4000 })
     .then(() => true)
@@ -27,11 +21,9 @@ export async function pickComune(page, fieldName, comune) {
 }
 
 /**
- * Sceglie una voce da un Select di shadcn.
- *
- * Non e' un <select> nativo: il trigger e' un pulsante che apre un menu, e
- * `selectOption()` fallisce. Se la voce non c'e' il menu si richiude senza
- * scegliere nulla — il chiamante decide se e' un problema.
+ * Not a native <select>: the trigger is a button that opens a menu, so
+ * `selectOption()` fails. If the entry is absent the menu closes without
+ * picking anything — the caller decides whether that is a problem.
  */
 export async function pickSelect(page, fieldName, text) {
   await page.click(`#${fieldName}`);
@@ -47,7 +39,7 @@ export async function pickSelect(page, fieldName, text) {
   return found;
 }
 
-/** Compila un form pratica; i comuni passano dal combobox. */
+/** Fills a practice form; municipalities go through the combobox. */
 export async function fillPractice(page, values) {
   const comuni = new Set([
     "personBirthCity",
@@ -62,7 +54,7 @@ export async function fillPractice(page, values) {
   }
 }
 
-/** Dati di prova completi, con codice fiscale valido. */
+/** Complete sample data, with a valid tax code. */
 export const SAMPLE = {
   personFirstName: "Mario",
   personLastName: "Rossi",
@@ -83,7 +75,7 @@ export const SAMPLE = {
   destinationCemetery: "Cimitero Comunale",
 };
 
-/** Accede e resta sulla pagina delle pratiche. */
+/** Logs in and lands on the practices page. */
 export async function login(page, base) {
   await page.goto(`${base}/login`);
   await page.fill("#password", process.env.TEST_PASSWORD ?? "sviluppo123");

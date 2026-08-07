@@ -14,24 +14,24 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    // Geist arriva dal pacchetto npm, non da Google: i file sono gia' su disco
-    // e il build nel container funziona senza rete.
+    // Geist comes from the npm package, not from Google: the files are already
+    // on disk, so the container build works without network access.
     //
-    // `dark` fissa sul root: il tema e' scuro sempre, non segue le preferenze
-    // di sistema. `color-scheme` fa adeguare anche i controlli nativi del
-    // browser — selettori di data e ora, barre di scorrimento — che altrimenti
-    // resterebbero chiari in mezzo al resto.
+    // `dark` is pinned on the root — the theme is always dark and ignores
+    // system preferences. `color-scheme` makes native browser controls (date
+    // and time pickers, scrollbars) follow suit; they would otherwise stay
+    // light against everything else.
     <html
       lang="it"
       className={`dark h-full antialiased ${GeistSans.variable} ${GeistMono.variable}`}
       style={{ colorScheme: "dark" }}
     >
-      {/* Niente flex-col qui: SidebarProvider dispone da se' barra e contenuto
-          affiancati, e un contenitore a colonna la lascerebbe alta quanto le
-          sue voci invece che quanto la pagina. */}
+      {/* No flex-col here: SidebarProvider lays the bar and the content out
+          side by side on its own, and a column container would leave the bar
+          as tall as its entries instead of the page. */}
       <body className="min-h-full">
-        {/* Richiesto dalla sidebar, che mostra i nomi delle voci come tooltip
-            quando e' compressa a sole icone. */}
+        {/* Required by the sidebar, which shows entry names as tooltips when
+            collapsed to icons only. */}
         <TooltipProvider>{children}</TooltipProvider>
         <Toaster />
       </body>

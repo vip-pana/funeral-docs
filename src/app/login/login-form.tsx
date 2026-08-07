@@ -59,8 +59,8 @@ export function LoginForm({ next }: { next?: string }) {
                   type="button"
                   size="icon-xs"
                   onClick={() => setVisible((v) => !v)}
-                  // `tabIndex={-1}` tiene il tasto Tab sul percorso
-                  // password → Accedi, senza fermarsi qui.
+                  // Keeps Tab on the password → submit path instead of
+                  // stopping here.
                   tabIndex={-1}
                   aria-label={
                     visible ? "Nascondi la password" : "Mostra la password"

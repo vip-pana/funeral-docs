@@ -23,7 +23,7 @@ try {
   await p.waitForTimeout(300);
   ck('2 ancora spento senza comune', await btn.isDisabled());
 
-  // scelgo il comune dall'elenco
+  // pick the municipality from the list
   await p.click('#personBirthCity');
   await p.waitForTimeout(400);
   await p.fill('[cmdk-input]','Foggia');
@@ -32,7 +32,7 @@ try {
   await p.waitForTimeout(600);
   ck('3 acceso con tutti i dati', await btn.isEnabled());
 
-  // NON deve aver calcolato da solo
+  // must NOT have computed on its own
   ck('4 CF ancora vuoto (nessun calcolo automatico)', (await p.inputValue('#personTaxCode'))==='' ,
      await p.inputValue('#personTaxCode'));
 
@@ -41,14 +41,14 @@ try {
   ck('5 calcolo su richiesta', (await p.inputValue('#personTaxCode'))==='RSSMRA40C12D643D',
      await p.inputValue('#personTaxCode'));
 
-  // donna -> codice diverso
+  // female -> different code
   await p.click('#personSex'); await p.waitForTimeout(300);
   await p.click('[role=option]:has-text("Femminile")'); await p.waitForTimeout(400);
   await btn.click(); await p.waitForTimeout(600);
   const f = await p.inputValue('#personTaxCode');
   ck('6 donna: giorno +40', f.slice(9,11)==='52', f);
 
-  // --- pratica riaperta: il codice catastale non e' in memoria ---
+  // --- reopened practice: the cadastral code is not in memory ---
   await p.fill('#personFirstName','Giuseppe');
   await p.fill('#personLastName','Verdi');
   await p.fill('#personDeathDate','2026-08-01');
@@ -77,7 +77,7 @@ try {
      (await p.inputValue('#personTaxCode')).length===16,
      await p.inputValue('#personTaxCode'));
 
-  // pulizia
+  // cleanup
   await p.click('button:has-text("Elimina")');
   await Promise.all([p.waitForURL(u=>u.pathname==='/pratiche',{timeout:15000}),
                      p.click('button:has-text("Confermi")')]);

@@ -9,7 +9,7 @@ await p.goto(`${B}/login`);
 await p.fill('#password',(process.env.TEST_PASSWORD ?? 'sviluppo123'));
 await Promise.all([p.waitForURL(/pratiche/,{timeout:15000}), p.click('button[type=submit]')]);
 
-// creo una pratica usa-e-getta
+// create a throwaway practice
 await p.goto(`${B}/pratiche/nuova`);
 const v={personFirstName:'Elimina',personLastName:'Prova',personTaxCode:'RSSMRA40C12D643D',
  personBirthDate:'1940-03-12',personBirthCity:'Foggia',personResidenceCity:'San Severo',
@@ -20,18 +20,18 @@ await fillPractice(p, v);
 await Promise.all([p.waitForURL(/\/pratiche\/\d+$/,{timeout:15000}), p.click('button:has-text("Crea pratica")')]);
 const id = p.url().match(/(\d+)$/)[1];
 
-// primo clic: chiede conferma, non elimina
+// first click: asks for confirmation, does not delete
 await p.click('button:has-text("Elimina")');
 await p.waitForTimeout(400);
 check('1 chiede conferma', await p.isVisible('button:has-text("Confermi")'));
 check('  ancora sulla pratica', p.url().endsWith(id));
 
-// annulla
+// cancel
 await p.click('button:has-text("Annulla")');
 await p.waitForTimeout(300);
 check('2 annulla ripristina', await p.isVisible('button:has-text("Elimina")'));
 
-// conferma
+// confirm
 await p.click('button:has-text("Elimina")');
 await Promise.all([
   p.waitForURL(u => u.pathname === '/pratiche', {timeout:15000}),
@@ -40,7 +40,7 @@ await Promise.all([
 check('3 eliminata, torna a elenco', p.url().endsWith('/pratiche'));
 check('  sparita dall elenco', !(await p.textContent('body')).includes('Elimina Prova'));
 
-// la pagina non esiste piu'
+// the page no longer exists
 const r = await p.request.get(`${B}/pratiche/${id}`);
 check('4 pagina -> 404', r.status()===404, String(r.status()));
 

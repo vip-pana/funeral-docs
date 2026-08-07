@@ -14,7 +14,7 @@ const check = (n, c, x = "") => {
   if (!c) fail++;
 };
 
-// --- tema scuro ---
+// --- dark theme ---
 await p.goto(`${B}/login`);
 check("1 classe dark sul root", await p.evaluate(() => document.documentElement.classList.contains("dark")));
 check(
@@ -25,7 +25,7 @@ const bg = await p.evaluate(() => getComputedStyle(document.body).backgroundColo
 const light = bg.match(/\d+/g)?.slice(0, 3).every((v) => Number(v) > 200);
 check("  sfondo scuro", !light, bg);
 
-// --- mostra password ---
+// --- show password ---
 check("2 password nascosta all'inizio", (await p.getAttribute("#password", "type")) === "password");
 await p.fill("#password", PW);
 await p.click('button[aria-label*="Mostra"]');
@@ -50,13 +50,13 @@ await p.waitForTimeout(400);
 const active2 = await p.getAttribute('[data-active="true"] a, a[data-active="true"]', "href").catch(() => null);
 check("  voce attiva su Impostazioni", active2 === "/impostazioni", String(active2));
 
-// la sottopagina tiene attiva la voce padre
+// the subpage keeps the parent entry active
 await p.goto(`${B}/pratiche/nuova`);
 await p.waitForTimeout(400);
 const active3 = await p.getAttribute('[data-active="true"] a, a[data-active="true"]', "href").catch(() => null);
 check("  sottopagina mantiene Pratiche", active3 === "/pratiche", String(active3));
 
-// --- compressione persistente ---
+// --- collapse persists ---
 await p.goto(`${B}/pratiche`);
 await p.click('button[data-sidebar="trigger"]');
 await p.waitForTimeout(600);
@@ -67,7 +67,7 @@ await p.waitForTimeout(600);
 const w = (await p.locator('[data-slot="sidebar-container"], [data-sidebar="sidebar"]').first().boundingBox())?.width;
 check("  resta compressa dopo il reload", w !== undefined && w < 100, `${w}px`);
 
-// --- logout dalla sidebar ---
+// --- logout from the sidebar ---
 await p.click('button[data-sidebar="trigger"]');
 await p.waitForTimeout(400);
 await p.click('button:has-text("Esci")');

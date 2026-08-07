@@ -3,13 +3,13 @@ import { NextResponse, type NextRequest } from "next/server";
 import { comuneByCode, searchComuni } from "@/lib/comuni";
 
 /**
- * Comuni: ricerca per nome o risoluzione del codice catastale.
+ * Municipality lookup: search by name or resolve a cadastral code.
  *
- *   GET /api/comuni?q=fogg       -> elenco di suggerimenti
- *   GET /api/comuni?codice=D643  -> il singolo comune (o 404)
+ *   GET /api/comuni?q=fogg       -> list of suggestions
+ *   GET /api/comuni?codice=D643  -> the single municipality (or 404)
  *
- * L'elenco completo pesa ~200 KB: tenerlo sul server evita di spedirlo a ogni
- * caricamento di pagina. L'accesso e' gia' filtrato dal middleware.
+ * The full list weighs ~200 KB: keeping it on the server avoids shipping it on
+ * every page load. Access is already filtered by the middleware.
  */
 export async function GET(request: NextRequest) {
   const cache = { "Cache-Control": "private, max-age=3600" };

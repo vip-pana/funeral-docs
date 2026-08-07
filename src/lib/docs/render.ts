@@ -6,27 +6,23 @@ import PizZip from "pizzip";
 import { ALL_FIELDS, DOCUMENTS, type DocumentId, type TemplateField } from "@/lib/fields";
 
 /**
- * Riempimento dei template .docx.
- *
- * I template usano la sintassi `{campo}` di docxtemplater (vedi
- * templates/FIELDS.md). Le date arrivano dal database in ISO e vanno convertite
- * in gg/mm/aaaa qui: e' il formato che i documenti stampano.
+ * Templates use docxtemplater's `{field}` syntax (see templates/FIELDS.md).
+ * Dates arrive from the database in ISO and are converted to dd/mm/yyyy here,
+ * which is what the documents print.
  */
 
 /**
- * I template vivono in `templates/`, accanto al codice.
- *
- * L'analisi statica di Next non sa risolvere un percorso composto a runtime e,
- * pur di non sbagliare, tracerebbe l'intero progetto dentro il bundle
- * standalone. `turbopackIgnore` disattiva quel tracing; i .docx entrano
- * comunque nell'output grazie a `outputFileTracingIncludes` in next.config.ts.
+ * Next's static analysis cannot resolve a path composed at runtime and, to
+ * stay safe, would trace the whole project into the standalone bundle.
+ * `turbopackIgnore` turns that tracing off; the .docx files still reach the
+ * output through `outputFileTracingIncludes` in next.config.ts.
  */
 function templatePath(file: string): string {
   const dir = process.env.TEMPLATES_DIR ?? path.join(process.cwd(), "templates");
   return path.join(/* turbopackIgnore: true */ dir, file);
 }
 
-/** yyyy-mm-dd -> gg/mm/aaaa. Lascia passare invariato tutto il resto. */
+/** yyyy-mm-dd -> dd/mm/yyyy. Anything else passes through unchanged. */
 export function formatDate(iso: string): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso.trim());
   if (!m) return iso;
@@ -34,7 +30,6 @@ export function formatDate(iso: string): string {
   return `${d}/${mo}/${y}`;
 }
 
-/** I campi il cui valore e' una data ISO da convertire. */
 const DATE_FIELDS = new Set<TemplateField>([
   "personBirthDate",
   "personDeathDate",
@@ -47,9 +42,8 @@ const DATE_FIELDS = new Set<TemplateField>([
 export type FieldValues = Partial<Record<TemplateField, string>>;
 
 /**
- * Prepara i valori per docxtemplater: converte le date e riempie con stringa
- * vuota i campi mancanti — un campo assente lascerebbe il placeholder grezzo
- * nel documento stampato.
+ * Missing fields are filled with an empty string: an absent one would leave
+ * the raw placeholder in the printed document.
  */
 export function prepareValues(values: FieldValues): Record<string, string> {
   const out: Record<string, string> = {};
@@ -60,7 +54,6 @@ export function prepareValues(values: FieldValues): Record<string, string> {
   return out;
 }
 
-/** Riempie un singolo template e restituisce il .docx pronto. */
 export async function renderDocument(
   documentId: DocumentId,
   values: FieldValues,
@@ -80,7 +73,7 @@ export async function renderDocument(
   return renderer.getZip().generate({ type: "nodebuffer" }) as Buffer;
 }
 
-/** Nome file leggibile: COGNOME_Nome_2026-08-06_1.docx */
+/** Readable file name: COGNOME_Nome_2026-08-06_1.docx */
 export function documentFileName(
   values: FieldValues,
   documentId: DocumentId,
@@ -100,5 +93,5 @@ export function documentFileName(
   return [last, first, date, documentId].filter(Boolean).join("_") + ".docx";
 }
 
-// Nessuna funzione di archiviazione: la pagina scarica i documenti uno per
-// uno, ciascuno come .docx a se' stante.
+// No archiving helper on purpose: the page downloads the documents one by
+// one, each as a standalone .docx.

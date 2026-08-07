@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { db, schema } from "@/lib/db";
 import type { Owner } from "@/lib/db/schema";
 
-/** La configurazione della ditta e' una riga sola, sempre con questo id. */
+/** The company configuration is a single row, always under this id. */
 export const OWNER_ID = 1;
 
 export async function getOwner(): Promise<Owner | null> {
@@ -16,10 +16,8 @@ export async function getOwner(): Promise<Owner | null> {
 }
 
 /**
- * Valori della ditta pronti per riempire i template.
- *
- * La targa non e' qui: dipende dall'autofunebre scelta nella singola pratica,
- * non dalla configurazione dell'impresa.
+ * The plate is deliberately absent: it depends on the hearse picked in the
+ * individual practice, not on the company configuration.
  */
 export function ownerValues(owner: Owner | null): Record<string, string> {
   if (!owner) return {};

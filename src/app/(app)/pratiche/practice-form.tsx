@@ -53,7 +53,7 @@ export function PracticeForm({
     {},
   );
   const formRef = useRef<HTMLFormElement>(null);
-  // Segnala all'utente cosa e' stato dedotto dal codice fiscale.
+  // Tells the user which fields were derived from the tax code.
   const [fromTaxCode, setFromTaxCode] = useState({ birth: false, city: false });
   const [firstName, setFirstName] = useState(practice?.personFirstName ?? "");
   const [lastName, setLastName] = useState(practice?.personLastName ?? "");
@@ -61,8 +61,8 @@ export function PracticeForm({
   const [taxCode, setTaxCode] = useState(practice?.personTaxCode ?? "");
   const [birthDate, setBirthDate] = useState(practice?.personBirthDate ?? "");
   const [birthCity, setBirthCity] = useState(practice?.personBirthCity ?? "");
-  // Il calcolo del codice fiscale usa il codice catastale, non il nome: si
-  // conserva quando il comune viene scelto dall'elenco.
+  // The tax code computation needs the cadastral code, not the name, so it is
+  // kept whenever the municipality is picked from the list.
   const [birthCode, setBirthCode] = useState("");
   const [computed, setComputed] = useState(false);
   const [destinationCity, setDestinationCity] = useState(
@@ -73,8 +73,8 @@ export function PracticeForm({
     practice?.vehicleId ? String(practice.vehicleId) : "",
   );
 
-  // Il veicolo puo' essere stato eliminato dopo il salvataggio: la pratica
-  // conserva la targa, ma l'elenco non ha piu' la voce da selezionare.
+  // The vehicle may have been deleted after saving: the practice keeps the
+  // plate, but the list no longer has an entry to select.
   const missingVehicle = Boolean(
     practice?.vehiclePlate && !vehicles.some((v) => String(v.id) === vehicleId),
   );
@@ -87,26 +87,24 @@ export function PracticeForm({
   }, [state]);
 
   /**
-   * Dati sufficienti per il calcolo. Il codice catastale non serve qui: se
-   * manca — succede riaprendo una pratica salvata, dove c'e' solo il nome del
-   * comune — viene cercato al momento del clic.
+   * The cadastral code is deliberately not required here: when it is missing —
+   * which happens on reopening a saved practice, where only the municipality
+   * name survives — it is looked up on click instead.
    */
   const canCompute = Boolean(
     firstName.trim() && lastName.trim() && birthDate && birthCity.trim(),
   );
 
   /**
-   * Calcola il codice fiscale su richiesta.
-   *
-   * Non avviene da solo: il codice calcolato puo' differire da quello reale
-   * per omocodia, e sovrascrivere in silenzio un valore copiato dalla tessera
-   * sanitaria sarebbe peggio che non proporre nulla.
+   * On demand only: the computed code can differ from the real one through
+   * omocodia, and silently overwriting a value copied from the health card
+   * would be worse than proposing nothing.
    */
   async function handleCompute() {
     let code = birthCode;
 
-    // Comune digitato o pratica riaperta: si risale al codice catastale dal
-    // nome, che e' l'unica cosa memorizzata.
+    // Municipality typed by hand, or practice reopened: recover the cadastral
+    // code from the name, which is the only thing stored.
     if (!code && birthCity.trim()) {
       const res = await fetch(
         `/api/comuni?q=${encodeURIComponent(birthCity.trim())}`,
@@ -150,9 +148,9 @@ export function PracticeForm({
     practice ? (practice[name] as string) : undefined;
 
   /**
-   * Il codice fiscale contiene data e comune di nascita: si compilano da soli,
-   * ma solo dove il campo e' ancora vuoto — un valore inserito a mano non va
-   * sovrascritto.
+   * The tax code carries birth date and municipality. They are filled in
+   * automatically, but only where the field is still empty — a hand-entered
+   * value must not be overwritten.
    */
   async function handleTaxCode(event: React.FocusEvent<HTMLInputElement>) {
     const parsed = parseTaxCode(event.target.value);
@@ -162,12 +160,10 @@ export function PracticeForm({
       setBirthDate(parsed.birthDate);
       setFromTaxCode((s) => ({ ...s, birth: true }));
     }
-    // Il sesso e' nel giorno di nascita: sopra 40 e' femminile.
+    // Sex is encoded in the birth day: above 40 means female.
     setSex(parsed.isFemale ? "F" : "M");
 
     if (!birthCity) {
-      // Gli ultimi quattro caratteri prima del controllo sono il codice
-      // catastale del comune di nascita.
       const res = await fetch(`/api/comuni?codice=${parsed.cadastralCode}`);
       if (res.ok) {
         const comune = await res.json();
@@ -237,9 +233,9 @@ export function PracticeForm({
             error={err("personBirthCity")}
             hint={fromTaxCode.city ? "Ricavato dal codice fiscale" : undefined}
           />
-          {/* `items-start` piu' il margine fisso sul pulsante: allineare in
-              basso lo farebbe saltare su e giu' a seconda che sotto al campo
-              compaia il suggerimento o un errore. */}
+          {/* `items-start` plus a fixed margin on the button: aligning to the
+              bottom would make it jump as the hint or an error appears below
+              the field. */}
           <div className="flex items-start gap-2">
             <Field
               name="personTaxCode"
@@ -264,7 +260,7 @@ export function PracticeForm({
               variant="outline"
               onClick={handleCompute}
               disabled={!canCompute}
-              // Scende all'altezza dell'input, saltando l'etichetta sopra.
+              // Drops down to the input's height, clearing the label above.
               className="mt-[calc(--spacing(6)+2px)] shrink-0"
               title={
                 canCompute
@@ -360,9 +356,9 @@ export function PracticeForm({
           />
           <FieldRoot>
             <FieldLabel htmlFor="vehicleId">Autofunebre</FieldLabel>
-            {/* Nessuna voce "nessuna": Radix vieta un SelectItem con valore
-                vuoto, e un valore fittizio non passerebbe la validazione. Il
-                segnaposto copre gia' il caso. */}
+            {/* No "none" entry: Radix forbids a SelectItem with an empty
+                value, and a sentinel value would fail validation. The
+                placeholder already covers that case. */}
             <Select
               name="vehicleId"
               value={vehicleId}
@@ -380,10 +376,10 @@ export function PracticeForm({
               </SelectContent>
             </Select>
             <FieldDescription>
-              {/* La targa registrata viene prima: se il mezzo e' stato
-                  eliminato, dire solo "nessuna autofunebre configurata"
-                  farebbe credere che il documento esca senza targa, mentre la
-                  pratica ne conserva una. */}
+              {/* The recorded plate comes first: if the vehicle was deleted,
+                  saying only "no hearse configured" would suggest the document
+                  comes out without a plate, when the practice still holds
+                  one. */}
               {missingVehicle
                 ? `Mezzo non piu' in elenco. Targa registrata: ${practice?.vehiclePlate}`
                 : vehicles.length === 0
@@ -405,8 +401,8 @@ export function PracticeForm({
             label={FIELD_LABELS.destinationCity}
             value={destinationCity}
             onChange={setDestinationCity}
-            // La provincia si ricava dal comune scelto: si compila da sola, ma
-            // resta modificabile.
+            // The province is derived from the chosen municipality: filled in
+            // automatically, but still editable.
             onPick={(c) => setProvince(c.provincia)}
             error={err("destinationCity")}
           />

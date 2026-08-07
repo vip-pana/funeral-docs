@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { deletePractice } from "../actions";
 
 /**
- * La cancellazione non si annulla: il primo clic chiede conferma, il secondo
- * esegue.
+ * Deletion cannot be undone: the first click asks for confirmation, the second
+ * performs it.
  */
 export function DeleteButton({ practiceId }: { practiceId: number }) {
   const [confirming, setConfirming] = useState(false);

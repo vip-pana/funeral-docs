@@ -2,14 +2,14 @@ import { sql } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 /**
- * Le date si memorizzano come testo ISO (yyyy-mm-dd) e le ore come hh:mm:
- * SQLite non ha un tipo data, e il testo ISO si ordina correttamente da solo.
- * La formattazione italiana avviene solo al momento di generare i documenti.
+ * Dates are stored as ISO text (yyyy-mm-dd) and times as hh:mm: SQLite has no
+ * date type, and ISO text sorts correctly on its own. Italian formatting
+ * happens only when generating the documents.
  */
 
 /**
- * Dati della ditta. Riga unica: `id` e' sempre 1, cosi' un secondo salvataggio
- * aggiorna la riga esistente invece di accumulare configurazioni parallele.
+ * Single-row table: `id` is always 1, so saving again updates the existing row
+ * instead of piling up parallel configurations.
  */
 export const owner = sqliteTable("owner", {
   id: integer("id").primaryKey().default(1),
@@ -26,13 +26,10 @@ export const owner = sqliteTable("owner", {
     .default(sql`(datetime('now'))`),
 });
 
-/**
- * Le autofunebri dell'impresa: si sceglie quale usare in ogni pratica.
- * Dichiarata prima di `practices`, che la referenzia.
- */
+/** Declared before `practices`, which references it. */
 export const vehicles = sqliteTable("vehicles", {
   id: integer("id").primaryKey({ autoIncrement: true }),
-  /** Descrizione libera per riconoscere il mezzo, es. "Mercedes Vito". */
+  /** Free-form description to recognise the vehicle, e.g. "Mercedes Vito". */
   name: text("name").notNull(),
   plate: text("plate").notNull(),
   createdAt: text("created_at")
@@ -40,15 +37,13 @@ export const vehicles = sqliteTable("vehicles", {
     .default(sql`(datetime('now'))`),
 });
 
-/** Una pratica = un defunto = una generazione di documenti. */
 export const practices = sqliteTable("practices", {
   id: integer("id").primaryKey({ autoIncrement: true }),
 
-  // defunto
   personFirstName: text("person_first_name").notNull(),
   personLastName: text("person_last_name").notNull(),
-  // Serve a calcolare il codice fiscale: nel giorno di nascita le donne hanno
-  // +40. Non compare in nessun documento.
+  // Feeds the tax code computation, where women get +40 on the birth day.
+  // Never appears in any document.
   personSex: text("person_sex", { enum: ["M", "F"] }).notNull().default("M"),
   personTaxCode: text("person_tax_code").notNull(),
   personBirthDate: text("person_birth_date").notNull(),
@@ -56,28 +51,24 @@ export const practices = sqliteTable("practices", {
   personResidenceCity: text("person_residence_city").notNull(),
   personResidenceAddress: text("person_residence_address").notNull(),
 
-  // decesso
   personDeathDate: text("person_death_date").notNull(),
   personDeathTime: text("person_death_time").notNull(),
   personDeathCity: text("person_death_city").notNull(),
   personDeathPlace: text("person_death_place").notNull(),
 
-  // trasporto
   transportDate: text("transport_date").notNull(),
   transportTime: text("transport_time").notNull(),
   transportPermitDate: text("transport_permit_date").notNull(),
   funeralChurch: text("funeral_church").notNull().default(""),
 
-  // Il veicolo scelto per il trasporto. Il riferimento dice quale mezzo e'
-  // stato usato e si annulla da solo se il veicolo viene eliminato; la targa
-  // e' copiata perche' i documenti gia' emessi non devono cambiare quando
-  // l'elenco delle autofunebri cambia.
+  // The reference records which vehicle was used and nulls itself out if that
+  // vehicle is deleted; the plate is copied because documents already issued
+  // must not change when the hearse list does.
   vehicleId: integer("vehicle_id").references(() => vehicles.id, {
     onDelete: "set null",
   }),
   vehiclePlate: text("vehicle_plate").notNull().default(""),
 
-  // destinazione
   destinationCity: text("destination_city").notNull(),
   destinationProvince: text("destination_province").notNull(),
   destinationCemetery: text("destination_cemetery").notNull(),

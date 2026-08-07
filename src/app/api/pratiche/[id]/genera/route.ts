@@ -7,16 +7,14 @@ import { DOCUMENTS, type DocumentId } from "@/lib/fields";
 import { getOwner, ownerValues } from "@/lib/owner";
 
 /**
- * Genera un documento di una pratica.
+ * Generates one document of a practice.
  *
- *   GET /api/pratiche/12/genera?doc=3   -> il documento 3 come .docx
- *   GET /api/pratiche/12/genera         -> il primo documento
+ *   GET /api/pratiche/12/genera?doc=3   -> document 3 as .docx
+ *   GET /api/pratiche/12/genera         -> the first document
  *
- * Un file per richiesta: la pagina ne chiede piu' d'uno in sequenza, cosi'
- * ogni documento arriva come .docx separato invece che dentro un archivio da
- * aprire.
- *
- * L'accesso e' gia' filtrato dal middleware.
+ * One file per request: the page asks for several in sequence, so each
+ * document arrives as a separate .docx instead of inside an archive that has
+ * to be opened. Access is already filtered by the middleware.
  */
 export async function GET(
   request: NextRequest,
@@ -54,14 +52,14 @@ export async function GET(
   const values = {
     ...practice,
     ...ownerValues(await getOwner()),
-    // Il placeholder nei template si chiama ancora {ownerVehiclePlate}, ma il
-    // valore e' la targa copiata sulla pratica al salvataggio. Sta dopo
-    // entrambi gli spread perche' l'assegnazione posizionale vince: e' l'unica
-    // fonte della targa, e cio' che rende ristampabile una pratica di mesi fa.
+    // The template placeholder is still called {ownerVehiclePlate}, but the
+    // value is the plate copied onto the practice at save time. It sits after
+    // both spreads because the later assignment wins: this is the only source
+    // of the plate, and what makes a months-old practice reprintable.
     ownerVehiclePlate: practice.vehiclePlate,
-    // La data di compilazione e' quella di oggi, non quella del salvataggio.
+    // The compilation date is today's, not the one from when it was saved.
     todayDate: new Date().toISOString().slice(0, 10),
-    // La domanda porta la data del trasporto: e' quando viene presentata.
+    // The request carries the transport date: that is when it is submitted.
     ownerRequestDate: practice.transportPermitDate,
   };
 

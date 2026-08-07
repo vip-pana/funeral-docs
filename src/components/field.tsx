@@ -7,12 +7,12 @@ import {
 import { Input } from "@/components/ui/input";
 
 /**
- * Campo di testo etichettato, costruito sulle primitive `ui/field` di shadcn:
- * `data-invalid` sul gruppo colora etichetta e bordo insieme, senza doverlo
- * gestire campo per campo.
+ * Labelled text field built on shadcn's `ui/field` primitives: `data-invalid`
+ * on the group colours label and border together, so that does not have to be
+ * handled field by field.
  *
- * Il valore vive nel DOM e viene raccolto dalla FormData al submit; gli errori
- * arrivano dalla validazione lato server.
+ * The value lives in the DOM and is collected by the FormData on submit;
+ * errors come from server-side validation.
  */
 export function Field({
   name,
@@ -28,8 +28,8 @@ export function Field({
   error?: string;
   hint?: string;
   /**
-   * Classi per il solo campo di testo. `className` veste il gruppo: usarlo per
-   * `uppercase` trasformerebbe anche etichetta e descrizione.
+   * Classes for the input alone. `className` styles the whole group: using it
+   * for `uppercase` would transform the label and description too.
    */
   inputClassName?: string;
 }) {

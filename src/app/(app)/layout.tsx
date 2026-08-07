@@ -4,14 +4,11 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 
 import { AppSidebar } from "./app-sidebar";
 
-/**
- * Guscio delle pagine autenticate. L'accesso e' gia' garantito dal middleware:
- * qui c'e' solo la navigazione.
- */
+/** Access is already enforced by the middleware; this is just navigation. */
 export default async function AppLayout({ children }: LayoutProps<"/">) {
-  // Lo stato aperto/chiuso della sidebar sta in un cookie: leggerlo lato
-  // server evita che la barra compaia aperta per un istante prima di
-  // richiudersi al primo render nel browser.
+  // The sidebar open/closed state lives in a cookie: reading it server-side
+  // stops the bar from flashing open before collapsing on the first client
+  // render.
   const store = await cookies();
   const defaultOpen = store.get("sidebar_state")?.value !== "false";
 

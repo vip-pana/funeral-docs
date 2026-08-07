@@ -6,7 +6,7 @@ import { VehiclesCard } from "./vehicles-card";
 
 export const metadata = { title: "Impostazioni — Documenti funebri" };
 
-// I valori arrivano dal database e cambiano al salvataggio.
+// Values come from the database and change on save.
 export const dynamic = "force-dynamic";
 
 export default async function ImpostazioniPage() {
@@ -21,8 +21,8 @@ export default async function ImpostazioniPage() {
         </p>
       </div>
       <OwnerForm owner={owner} />
-      {/* Dopo il form della ditta, che ha il proprio pulsante di salvataggio:
-          in mezzo suggerirebbe che "Salva impostazioni" salvi anche i mezzi. */}
+      {/* After the company form, which has its own save button: placing it in
+          between would suggest "Salva impostazioni" saves the vehicles too. */}
       <VehiclesCard vehicles={vehicles} />
     </div>
   );
