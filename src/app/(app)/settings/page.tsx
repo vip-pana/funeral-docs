@@ -1,9 +1,7 @@
 import { listBearers } from "@/lib/bearers";
-import { getOwner } from "@/lib/owner";
 import { listVehicles } from "@/lib/vehicles";
 
 import { BearersCard } from "./bearers-card";
-import { OwnerForm } from "./owner-form";
 import { VehiclesCard } from "./vehicles-card";
 
 export const metadata = { title: "Impostazioni — Documenti funebri" };
@@ -12,8 +10,7 @@ export const metadata = { title: "Impostazioni — Documenti funebri" };
 export const dynamic = "force-dynamic";
 
 export default async function ImpostazioniPage() {
-  const [owner, vehicles, bearers] = await Promise.all([
-    getOwner(),
+  const [vehicles, bearers] = await Promise.all([
     listVehicles(),
     listBearers(),
   ]);
@@ -23,12 +20,10 @@ export default async function ImpostazioniPage() {
       <div>
         <h1 className="text-2xl font-semibold">Impostazioni</h1>
         <p className="text-muted-foreground text-sm">
-          Dati dell&apos;impresa funebre, ripresi in tutti i documenti.
+          Mezzi e personale, da scegliere per ogni defunto. Dichiarante e
+          impresa stanno nella scheda del cliente.
         </p>
       </div>
-      <OwnerForm owner={owner} />
-      {/* After the company form, which has its own save button: placing them
-          in between would suggest "Salva impostazioni" saves these lists too. */}
       <VehiclesCard vehicles={vehicles} />
       <BearersCard bearers={bearers} />
     </div>

@@ -1,6 +1,11 @@
 "use client";
 
-import { FileTextIcon, LogOutIcon, SettingsIcon } from "lucide-react";
+import {
+  FileTextIcon,
+  LogOutIcon,
+  SettingsIcon,
+  UsersIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -20,6 +25,7 @@ import { logout } from "@/app/login/actions";
 
 const LINKS = [
   { href: "/deceased", label: "Defunti", icon: FileTextIcon },
+  { href: "/clients", label: "Clienti", icon: UsersIcon },
   { href: "/settings", label: "Impostazioni", icon: SettingsIcon },
 ] as const;
 

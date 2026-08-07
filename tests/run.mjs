@@ -11,6 +11,8 @@ const suites = [
   "login.mjs",
   "interfaccia.mjs",
   "impostazioni.mjs",
+  // Before the suites that create a record: they need a client to pick.
+  "clienti.mjs",
   "veicoli.mjs",
   "conducenti.mjs",
   "allegati.mjs",

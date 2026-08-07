@@ -3,6 +3,7 @@
 import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
 
+import { ComuneField } from "@/components/comune-field";
 import { Field } from "@/components/field";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,20 +13,41 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { Owner } from "@/lib/db/schema";
+import type { Client } from "@/lib/db/schema";
 import { FIELD_LABELS } from "@/lib/fields";
 
-import { saveOwner, type OwnerFormState } from "./actions";
+import type { ClientFormState } from "./actions";
 
-export function OwnerForm({ owner }: { owner: Owner | null }) {
-  const [state, formAction, pending] = useActionState<OwnerFormState, FormData>(
-    saveOwner,
+type Action = (
+  state: ClientFormState,
+  formData: FormData,
+) => Promise<ClientFormState>;
+
+/**
+ * The field names are the client columns, without the `owner` prefix the
+ * template placeholders still carry. `clientValues` in src/lib/clients.ts maps
+ * one onto the other; the labels come from FIELD_LABELS, which describes the
+ * placeholders.
+ */
+export function ClientForm({
+  action,
+  client,
+  submitLabel,
+}: {
+  action: Action;
+  client?: Client;
+  submitLabel: string;
+}) {
+  const [state, formAction, pending] = useActionState<ClientFormState, FormData>(
+    action,
     {},
   );
 
   useEffect(() => {
-    if (state.ok) toast.success(state.message ?? "Salvato.");
-    else if (state.message) toast.error(state.message);
+    if (state.message) {
+      if (state.errors) toast.error(state.message);
+      else toast.success(state.message);
+    }
   }, [state]);
 
   const err = (name: string) => state.errors?.[name];
@@ -41,29 +63,30 @@ export function OwnerForm({ owner }: { owner: Owner | null }) {
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-3">
           <Field
-            name="ownerFirstName"
+            name="firstName"
             label={FIELD_LABELS.ownerFirstName}
-            defaultValue={owner?.ownerFirstName}
-            error={err("ownerFirstName")}
+            defaultValue={client?.firstName}
+            error={err("firstName")}
+            autoFocus={!client}
           />
           <Field
-            name="ownerMiddleName"
+            name="middleName"
             label={FIELD_LABELS.ownerMiddleName}
-            defaultValue={owner?.ownerMiddleName}
-            error={err("ownerMiddleName")}
+            defaultValue={client?.middleName}
+            error={err("middleName")}
             hint="Facoltativo"
           />
           <Field
-            name="ownerLastName"
+            name="lastName"
             label={FIELD_LABELS.ownerLastName}
-            defaultValue={owner?.ownerLastName}
-            error={err("ownerLastName")}
+            defaultValue={client?.lastName}
+            error={err("lastName")}
           />
         </CardContent>
       </Card>
 
       {/* Only the allegati (documents 6 to 9) print these, so they are all
-          optional: a configuration saved before those existed stays valid. */}
+          optional: a client saved without them stays valid. */}
       <Card>
         <CardHeader>
           <CardTitle>Documento del dichiarante</CardTitle>
@@ -74,64 +97,66 @@ export function OwnerForm({ owner }: { owner: Owner | null }) {
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <Field
-            name="ownerBirthDate"
+            name="birthDate"
             label={FIELD_LABELS.ownerBirthDate}
             type="date"
-            defaultValue={owner?.ownerBirthDate}
-            error={err("ownerBirthDate")}
+            defaultValue={client?.birthDate}
+            error={err("birthDate")}
           />
-          <Field
-            name="ownerBirthCity"
+          {/* Picked from the list rather than typed: the province printed
+              beside it is derived from the name. */}
+          <ComuneField
+            name="birthCity"
             label={FIELD_LABELS.ownerBirthCity}
-            defaultValue={owner?.ownerBirthCity}
-            error={err("ownerBirthCity")}
+            defaultValue={client?.birthCity}
+            error={err("birthCity")}
           />
           <Field
-            name="ownerCitizenship"
+            name="citizenship"
             label={FIELD_LABELS.ownerCitizenship}
-            defaultValue={owner?.ownerCitizenship}
-            error={err("ownerCitizenship")}
+            defaultValue={client?.citizenship ?? "italiana"}
+            error={err("citizenship")}
             hint="Es. italiana — documento 9"
           />
           <Field
-            name="ownerAddress"
+            name="address"
             label={FIELD_LABELS.ownerAddress}
-            defaultValue={owner?.ownerAddress}
-            error={err("ownerAddress")}
+            defaultValue={client?.address}
+            error={err("address")}
             hint="Via e numero civico"
           />
           <Field
-            name="ownerPostalCode"
+            name="postalCode"
             label={FIELD_LABELS.ownerPostalCode}
-            defaultValue={owner?.ownerPostalCode}
-            error={err("ownerPostalCode")}
+            defaultValue={client?.postalCode}
+            error={err("postalCode")}
           />
           <Field
-            name="ownerIdType"
+            name="idType"
             label={FIELD_LABELS.ownerIdType}
-            defaultValue={owner?.ownerIdType}
-            error={err("ownerIdType")}
+            defaultValue={client?.idType}
+            error={err("idType")}
             hint="Es. CARTA D'IDENTITA"
           />
           <Field
-            name="ownerIdNumber"
+            name="idNumber"
             label={FIELD_LABELS.ownerIdNumber}
-            defaultValue={owner?.ownerIdNumber}
-            error={err("ownerIdNumber")}
+            defaultValue={client?.idNumber}
+            error={err("idNumber")}
           />
           <Field
-            name="ownerIdIssuer"
+            name="idIssuer"
             label={FIELD_LABELS.ownerIdIssuer}
-            defaultValue={owner?.ownerIdIssuer}
-            error={err("ownerIdIssuer")}
+            defaultValue={client?.idIssuer}
+            error={err("idIssuer")}
             hint="Es. COMUNE DI SAN SEVERO"
           />
           <Field
-            name="ownerIdDate"
+            name="idDate"
             label={FIELD_LABELS.ownerIdDate}
             type="date"
-            defaultValue={owner?.ownerIdDate}
-            error={err("ownerIdDate")}
+            defaultValue={client?.idDate}
+            error={err("idDate")}
           />
         </CardContent>
       </Card>
@@ -142,29 +167,29 @@ export function OwnerForm({ owner }: { owner: Owner | null }) {
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <Field
-            name="ownerCompanyName"
+            name="companyName"
             label={FIELD_LABELS.ownerCompanyName}
-            defaultValue={owner?.ownerCompanyName}
-            error={err("ownerCompanyName")}
+            defaultValue={client?.companyName}
+            error={err("companyName")}
           />
-          <Field
-            name="ownerCompanyCity"
+          <ComuneField
+            name="companyCity"
             label={FIELD_LABELS.ownerCompanyCity}
-            defaultValue={owner?.ownerCompanyCity}
-            error={err("ownerCompanyCity")}
+            defaultValue={client?.companyCity}
+            error={err("companyCity")}
           />
-          <Field
-            name="ownerCity"
+          <ComuneField
+            name="city"
             label={FIELD_LABELS.ownerCity}
-            defaultValue={owner?.ownerCity}
-            error={err("ownerCity")}
+            defaultValue={client?.city}
+            error={err("city")}
             hint="Il Comune a cui si presenta la domanda"
           />
-          <Field
-            name="ownerCityName"
+          <ComuneField
+            name="cityName"
             label={FIELD_LABELS.ownerCityName}
-            defaultValue={owner?.ownerCityName}
-            error={err("ownerCityName")}
+            defaultValue={client?.cityName}
+            error={err("cityName")}
             hint="Da dove parte il feretro"
           />
         </CardContent>
@@ -172,7 +197,7 @@ export function OwnerForm({ owner }: { owner: Owner | null }) {
 
       <div className="flex justify-end">
         <Button type="submit" disabled={pending}>
-          {pending ? "Salvataggio…" : "Salva impostazioni"}
+          {pending ? "Salvataggio…" : submitLabel}
         </Button>
       </div>
     </form>

@@ -1,7 +1,7 @@
 import { chromium } from 'playwright-core';
 import fs from 'node:fs';
 import JSZip from 'jszip';
-import { fillPractice, pickComune, pickSelect } from './helpers.mjs';
+import { fillPractice, pickSelect, SEED_CLIENT } from './helpers.mjs';
 
 const B = process.env.BASE_URL ?? 'http://localhost:3000';
 const b = await chromium.launch({ channel: 'chrome' });
@@ -39,7 +39,11 @@ const v = {
   destinationCity:'Foggia',
   destinationCemetery:'Cimitero Comunale',
 };
+// The client is required, and fillPractice picks it: without one the form does
+// not save at all, so this is checked before the optional hearse and driver.
 await fillPractice(p, v);
+const hasClient = await p.$eval('#clientId', el => (el.textContent ?? '').trim());
+check('3a cliente selezionato', hasClient.includes(SEED_CLIENT), hasClient);
 // Hearse and driver are left behind by veicoli.mjs and conducenti.mjs, which
 // run first: without them plate and name would not reach the document and the
 // checks below would be pointless.
@@ -106,7 +110,8 @@ await d4.saveAs(f4);
 const z4 = await JSZip.loadAsync(fs.readFileSync(f4));
 const t4 = [...(await z4.file('word/document.xml').async('string'))
   .matchAll(/<w:t[^>]*>([\s\S]*?)<\/w:t>/g)].map(m=>m[1]).join('');
-check('  doc4 dati ditta', t4.includes('Rossi'));
+// Read live from the client picked above, not copied onto the record.
+check('  doc4 dati ditta', t4.includes(SEED_CLIENT), SEED_CLIENT);
 check('  doc4 targa autofunebre', t4.includes('FG123AB'), t4.match(/[A-Z]{2}\d{3}[A-Z]{2}/)?.[0] ?? 'assente');
 check('  doc4 conducente', t4.includes('Giuseppe Verdi'), '');
 check('  doc4 codice fiscale', t4.includes('RSSMRA40C12D643D'));

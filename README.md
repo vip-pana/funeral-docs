@@ -70,9 +70,15 @@ docxtemplater.
 | `scripts/placeholders-6-7.py` | trasforma in template gli allegati 2 e 3 |
 | `tests/` | suite end-to-end su browser |
 
-I dati dell'impresa si compilano una volta in **Impostazioni**; per ogni
-defunto restano da inserire solo i suoi dati. Il codice fiscale compila da solo
-data e comune di nascita.
+Dichiarante e impresa stanno nella scheda di un **cliente**: si registrano una
+volta in **Clienti** e per ogni defunto si sceglie per conto di chi vengono
+emessi i documenti. È l'unico campo obbligatorio oltre ai dati del defunto —
+senza, i documenti uscirebbero senza intestazione. Il codice fiscale compila da
+solo data e comune di nascita.
+
+A differenza della targa e del conducente, i dati del cliente non vengono
+copiati sulla scheda: i documenti li rileggono al momento della generazione,
+così correggere un indirizzo sistema tutto ciò che viene ristampato dopo.
 
 **Autofunebri**, **conducenti** e **necrofori** si elencano in Impostazioni ma
 si scelgono per singolo defunto: targa e nomi vengono copiati sulla scheda al
@@ -80,8 +86,8 @@ salvataggio, così i documenti già emessi restano corretti anche se una voce
 viene poi eliminata dall'elenco.
 
 Gli **allegati 2 e 3** (documenti 6 e 7) della L.R. 34/2008 identificano per
-esteso il dichiarante: il suo documento d'identità e la residenza si compilano
-una volta in Impostazioni, mentre la qualità con cui presenta la domanda e i
+esteso il dichiarante: il suo documento d'identità e la residenza stanno nella
+scheda del cliente, mentre la qualità con cui presenta la domanda e i
 necrofori si scelgono per ogni defunto. La provincia di nascita non è un campo:
 viene ricavata dal comune tramite il dataset ISTAT.
 

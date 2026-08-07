@@ -5,6 +5,12 @@
  * hand. Full reference: templates/FIELDS.md
  */
 
+/**
+ * The `owner` prefix no longer matches anything in the database: these are the
+ * placeholders written inside the .docx, and they are filled from the `clients`
+ * table, whose columns drop the prefix. `clientValues` in src/lib/clients.ts is
+ * the only place the two are mapped onto each other.
+ */
 export const OWNER_FIELDS = [
   "ownerFirstName",
   "ownerMiddleName",
@@ -13,12 +19,9 @@ export const OWNER_FIELDS = [
   "ownerCompanyCity",
   "ownerCity",
   "ownerCityName",
-  // Both keep the `owner*` name because that is the placeholder inside the
-  // .docx files (the plate in 2, 3 and 4; the driver in 4), but neither value
-  // comes from the company any more: they are the hearse and the driver picked
-  // in the individual practice. Renaming them here without renaming them in
-  // the .docx would leave a hole in the printed documents.
-  // See src/app/api/deceased/[id]/generate/route.ts
+  // These two do not even come from the client: they are the hearse and the
+  // driver picked in the individual practice, and are copied onto it at save
+  // time. See src/app/api/deceased/[id]/generate/route.ts
   "ownerVehiclePlate",
   "ownerDriverName",
   "ownerRequestDate",

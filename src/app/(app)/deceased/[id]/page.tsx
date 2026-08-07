@@ -6,7 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 import { db, schema } from "@/lib/db";
 import { listBearers, listDrivers } from "@/lib/bearers";
-import { getOwner } from "@/lib/owner";
+import { listClients } from "@/lib/clients";
 import { listVehicles } from "@/lib/vehicles";
 
 import { updatePractice } from "../actions";
@@ -51,8 +51,8 @@ export default async function DefuntoPage({
 }) {
   const { id } = await params;
   const practice = await loadPractice(id);
-  const [owner, vehicles, drivers, bearers] = await Promise.all([
-    getOwner(),
+  const [clients, vehicles, drivers, bearers] = await Promise.all([
+    listClients(),
     listVehicles(),
     listDrivers(),
     listBearers(),
@@ -74,12 +74,16 @@ export default async function DefuntoPage({
         <DeleteButton practiceId={practice.id} />
       </div>
 
-      {!owner && (
+      {/* The record itself is what may be missing a client — deleted after it
+          was saved — so the alert follows the record, not the list. The form
+          stays visible either way: it is where another client is picked. */}
+      {!practice.clientId && (
         <Alert variant="destructive">
           <TriangleAlertIcon />
-          <AlertTitle>Impostazioni dell&apos;impresa mancanti</AlertTitle>
+          <AlertTitle>Nessun cliente collegato</AlertTitle>
           <AlertDescription>
-            I documenti uscirebbero senza i dati della ditta.
+            I documenti uscirebbero senza dichiarante e senza i dati della
+            ditta. Scegli un cliente qui sotto e salva.
           </AlertDescription>
         </Alert>
       )}
@@ -89,6 +93,7 @@ export default async function DefuntoPage({
       <PracticeForm
         action={action}
         practice={practice}
+        clients={clients}
         vehicles={vehicles}
         drivers={drivers}
         bearers={bearers}

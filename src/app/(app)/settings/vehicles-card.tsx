@@ -86,8 +86,8 @@ export function VehiclesCard({ vehicles }: { vehicles: Vehicle[] }) {
           </p>
         )}
 
-        {/* Separate from the company-data form: nested forms are invalid HTML
-            and the browser drops the inner one. */}
+        {/* Its own form: nested forms are invalid HTML and the browser drops
+            the inner one. */}
         <form
           ref={formRef}
           action={formAction}

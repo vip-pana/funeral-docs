@@ -35,7 +35,9 @@ check('uuid inesistente -> 404', r.status===404, String(r.status));
 r = await call('/api/deceased/abc/generate');
 check('id malformato -> 404', r.status===404, String(r.status));
 
-r = await call(`/api/deceased/${ID}/generate?doc=9`);
+// Not a number that happens to be free today: 9 was one until the cremation
+// forms were added and this check started passing a real document.
+r = await call(`/api/deceased/${ID}/generate?doc=999`);
 check('documento inesistente -> 400', r.status===400, String(r.status));
 
 r = await call(`/api/deceased/${ID}/generate?doc=2`);

@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { checkChar, computeTaxCode } from "./tax-code";
 import {
   bearerSchema,
-  ownerSchema,
+  clientSchema,
   parseTaxCode,
   practiceSchema,
   vehicleSchema,
@@ -11,6 +11,7 @@ import {
 
 /** A complete, valid practice: each test overrides the one field it is about. */
 const PRACTICE = {
+  clientId: "6a3f0c2e-1b4d-4e9a-8c7f-2d5b8e1a4c60",
   personFirstName: "Mario",
   personLastName: "Rossi",
   personTaxCode: "RSSMRA40C12D643D",
@@ -173,6 +174,17 @@ describe("practiceSchema", () => {
     expect(result.success && result.data.personSex).toBe("M");
   });
 
+  /**
+   * Unlike the hearse and the driver, which may legitimately be left out: with
+   * no client every document comes out with no declarant and no company. An
+   * untouched Select posts an empty string, and that has to be the error case
+   * rather than pass as "none chosen".
+   */
+  it("requires a client, empty string included", () => {
+    expect(errorOn(parse({ clientId: "" }), "clientId")).toBeDefined();
+    expect(errorOn(parse({ clientId: undefined }), "clientId")).toBeDefined();
+  });
+
   it("treats the church as optional and turns it into an empty string", () => {
     const result = parse();
     expect(result.success && result.data.funeralChurch).toBe("");
@@ -286,30 +298,43 @@ describe("practiceSchema", () => {
   });
 });
 
-describe("ownerSchema", () => {
-  const OWNER = {
-    ownerFirstName: "Mario",
-    ownerLastName: "Rossi",
-    ownerCompanyName: "OO.FF. Rossi",
-    ownerCompanyCity: "San Severo",
-    ownerCity: "San Severo",
-    ownerCityName: "San Severo",
+describe("clientSchema", () => {
+  const CLIENT = {
+    firstName: "Mario",
+    lastName: "Rossi",
+    companyName: "OO.FF. Rossi",
+    companyCity: "San Severo",
+    city: "San Severo",
+    cityName: "San Severo",
   };
 
-  it("accepts the company data without the optional fields", () => {
-    const result = ownerSchema.safeParse(OWNER);
+  it("accepts a client without the optional fields", () => {
+    const result = clientSchema.safeParse(CLIENT);
     expect(result.success).toBe(true);
     // The middle name is optional and becomes an empty string.
-    expect(result.success && result.data.ownerMiddleName).toBe("");
+    expect(result.success && result.data.middleName).toBe("");
   });
 
-  it("no longer knows about the driver, which now lives on the practice", () => {
-    expect(Object.keys(ownerSchema.shape)).not.toContain("ownerDriverName");
+  /**
+   * Both were dropped from the client when they moved onto the practice: the
+   * plate and the driver come from the hearse picked for the single record, and
+   * the request date from its transport permit.
+   */
+  it("knows nothing about the driver or the request date", () => {
+    const shape = Object.keys(clientSchema.shape);
+    expect(shape).not.toContain("driverName");
+    expect(shape).not.toContain("ownerDriverName");
+    expect(shape).not.toContain("requestDate");
+    expect(shape).not.toContain("ownerRequestDate");
   });
 
-  it("keeps an empty request date as it is", () => {
-    const result = ownerSchema.safeParse({ ...OWNER, ownerRequestDate: "" });
-    expect(result.success && result.data.ownerRequestDate).toBe("");
+  it("uses the column names, not the owner-prefixed placeholders", () => {
+    const result = clientSchema.safeParse({
+      ...CLIENT,
+      firstName: undefined,
+      ownerFirstName: "Mario",
+    });
+    expect(result.success).toBe(false);
   });
 });
 

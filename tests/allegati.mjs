@@ -52,6 +52,7 @@ try {
   // --- the record picks it, plus the applicant role ---
   await p.goto(`${B}/deceased/new`);
   await p.waitForTimeout(700);
+  // fillPractice also picks the client, which is required.
   await fillPractice(p, SAMPLE);
   await pickSelect(p, "vehicleId", "FG123AB");
   await pickSelect(p, "driverId", "Giuseppe Verdi");

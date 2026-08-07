@@ -39,8 +39,26 @@ export async function pickSelect(page, fieldName, text) {
   return found;
 }
 
-/** Fills a practice form; municipalities go through the combobox. */
-export async function fillPractice(page, values) {
+/**
+ * The seeded client the practice suites pick. Required on every record, so
+ * without it the form fails validation instead of saving.
+ */
+export const SEED_CLIENT = "OO.FF. Rossi";
+
+/** Picks the seeded client on a practice form. */
+export async function pickClient(page, text = SEED_CLIENT) {
+  return pickSelect(page, "clientId", text);
+}
+
+/**
+ * Fills a practice form; municipalities go through the combobox.
+ *
+ * The client is picked too, unless the caller passes one in `values` or opts
+ * out with `{client: false}`: it is required, so a form filled without it does
+ * not save and every suite that only wanted a throwaway record would hang on
+ * the navigation that never happens.
+ */
+export async function fillPractice(page, values, { client = SEED_CLIENT } = {}) {
   const comuni = new Set([
     "personBirthCity",
     "personResidenceCity",
@@ -52,6 +70,8 @@ export async function fillPractice(page, values) {
     if (comuni.has(name)) await pickComune(page, name, value);
     else await page.fill(`#${name}`, value);
   }
+
+  if (client) await pickClient(page, client);
 }
 
 /** Complete sample data, with a valid tax code. */

@@ -1,11 +1,11 @@
 import { eq } from "drizzle-orm";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { getClient, clientValues } from "@/lib/clients";
 import { provinciaOf } from "@/lib/comuni";
 import { db, schema } from "@/lib/db";
 import { renderDocument, documentFileName } from "@/lib/docs/render";
 import { DOCUMENTS, type DocumentId } from "@/lib/fields";
-import { getOwner, ownerValues } from "@/lib/owner";
 
 /**
  * Generates one document of a practice.
@@ -47,7 +47,11 @@ export async function GET(
 
   const documentId = requested as DocumentId;
 
-  const owner = await getOwner();
+  // Read live rather than copied onto the record: correcting a client's address
+  // fixes every document reprinted afterwards. Null when the client was deleted
+  // — the placeholders then come out empty, as they do for a record saved
+  // before there was one.
+  const client = practice.clientId ? await getClient(practice.clientId) : null;
 
   // Every province printed by the documents is derived from the municipality
   // beside it rather than stored, so the two can never disagree. Empty for a
@@ -58,7 +62,7 @@ export async function GET(
 
   const values = {
     ...practice,
-    ...ownerValues(owner),
+    ...clientValues(client),
     // The template placeholders are still called {ownerVehiclePlate} and
     // {ownerDriverName}, but the values are the ones copied onto the practice at
     // save time. They sit after both spreads because the later assignment wins:
@@ -72,8 +76,8 @@ export async function GET(
     crematoryProvince: prov(practice.crematoryCity),
     funeralStopProvince: prov(practice.funeralStopCity),
     ashesProvince: prov(practice.ashesCity),
-    ownerBirthProvince: prov(owner?.ownerBirthCity),
-    ownerCompanyProvince: prov(owner?.ownerCompanyCity),
+    ownerBirthProvince: prov(client?.birthCity),
+    ownerCompanyProvince: prov(client?.companyCity),
     // The compilation date is today's, not the one from when it was saved.
     todayDate: new Date().toISOString().slice(0, 10),
     // The request carries the transport date: that is when it is submitted.

@@ -1,10 +1,10 @@
 /**
  * Fills the database with plausible sample data: `pnpm db:seed`.
  *
- * For development and demos. It never touches an existing row: vehicles and
- * bearers are added only if the list is empty, and practices are skipped
- * entirely when there is already one, so running it twice does not pile up
- * duplicates. `--reset` deletes the sample practices first.
+ * For development and demos. It never touches an existing row: clients,
+ * vehicles and bearers are added only if the list is empty, and practices are
+ * skipped entirely when there is already one, so running it twice does not pile
+ * up duplicates. `--reset` deletes the sample practices first.
  *
  * Tax codes are computed with the real `computeTaxCode`, so every practice
  * passes validation when reopened in the form.
@@ -20,25 +20,47 @@ const reset = process.argv.includes("--reset");
 const db = new Database(file);
 db.pragma("journal_mode = WAL");
 
-const OWNER = {
-  ownerFirstName: "Mario",
-  ownerMiddleName: "F.",
-  ownerLastName: "Rossi",
-  ownerCompanyName: "OO.FF. Rossi Mario",
-  ownerCompanyCity: "San Severo",
-  ownerCity: "San Severo",
-  ownerCityName: "San Severo",
-  // Documents 6 and 7 identify the declarant in full.
-  ownerBirthDate: "1980-03-15",
-  ownerBirthCity: "San Severo",
-  ownerAddress: "Via Giuseppe Verdi 12",
-  ownerPostalCode: "71016",
-  ownerIdType: "CARTA D'IDENTITA",
-  ownerIdNumber: "AA1234567",
-  ownerIdIssuer: "COMUNE DI SAN SEVERO",
-  ownerIdDate: "2020-06-10",
-  ownerCitizenship: "italiana",
-};
+// Two of them so the picker on the practice form has something to choose
+// between, and so a second declarant shows up in the documents.
+const CLIENTS = [
+  {
+    firstName: "Mario",
+    middleName: "F.",
+    lastName: "Rossi",
+    companyName: "OO.FF. Rossi Mario",
+    companyCity: "San Severo",
+    city: "San Severo",
+    cityName: "San Severo",
+    // Documents 6 and 7 identify the declarant in full.
+    birthDate: "1980-03-15",
+    birthCity: "San Severo",
+    address: "Via Giuseppe Verdi 12",
+    postalCode: "71016",
+    idType: "CARTA D'IDENTITA",
+    idNumber: "AA1234567",
+    idIssuer: "COMUNE DI SAN SEVERO",
+    idDate: "2020-06-10",
+    citizenship: "italiana",
+  },
+  {
+    firstName: "Michele",
+    middleName: "",
+    lastName: "Sacco",
+    companyName: "Onoranze Funebri Sacco",
+    companyCity: "Torremaggiore",
+    city: "Torremaggiore",
+    cityName: "Torremaggiore",
+    birthDate: "1975-03-19",
+    birthCity: "Torremaggiore",
+    address: "Via Municipio 8",
+    postalCode: "71017",
+    idType: "CARTA D'IDENTITA",
+    idNumber: "CA20431TM",
+    idIssuer: "COMUNE DI TORREMAGGIORE",
+    idDate: "2021-05-06",
+    citizenship: "italiana",
+  },
+];
 
 const VEHICLES = [
   { name: "Mercedes Vito", plate: "FG123AB" },
@@ -166,23 +188,28 @@ const PEOPLE: Person[] = [
   },
 ];
 
-function seedOwner() {
-  const existing = db.prepare("SELECT id FROM owner WHERE id = 1").get();
-  if (existing) return "already configured";
+/** Adds the sample clients only when the list is empty, like the lists below. */
+function seedClients(): number {
+  const existing = (
+    db.prepare("SELECT COUNT(*) AS n FROM clients").get() as { n: number }
+  ).n;
+  if (existing) return existing;
 
-  db.prepare(
-    `INSERT INTO owner (id, owner_first_name, owner_middle_name, owner_last_name,
-       owner_company_name, owner_company_city, owner_city, owner_city_name,
-       owner_birth_date, owner_birth_city, owner_address, owner_postal_code,
-       owner_id_type, owner_id_number, owner_id_issuer, owner_id_date,
-       owner_citizenship)
-     VALUES (1, @ownerFirstName, @ownerMiddleName, @ownerLastName,
-       @ownerCompanyName, @ownerCompanyCity, @ownerCity, @ownerCityName,
-       @ownerBirthDate, @ownerBirthCity, @ownerAddress, @ownerPostalCode,
-       @ownerIdType, @ownerIdNumber, @ownerIdIssuer, @ownerIdDate,
-       @ownerCitizenship)`,
-  ).run(OWNER);
-  return "inserted";
+  const insert = db.prepare(
+    `INSERT INTO clients (id, first_name, middle_name, last_name,
+       company_name, company_city, city, city_name,
+       birth_date, birth_city, address, postal_code,
+       id_type, id_number, id_issuer, id_date, citizenship)
+     VALUES (@id, @firstName, @middleName, @lastName,
+       @companyName, @companyCity, @city, @cityName,
+       @birthDate, @birthCity, @address, @postalCode,
+       @idType, @idNumber, @idIssuer, @idDate, @citizenship)`,
+  );
+
+  // The id is generated here for the same reason as in `seedList` below: this
+  // script talks to SQLite directly, so the schema's `$defaultFn` never runs.
+  for (const client of CLIENTS) insert.run({ id: crypto.randomUUID(), ...client });
+  return CLIENTS.length;
 }
 
 /**
@@ -235,7 +262,7 @@ function seedPractices() {
 
   const insert = db.prepare(
     `INSERT INTO practices (
-       id,
+       id, client_id, client_name,
        person_first_name, person_last_name, person_sex, person_tax_code,
        person_birth_date, person_birth_city, person_residence_city,
        person_residence_address, person_death_date, person_death_time,
@@ -246,7 +273,7 @@ function seedPractices() {
        crematory_city, funeral_stop_city, ashes_city,
        cremation_consent_relative, burial_permit_date
      ) VALUES (
-       @id,
+       @id, @clientId, @clientName,
        @firstName, @lastName, @sex, @taxCode,
        @birthDate, @birthCity, @residenceCity,
        @residenceAddress, @deathDate, @deathTime,
@@ -261,6 +288,9 @@ function seedPractices() {
 
   // Ordered by name, not by id: a UUID sorts arbitrarily, and the rotation
   // below promises the same pairings on every run.
+  const clients = db
+    .prepare("SELECT id, company_name FROM clients ORDER BY last_name")
+    .all() as { id: string; company_name: string }[];
   const vehicles = db
     .prepare("SELECT id, plate FROM vehicles ORDER BY name")
     .all() as { id: string; plate: string }[];
@@ -303,9 +333,12 @@ function seedPractices() {
     // rows and a screenshot stays comparable.
     const vehicle = vehicles[index % vehicles.length];
     const driver = drivers[index % drivers.length];
+    const client = clients[index % clients.length];
 
     insert.run({
       id: crypto.randomUUID(),
+      clientId: client?.id ?? null,
+      clientName: client?.company_name ?? "",
       firstName: p.firstName,
       lastName: p.lastName,
       sex: p.isFemale ? "F" : "M",
@@ -352,7 +385,8 @@ if (reset) {
   console.log(`Defunti eliminati: ${removed.changes}`);
 }
 
-console.log(`Impresa: ${seedOwner()}`);
+// Before the practices, which pick one.
+console.log(`Clienti: ${seedClients()}`);
 console.log(`Autofunebri: ${seedList("vehicles", VEHICLES).length}`);
 console.log(`Necrofori: ${seedList("bearers", BEARERS).length}`);
 console.log(`Defunti: ${seedPractices()}`);

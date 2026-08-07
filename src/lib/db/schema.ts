@@ -18,37 +18,46 @@ import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 const uuid = () => text("id").primaryKey().$defaultFn(() => crypto.randomUUID());
 
 /**
- * Single-row table: `id` is always 1, so saving again updates the existing row
- * instead of piling up parallel configurations. Deliberately not a UUID — it is
- * a sentinel, not an identity, and the upsert in settings/actions.ts needs a
- * constant to conflict on.
+ * Whoever the documents are issued on behalf of: the declarant who signs the
+ * applications and the company they run. The two are one row because every
+ * document names them together, and each record picks one.
+ *
+ * It replaces a single-row `owner` table, which allowed one declarant for the
+ * whole installation.
+ *
+ * Declared before `practices`, which references it.
  */
-export const owner = sqliteTable("owner", {
-  id: integer("id").primaryKey().default(1),
-  ownerFirstName: text("owner_first_name").notNull(),
-  ownerMiddleName: text("owner_middle_name").notNull().default(""),
-  ownerLastName: text("owner_last_name").notNull(),
-  ownerCompanyName: text("owner_company_name").notNull(),
-  ownerCompanyCity: text("owner_company_city").notNull(),
-  ownerCity: text("owner_city").notNull(),
-  ownerCityName: text("owner_city_name").notNull(),
+export const clients = sqliteTable("clients", {
+  id: uuid(),
+  firstName: text("first_name").notNull(),
+  middleName: text("middle_name").notNull().default(""),
+  lastName: text("last_name").notNull(),
+  companyName: text("company_name").notNull(),
+  companyCity: text("company_city").notNull(),
+  /** The municipality the application is submitted to. */
+  city: text("city").notNull(),
+  /** Where the coffin leaves from. */
+  cityName: text("city_name").notNull(),
 
   // Required by attachments 2 and 3 of L.R. 34/2008 (documents 6 and 7), which
-  // identify the declarant in full. Default to empty so an existing
-  // configuration stays valid: the older documents do not use them.
-  ownerBirthDate: text("owner_birth_date").notNull().default(""),
-  ownerBirthCity: text("owner_birth_city").notNull().default(""),
+  // identify the declarant in full. Default to empty because only those
+  // documents print them: the older ones leave the gap blank.
+  birthDate: text("birth_date").notNull().default(""),
+  birthCity: text("birth_city").notNull().default(""),
   /** Street and number together, as for the deceased. */
-  ownerAddress: text("owner_address").notNull().default(""),
-  ownerPostalCode: text("owner_postal_code").notNull().default(""),
-  ownerIdType: text("owner_id_type").notNull().default(""),
-  ownerIdNumber: text("owner_id_number").notNull().default(""),
-  ownerIdIssuer: text("owner_id_issuer").notNull().default(""),
-  ownerIdDate: text("owner_id_date").notNull().default(""),
+  address: text("address").notNull().default(""),
+  postalCode: text("postal_code").notNull().default(""),
+  idType: text("id_type").notNull().default(""),
+  idNumber: text("id_number").notNull().default(""),
+  idIssuer: text("id_issuer").notNull().default(""),
+  idDate: text("id_date").notNull().default(""),
 
   /** Printed beside the declarant's name by document 9. */
-  ownerCitizenship: text("owner_citizenship").notNull().default("italiana"),
+  citizenship: text("citizenship").notNull().default("italiana"),
 
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
   updatedAt: text("updated_at")
     .notNull()
     .default(sql`(datetime('now'))`),
@@ -89,6 +98,18 @@ export const bearers = sqliteTable("bearers", {
 
 export const practices = sqliteTable("practices", {
   id: uuid(),
+
+  // On whose behalf the documents are issued. Same split as the vehicle and the
+  // driver below: the reference nulls itself out if the client is deleted, and
+  // the name is copied so the record stays readable in the list either way.
+  // The documents themselves read the client row live, so correcting an address
+  // fixes every document reprinted afterwards — unlike the plate and the driver
+  // name, which are frozen. A client is required by the form, not by the
+  // database: deleting one must not lock the records that used it.
+  clientId: text("client_id").references(() => clients.id, {
+    onDelete: "set null",
+  }),
+  clientName: text("client_name").notNull().default(""),
 
   personFirstName: text("person_first_name").notNull(),
   personLastName: text("person_last_name").notNull(),
@@ -167,8 +188,8 @@ export const practices = sqliteTable("practices", {
     .default(sql`(datetime('now'))`),
 });
 
-export type Owner = typeof owner.$inferSelect;
-export type NewOwner = typeof owner.$inferInsert;
+export type Client = typeof clients.$inferSelect;
+export type NewClient = typeof clients.$inferInsert;
 export type Vehicle = typeof vehicles.$inferSelect;
 export type NewVehicle = typeof vehicles.$inferInsert;
 export type Bearer = typeof bearers.$inferSelect;

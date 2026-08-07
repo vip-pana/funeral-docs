@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-core';
-import { pickComune } from './helpers.mjs';
+import { pickClient, pickComune } from './helpers.mjs';
 const B = process.env.BASE_URL ?? 'http://localhost:3000';
 const b = await chromium.launch({ channel:'chrome' });
 try {
@@ -62,6 +62,8 @@ try {
   await pickComune(p,'personResidenceCity','San Severo');
   await pickComune(p,'personDeathCity','San Severo');
   await pickComune(p,'destinationCity','Foggia');
+  // Required to save: without it the form never navigates.
+  await pickClient(p);
   await Promise.all([p.waitForURL(/\/deceased\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,{timeout:20000}),
                      p.click('button:has-text("Crea scheda")')]);
   await p.reload();

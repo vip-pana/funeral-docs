@@ -89,13 +89,19 @@ coincidano nei due sensi.
 | `cremationConsentRelative` | Chi ha reso la dichiarazione di volonta', preposizione inclusa (es. "dalla moglie") | 8 |
 | `burialPermitDate` | Data del permesso di seppellimento | 8 |
 
-## Impresa funebre — dati fissi, da salvare una volta sola
+## Dichiarante e impresa — dalla scheda del cliente
 
-> `ownerVehiclePlate` e `ownerDriverName` non sono più qui: i nomi restano
-> `owner*` perché sono i placeholder dentro i `.docx`, ma i valori arrivano
-> dall'autofunebre e dal conducente scelti per il singolo defunto (tabelle
-> `vehicles` e `drivers`). Rinominarli in `fields.ts` senza rinominarli nei
+> **Il prefisso `owner` non corrisponde più a nulla nel database.** Questi campi
+> arrivano dalla tabella `clients`, dove le colonne si chiamano `first_name`,
+> `company_name` e così via: la corrispondenza sta tutta in `clientValues()`
+> (`src/lib/clients.ts`). I nomi qui restano `owner*` perché sono i placeholder
+> scritti dentro i `.docx` — rinominarli in `fields.ts` senza rinominarli nei
 > template lascerebbe un buco nei documenti stampati.
+>
+> `ownerVehiclePlate` e `ownerDriverName` non arrivano nemmeno dal cliente: sono
+> l'autofunebre e il conducente scelti per il singolo defunto (tabelle
+> `vehicles` e `bearers`), copiati sulla scheda al salvataggio. I dati del
+> cliente invece no: vengono riletti a ogni generazione.
 
 | Campo | Descrizione | Doc |
 |---|---|---|

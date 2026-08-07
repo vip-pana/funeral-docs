@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   Field as FieldRoot,
   FieldDescription,
+  FieldError,
   FieldLabel,
 } from "@/components/ui/field";
 import {
@@ -26,7 +27,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { Bearer, Practice, Vehicle } from "@/lib/db/schema";
+// From lib/client-name, not lib/clients: that one opens the database, and this
+// is a client component.
+import { clientLabel } from "@/lib/client-name";
+import type { Bearer, Client, Practice, Vehicle } from "@/lib/db/schema";
 import { FIELD_LABELS } from "@/lib/fields";
 import { computeTaxCode } from "@/lib/tax-code";
 import { parseTaxCode } from "@/lib/validation";
@@ -41,6 +45,7 @@ type Action = (
 export function PracticeForm({
   action,
   practice,
+  clients,
   vehicles,
   drivers,
   bearers,
@@ -48,6 +53,7 @@ export function PracticeForm({
 }: {
   action: Action;
   practice?: Practice;
+  clients: Client[];
   vehicles: Vehicle[];
   /** Already filtered to the bearers flagged as drivers. */
   drivers: Bearer[];
@@ -75,6 +81,18 @@ export function PracticeForm({
     practice?.destinationCity ?? "",
   );
   const [province, setProvince] = useState(practice?.destinationProvince ?? "");
+  // With a single client there is nothing to choose: preselecting it saves a
+  // click on every record and still posts the id.
+  const [clientId, setClientId] = useState(
+    practice?.clientId ?? (clients.length === 1 ? clients[0].id : ""),
+  );
+
+  // The client may have been deleted after saving: the record keeps the name,
+  // but the list no longer has an entry to select.
+  const missingClient = Boolean(
+    practice?.clientName && !clients.some((c) => c.id === clientId),
+  );
+
   const [vehicleId, setVehicleId] = useState(
     practice?.vehicleId ?? "",
   );
@@ -206,6 +224,50 @@ export function PracticeForm({
 
   return (
     <form ref={formRef} action={formAction} className="space-y-6">
+      {/* First, before the deceased: it decides the declarant and the company
+          named at the top of every document. */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Cliente</CardTitle>
+          <CardDescription>
+            Per conto di chi vengono emessi i documenti.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <FieldRoot data-invalid={err("clientId") ? true : undefined}>
+            <FieldLabel htmlFor="clientId">Cliente</FieldLabel>
+            {/* Same as the hearse below: no "none" entry, because Radix forbids
+                a SelectItem with an empty value — and here none is not a valid
+                choice anyway. */}
+            <Select name="clientId" value={clientId} onValueChange={setClientId}>
+              <SelectTrigger
+                id="clientId"
+                className="w-full"
+                aria-invalid={err("clientId") ? true : undefined}
+              >
+                <SelectValue placeholder="Scegli un cliente" />
+              </SelectTrigger>
+              <SelectContent>
+                {clients.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {clientLabel(c)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {err("clientId") ? (
+              <FieldError>{err("clientId")}</FieldError>
+            ) : (
+              <FieldDescription>
+                {missingClient
+                  ? `Cliente non piu' in elenco. Nome registrato: ${practice?.clientName}. Scegline un altro: senza, i documenti escono senza dichiarante.`
+                  : "Dichiarante e impresa nei documenti"}
+              </FieldDescription>
+            )}
+          </FieldRoot>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Defunto</CardTitle>

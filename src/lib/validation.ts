@@ -101,33 +101,35 @@ const optionalId = z
   .optional()
   .transform((v) => v || undefined);
 
-export const ownerSchema = z.object({
-  ownerFirstName: requiredText("Nome"),
-  ownerMiddleName: optionalText,
-  ownerLastName: requiredText("Cognome"),
-  ownerCompanyName: requiredText("Ragione sociale"),
-  ownerCompanyCity: requiredText("Comune sede"),
-  ownerCity: requiredText("Comune autorizzazione"),
-  ownerCityName: requiredText("Comune di partenza"),
-  // Optional: only documents 6 and 7 use them, and a configuration saved before
-  // those existed must stay valid. Documents leave the gap blank instead.
-  ownerBirthDate: isoDate.optional().or(z.literal("")),
-  ownerBirthCity: optionalText,
-  ownerAddress: optionalText,
-  ownerPostalCode: optionalText,
-  ownerIdType: optionalText,
-  ownerIdNumber: optionalText,
-  ownerIdIssuer: optionalText,
-  ownerIdDate: isoDate.optional().or(z.literal("")),
+export const clientSchema = z.object({
+  firstName: requiredText("Nome"),
+  middleName: optionalText,
+  lastName: requiredText("Cognome"),
+  companyName: requiredText("Ragione sociale"),
+  companyCity: requiredText("Comune sede"),
+  city: requiredText("Comune autorizzazione"),
+  cityName: requiredText("Comune di partenza"),
+  // Optional: only documents 6 and 7 use them, and a client saved before those
+  // existed must stay valid. Documents leave the gap blank instead.
+  birthDate: isoDate.optional().or(z.literal("")),
+  birthCity: optionalText,
+  address: optionalText,
+  postalCode: optionalText,
+  idType: optionalText,
+  idNumber: optionalText,
+  idIssuer: optionalText,
+  idDate: isoDate.optional().or(z.literal("")),
   // Document 9 only. Optional like the fields above, and free text rather than
   // a list: the declarant may not be an Italian citizen.
-  ownerCitizenship: optionalText,
-  // The request date changes with every practice: kept as an editable
-  // default rather than fixed company data.
-  ownerRequestDate: isoDate.optional().or(z.literal("")),
+  citizenship: optionalText,
 });
 
 export const practiceSchema = z.object({
+  // Required, unlike the hearse and the driver: without a client every document
+  // comes out with no declarant and no company at all. `requiredText` rather
+  // than `optionalId` precisely so an untouched Select, which posts an empty
+  // string, is reported as a missing field instead of passing as "none chosen".
+  clientId: requiredText("Cliente"),
   personFirstName: requiredText("Nome del defunto"),
   personLastName: requiredText("Cognome del defunto"),
   // Never printed: only feeds the tax code computation.
@@ -174,7 +176,7 @@ export const practiceSchema = z.object({
   personCitizenship: optionalText,
 });
 
-export type OwnerInput = z.infer<typeof ownerSchema>;
+export type ClientInput = z.infer<typeof clientSchema>;
 export type VehicleInput = z.infer<typeof vehicleSchema>;
 export type BearerInput = z.infer<typeof bearerSchema>;
 export type PracticeInput = z.infer<typeof practiceSchema>;

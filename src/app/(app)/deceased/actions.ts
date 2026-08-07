@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getBearers, getDriver } from "@/lib/bearers";
+import { clientNameOf } from "@/lib/client-name";
+import { getClient } from "@/lib/clients";
 import { db, schema } from "@/lib/db";
 import { collectErrors } from "@/lib/form-errors";
 import { practiceSchema, type PracticeInput } from "@/lib/validation";
@@ -16,22 +18,31 @@ export type PracticeFormState = {
 };
 
 /**
- * Copies the plate from the chosen vehicle, and the names from the chosen driver
- * and bearers.
+ * Copies the company name from the chosen client, the plate from the chosen
+ * vehicle, and the names from the chosen driver and bearers.
  *
  * Every row is re-read from the database instead of trusting values sent by the
  * client, because they end up in an official document. From here on the record
  * no longer depends on the lists, so deleting a hearse, a driver or a bearer
  * does not change documents already issued.
+ *
+ * The client is the exception: only its name is copied, to label the record.
+ * The documents read the client row itself when they are filled, so correcting
+ * an address there fixes every document reprinted afterwards.
  */
 async function withSelections(data: PracticeInput) {
-  const [vehicle, driver, bearers] = await Promise.all([
+  const [client, vehicle, driver, bearers] = await Promise.all([
+    getClient(data.clientId),
     data.vehicleId ? getVehicle(data.vehicleId) : null,
     data.driverId ? getDriver(data.driverId) : null,
     getBearers(data.bearerIds),
   ]);
   return {
     ...data,
+    // Required by the form, so an id matching no row is a stale list rather
+    // than a blank field: null keeps the insert legal and the record editable.
+    clientId: client?.id ?? null,
+    clientName: client ? clientNameOf(client) : "",
     // A non-existent id becomes null: passing it through would violate the
     // foreign key and fail the insert with a raw error.
     vehicleId: vehicle?.id ?? null,
