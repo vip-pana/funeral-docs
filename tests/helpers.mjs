@@ -43,7 +43,7 @@ export async function pickSelect(page, fieldName, text) {
  * The seeded client the practice suites pick. Required on every record, so
  * without it the form fails validation instead of saving.
  */
-export const SEED_CLIENT = "OO.FF. Rossi";
+export const SEED_CLIENT = "OO.FF. Rossi Mario";
 
 /** Picks the seeded client on a practice form. */
 export async function pickClient(page, text = SEED_CLIENT) {

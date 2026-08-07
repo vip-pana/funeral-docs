@@ -18,7 +18,7 @@ import { fillPractice, login, pickSelect, SAMPLE } from "./helpers.mjs";
  */
 
 const B = process.env.BASE_URL ?? "http://localhost:3000";
-const DRIVER = "Giuseppe Verdi";
+const DRIVER = "Giuseppe Bianchi";
 
 const b = await chromium.launch({ channel: "chrome" });
 try {

@@ -34,7 +34,7 @@ const CLIENTS = [
     // Documents 6 and 7 identify the declarant in full.
     birthDate: "1980-03-15",
     birthCity: "San Severo",
-    address: "Via Giuseppe Verdi 12",
+    address: "Via Giuseppe Bianchi 12",
     postalCode: "71016",
     idType: "CARTA D'IDENTITA",
     idNumber: "AA1234567",
@@ -70,7 +70,7 @@ const VEHICLES = [
 
 // One list: anyone can carry the coffin, and the flag says who also drives.
 const BEARERS = [
-  { name: "Giuseppe Verdi", isDriver: true },
+  { name: "Giuseppe Bianchi", isDriver: true },
   { name: "Antonio Russo", isDriver: true },
   { name: "Michele Costa", isDriver: true },
   { name: "Paolo Neri", isDriver: false },

@@ -99,9 +99,7 @@ describe("personName", () => {
 
 describe("clientLabel and clientNameOf", () => {
   it("names both company and declarant in the picker", () => {
-    expect(clientLabel(CLIENT)).toBe(
-      "OO.FF. Rossi Mario — Mario F. Rossi",
-    );
+    expect(clientLabel(CLIENT)).toBe("OO.FF. Rossi Mario — Mario F. Rossi");
   });
 
   /** Only the company is copied onto the record: it is what the list shows. */

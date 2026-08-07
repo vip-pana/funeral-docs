@@ -14,6 +14,7 @@ import shutil
 import zipfile
 from pathlib import Path
 
+# Relative to this file, so the script runs from any checkout.
 TEMPLATES = Path(__file__).resolve().parent.parent / "templates"
 PARTS = ("word/document.xml", "word/header1.xml", "word/footer1.xml")
 

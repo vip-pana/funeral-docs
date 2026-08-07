@@ -61,13 +61,13 @@ SPLIT = {
         ([" CIMITERO", " DI ", "SAN ", "SEVERO."], "{destinationCemetery}."),
         # "VIA DELLE ROSE n° 4": street and number are one field, so the literal
         # "VIA" and "n°" go too — the value carries its own.
-        (["VIA", " DELLE ROSE", " ", "n°", " ", "27"], "{personResidenceAddress}"),
+        (["VIA", " DELLE ROSE", " ", "n°", " ", "4"], "{personResidenceAddress}"),
     ],
     "7": [
         (["12", "/", "05", "/19", "39"], "{personBirthDate}"),
         (["20", "/07/2026"], "{personDeathDate}"),
         (["21", "/", "07", "/2026"], "{todayDate}"),
-        (["VIA", " DELLE ROSE", " ", "n°", " ", "27"], "{personResidenceAddress}"),
+        (["VIA", " DELLE ROSE", " ", "n°", " ", "4"], "{personResidenceAddress}"),
         (["ROSSI MARIO", " FRANCESCO"], "{ownerDriverName}"),
         (["NERI PAOLO", ", ", "GALLI LUCA, CARLO FERRARI",
           ", CONTI MARCO"], "{bearerNames}"),

@@ -55,7 +55,7 @@ try {
   // fillPractice also picks the client, which is required.
   await fillPractice(p, SAMPLE);
   await pickSelect(p, "vehicleId", "FG123AB");
-  await pickSelect(p, "driverId", "Giuseppe Verdi");
+  await pickSelect(p, "driverId", "Giuseppe Bianchi");
   await p.fill("#applicantRole", ROLE);
 
   // The bearer is a checkbox, not a Select: several are chosen at once.

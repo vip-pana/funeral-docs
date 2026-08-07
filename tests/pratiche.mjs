@@ -48,7 +48,7 @@ check('3a cliente selezionato', hasClient.includes(SEED_CLIENT), hasClient);
 // run first: without them plate and name would not reach the document and the
 // checks below would be pointless.
 const hasVehicle = await pickSelect(p, 'vehicleId', 'FG123AB');
-const hasDriver = await pickSelect(p, 'driverId', 'Giuseppe Verdi');
+const hasDriver = await pickSelect(p, 'driverId', 'Giuseppe Bianchi');
 await Promise.all([
   p.waitForURL(/\/deceased\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/, { timeout: 15000 }),
   p.click('button:has-text("Crea scheda")'),
@@ -113,7 +113,7 @@ const t4 = [...(await z4.file('word/document.xml').async('string'))
 // Read live from the client picked above, not copied onto the record.
 check('  doc4 dati ditta', t4.includes(SEED_CLIENT), SEED_CLIENT);
 check('  doc4 targa autofunebre', t4.includes('FG123AB'), t4.match(/[A-Z]{2}\d{3}[A-Z]{2}/)?.[0] ?? 'assente');
-check('  doc4 conducente', t4.includes('Giuseppe Verdi'), '');
+check('  doc4 conducente', t4.includes('Giuseppe Bianchi'), '');
 check('  doc4 codice fiscale', t4.includes('RSSMRA40C12D643D'));
 check('  doc4 nessun placeholder', !t4.match(/\{[^}]*\}/));
 
