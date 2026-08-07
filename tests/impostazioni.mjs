@@ -16,7 +16,7 @@ check('1 pagina aperta', (await p.textContent('h1'))?.includes('Impostazioni'));
 
 // Submit with empty fields. They have to be cleared by hand: if the company is
 // already configured the form arrives prefilled and the submit would be valid.
-// Scoped to this form only: the Autofunebri and Conducenti cards have their own
+// Scoped to this form only: the Autofunebri and Necrofori cards have their own
 // fields, which "Salva impostazioni" does not touch.
 const ownerForm = 'form:has(button:has-text("Salva impostazioni"))';
 for (const el of await p.$$(`${ownerForm} input:not([type=hidden])`)) await el.fill('');

@@ -30,7 +30,7 @@ try {
 
   const plateText = async () => (await p.textContent("body")) ?? "";
 
-  // The Conducenti card has an identical "Aggiungi" button and its own table:
+  // The Necrofori card has an identical "Aggiungi" button and its own table:
   // everything here is scoped to the hearse card, otherwise the selectors would
   // be ambiguous.
   const card = p.locator('[data-slot=card]:has(#plate)');

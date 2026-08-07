@@ -2,7 +2,7 @@
  * Fills the database with plausible sample data: `pnpm db:seed`.
  *
  * For development and demos. It never touches an existing row: vehicles and
- * drivers are added only if the list is empty, and practices are skipped
+ * bearers are added only if the list is empty, and practices are skipped
  * entirely when there is already one, so running it twice does not pile up
  * duplicates. `--reset` deletes the sample practices first.
  *
@@ -45,17 +45,15 @@ const VEHICLES = [
   { name: "Mercedes Classe E", plate: "FG789EF" },
 ];
 
-const DRIVERS = [
-  { name: "Giuseppe Verdi" },
-  { name: "Antonio Russo" },
-  { name: "Michele Costa" },
-];
-
+// One list: anyone can carry the coffin, and the flag says who also drives.
 const BEARERS = [
-  { name: "Paolo Neri" },
-  { name: "Luca Galli" },
-  { name: "Carlo Ferrari" },
-  { name: "Marco Conti" },
+  { name: "Giuseppe Verdi", isDriver: true },
+  { name: "Antonio Russo", isDriver: true },
+  { name: "Michele Costa", isDriver: true },
+  { name: "Paolo Neri", isDriver: false },
+  { name: "Luca Galli", isDriver: false },
+  { name: "Carlo Ferrari", isDriver: false },
+  { name: "Marco Conti", isDriver: false },
 ];
 
 /**
@@ -176,8 +174,8 @@ function seedOwner() {
  * internal rowid, which has nothing to do with the UUID.
  */
 function seedList(
-  table: "vehicles" | "drivers" | "bearers",
-  rows: { name: string; plate?: string }[],
+  table: "vehicles" | "bearers",
+  rows: { name: string; plate?: string; isDriver?: boolean }[],
 ): string[] {
   const ids = db
     .prepare(`SELECT id FROM ${table} ORDER BY name`)
@@ -190,13 +188,20 @@ function seedList(
           "INSERT INTO vehicles (id, name, plate) VALUES (@id, @name, @plate)",
         )
       : db.prepare(
-          `INSERT INTO ${table} (id, name) VALUES (@id, @name)`,
+          "INSERT INTO bearers (id, name, is_driver) VALUES (@id, @name, @isDriver)",
         );
 
   const inserted: string[] = [];
   for (const row of rows) {
     const id = crypto.randomUUID();
-    insert.run({ ...row, id });
+    // Only the parameters the statement declares: better-sqlite3 rejects a
+    // named object carrying keys the SQL never mentions. And SQLite has no
+    // boolean, so the flag has to arrive as 0 or 1.
+    insert.run(
+      table === "vehicles"
+        ? { id, name: row.name, plate: row.plate }
+        : { id, name: row.name, isDriver: row.isDriver ? 1 : 0 },
+    );
     inserted.push(id);
   }
   return inserted;
@@ -236,10 +241,12 @@ function seedPractices() {
     .prepare("SELECT id, plate FROM vehicles ORDER BY name")
     .all() as { id: string; plate: string }[];
   const drivers = db
-    .prepare("SELECT id, name FROM drivers ORDER BY name")
+    .prepare("SELECT id, name FROM bearers WHERE is_driver = 1 ORDER BY name")
     .all() as { id: string; name: string }[];
+  // The ones who only carry: keeping the drivers out of document 7 makes the
+  // sample read like a real crew rather than everybody doing everything.
   const bearers = db
-    .prepare("SELECT id, name FROM bearers ORDER BY name")
+    .prepare("SELECT id, name FROM bearers WHERE is_driver = 0 ORDER BY name")
     .all() as { id: string; name: string }[];
 
   let inserted = 0;
@@ -316,7 +323,6 @@ if (reset) {
 
 console.log(`Impresa: ${seedOwner()}`);
 console.log(`Autofunebri: ${seedList("vehicles", VEHICLES).length}`);
-console.log(`Conducenti: ${seedList("drivers", DRIVERS).length}`);
 console.log(`Necrofori: ${seedList("bearers", BEARERS).length}`);
 console.log(`Defunti: ${seedPractices()}`);
 

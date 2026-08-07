@@ -33,7 +33,10 @@ export async function addBearer(
   // Field read explicitly rather than via Object.fromEntries: that collapses
   // repeated names to the last one, and would break silently if this form ever
   // became multi-row.
-  const parsed = bearerSchema.safeParse({ name: formData.get("bearerName") });
+  const parsed = bearerSchema.safeParse({
+    name: formData.get("bearerName"),
+    isDriver: formData.get("bearerIsDriver"),
+  });
 
   if (!parsed.success) {
     return {
@@ -50,8 +53,24 @@ export async function addBearer(
   return { ok: true, message: "Necroforo aggiunto." };
 }
 
+/**
+ * Whether they drive the hearse. Separate from `addBearer` because it is toggled
+ * straight from the table row, with no form around it.
+ */
+export async function setBearerDriver(id: string, isDriver: boolean) {
+  // The practices that already picked them keep the reference: unticking the box
+  // takes them out of the list for new records, it does not rewrite old ones.
+  await db
+    .update(schema.bearers)
+    .set({ isDriver })
+    .where(eq(schema.bearers.id, id));
+  revalidateBearerViews();
+}
+
 export async function deleteBearer(id: string) {
-  // No foreign key to null out here: records keep the names they copied, so
+  // Practices that used them keep the copied names: the bearers are stored as a
+  // copied string, and a practice that picked them as driver has its reference
+  // nulled out (ON DELETE SET NULL) while `driver_name` survives. Either way the
   // documents already issued stay unchanged.
   await db.delete(schema.bearers).where(eq(schema.bearers.id, id));
   revalidateBearerViews();

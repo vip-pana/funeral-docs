@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { Field } from "@/components/field";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
   CardContent,
@@ -22,7 +23,11 @@ import {
 } from "@/components/ui/table";
 import type { Bearer } from "@/lib/db/schema";
 
-import { addBearer, type BearerFormState } from "./bearer-actions";
+import {
+  addBearer,
+  type BearerFormState,
+  setBearerDriver,
+} from "./bearer-actions";
 import { DeleteBearerButton } from "./delete-bearer-button";
 
 export function BearersCard({ bearers }: { bearers: Bearer[] }) {
@@ -51,7 +56,9 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
         <CardTitle>Necrofori</CardTitle>
         <CardDescription>
           Chi porta il feretro: per ogni defunto scegli quali hanno prestato
-          servizio, e i nomi finiscono nel documento 7.
+          servizio, e i nomi finiscono nel documento 7. Spunta Conducente per
+          chi puo&apos; anche guidare l&apos;autofunebre: solo loro compaiono
+          nella scelta del conducente, il cui nome finisce nel documento 4.
         </CardDescription>
       </CardHeader>
 
@@ -62,6 +69,7 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nome</TableHead>
+                  <TableHead>Conducente</TableHead>
                   <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
               </TableHeader>
@@ -69,6 +77,19 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
                 {bearers.map((b) => (
                   <TableRow key={b.id}>
                     <TableCell className="font-medium">{b.name}</TableCell>
+                    <TableCell>
+                      {/* Saved on the spot rather than behind a submit: it is a
+                          single flag, and a form here would nest inside the one
+                          below. */}
+                      <Checkbox
+                        id={`bearerIsDriver-${b.id}`}
+                        aria-label={`${b.name}: conducente`}
+                        checked={b.isDriver}
+                        onCheckedChange={(on) =>
+                          setBearerDriver(b.id, on === true)
+                        }
+                      />
+                    </TableCell>
                     <TableCell className="text-right">
                       <DeleteBearerButton bearerId={b.id} />
                     </TableCell>
@@ -89,7 +110,7 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
         <form
           ref={formRef}
           action={formAction}
-          className="grid items-start gap-4 sm:grid-cols-[1fr_auto]"
+          className="grid items-start gap-4 sm:grid-cols-[1fr_auto_auto]"
         >
           {/* Not just "name": the other cards' inputs already use it, and the
               e2e sweep over the settings inputs would match them all. */}
@@ -99,6 +120,12 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
             placeholder="Es. Paolo Neri"
             error={err("bearerName")}
           />
+          {/* Radix renders its own hidden input for `name`, which posts "on"
+              when ticked and nothing at all when not. */}
+          <label className="mt-[calc(--spacing(6)+2px)] flex h-9 items-center gap-2 text-sm whitespace-nowrap">
+            <Checkbox id="bearerIsDriver" name="bearerIsDriver" />
+            Conducente
+          </label>
           <Button
             type="submit"
             variant="outline"

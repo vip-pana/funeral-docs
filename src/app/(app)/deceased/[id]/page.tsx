@@ -5,8 +5,7 @@ import { notFound } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 import { db, schema } from "@/lib/db";
-import { listBearers } from "@/lib/bearers";
-import { listDrivers } from "@/lib/drivers";
+import { listBearers, listDrivers } from "@/lib/bearers";
 import { getOwner } from "@/lib/owner";
 import { listVehicles } from "@/lib/vehicles";
 

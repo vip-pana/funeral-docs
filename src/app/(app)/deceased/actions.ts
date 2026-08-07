@@ -4,9 +4,8 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { getBearers } from "@/lib/bearers";
+import { getBearers, getDriver } from "@/lib/bearers";
 import { db, schema } from "@/lib/db";
-import { getDriver } from "@/lib/drivers";
 import { collectErrors } from "@/lib/form-errors";
 import { practiceSchema, type PracticeInput } from "@/lib/validation";
 import { getVehicle } from "@/lib/vehicles";

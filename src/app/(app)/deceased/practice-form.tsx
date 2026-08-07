@@ -26,7 +26,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { Bearer, Driver, Practice, Vehicle } from "@/lib/db/schema";
+import type { Bearer, Practice, Vehicle } from "@/lib/db/schema";
 import { FIELD_LABELS } from "@/lib/fields";
 import { computeTaxCode } from "@/lib/tax-code";
 import { parseTaxCode } from "@/lib/validation";
@@ -49,7 +49,8 @@ export function PracticeForm({
   action: Action;
   practice?: Practice;
   vehicles: Vehicle[];
-  drivers: Driver[];
+  /** Already filtered to the bearers flagged as drivers. */
+  drivers: Bearer[];
   bearers: Bearer[];
   submitLabel: string;
 }) {
@@ -436,7 +437,7 @@ export function PracticeForm({
               {missingDriver
                 ? `Conducente non piu' in elenco. Nome registrato: ${practice?.driverName}`
                 : drivers.length === 0
-                  ? "Nessun conducente configurato: aggiungilo in Impostazioni."
+                  ? "Nessun conducente: in Impostazioni spunta la casella Conducente su un necroforo."
                   : "Il nome finisce nel documento 4"}
             </FieldDescription>
           </FieldRoot>

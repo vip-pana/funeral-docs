@@ -3,8 +3,7 @@ import Link from "next/link";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { listBearers } from "@/lib/bearers";
-import { listDrivers } from "@/lib/drivers";
+import { listBearers, listDrivers } from "@/lib/bearers";
 import { getOwner } from "@/lib/owner";
 import { listVehicles } from "@/lib/vehicles";
 

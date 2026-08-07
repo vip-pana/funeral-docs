@@ -62,26 +62,23 @@ export const vehicles = sqliteTable("vehicles", {
     .default(sql`(datetime('now'))`),
 });
 
-/** Declared before `practices`, which references it. */
-export const drivers = sqliteTable("drivers", {
-  id: uuid(),
-  name: text("name").notNull(),
-  createdAt: text("created_at")
-    .notNull()
-    .default(sql`(datetime('now'))`),
-});
-
 /**
- * Pallbearers, listed by document 7.
+ * The staff: whoever carries the coffin, listed by document 7, and whoever
+ * drives the hearse, named by document 4. One table rather than two, because
+ * anyone on the list can potentially do either — a separate `drivers` table
+ * only forced the same person to be entered twice.
  *
- * No foreign key on the practice side: several are chosen at once, and the names
- * are copied onto the record as one string. A join table would buy nothing —
- * nothing queries the other way round, and the copy is what keeps documents
- * already issued unchanged.
+ * Declared before `practices`, which references it.
+ *
+ * The bearers picked for a record are not joined but copied onto it as one
+ * string: several are chosen at once, nothing queries the other way round, and
+ * the copy is what keeps documents already issued unchanged.
  */
 export const bearers = sqliteTable("bearers", {
   id: uuid(),
   name: text("name").notNull(),
+  /** Whether they can drive the hearse, i.e. whether the practice can pick them. */
+  isDriver: integer("is_driver", { mode: "boolean" }).notNull().default(false),
   createdAt: text("created_at")
     .notNull()
     .default(sql`(datetime('now'))`),
@@ -121,7 +118,8 @@ export const practices = sqliteTable("practices", {
 
   // Same split as the vehicle above: the reference nulls itself out if the
   // driver is deleted, the name is copied so documents already issued keep it.
-  driverId: text("driver_id").references(() => drivers.id, {
+  // It points at `bearers`, filtered to those flagged as drivers.
+  driverId: text("driver_id").references(() => bearers.id, {
     onDelete: "set null",
   }),
   driverName: text("driver_name").notNull().default(""),
@@ -151,8 +149,6 @@ export type Owner = typeof owner.$inferSelect;
 export type NewOwner = typeof owner.$inferInsert;
 export type Vehicle = typeof vehicles.$inferSelect;
 export type NewVehicle = typeof vehicles.$inferInsert;
-export type Driver = typeof drivers.$inferSelect;
-export type NewDriver = typeof drivers.$inferInsert;
 export type Bearer = typeof bearers.$inferSelect;
 export type NewBearer = typeof bearers.$inferInsert;
 export type Practice = typeof practices.$inferSelect;
