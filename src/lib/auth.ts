@@ -1,12 +1,18 @@
-import bcrypt from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
 
 /**
- * Single shared password.
+ * The session.
  *
  * Tailscale limits who can reach the app; the password guards against a
  * browser left open on an office machine. The session is a signed JWT in an
  * httpOnly cookie, so there is no sessions table to maintain.
+ *
+ * Nothing here touches the database, on purpose: src/middleware.ts imports this
+ * file and runs on the Edge runtime, where better-sqlite3 cannot be loaded. The
+ * password lives in src/lib/password.ts.
+ *
+ * The token carries no password material, so changing the password does not
+ * invalidate the sessions already open. Rotating SESSION_SECRET does.
  */
 
 export const SESSION_COOKIE = "funeral_session";
@@ -23,29 +29,6 @@ function secret(): Uint8Array {
     );
   }
   return new TextEncoder().encode(value);
-}
-
-export function passwordHash(): string {
-  const hash = process.env.AUTH_PASSWORD_HASH;
-  if (!hash) {
-    throw new Error(
-      "AUTH_PASSWORD_HASH mancante. Generalo con: pnpm auth:hash <password>",
-    );
-  }
-  // The .env parser expands `$xxx` as a variable: a hash not escaped with
-  // `\$` arrives here truncated, and every login would fail unexplained.
-  if (!/^\$2[aby]\$\d{2}\$.{53}$/.test(hash)) {
-    throw new Error(
-      "AUTH_PASSWORD_HASH non e' un hash bcrypt valido. Nel .env ogni `$` va " +
-        'scritto come `\\$` (es. AUTH_PASSWORD_HASH="\\$2b\\$12\\$..."). ' +
-        "Rigeneralo con: pnpm auth:hash <password>",
-    );
-  }
-  return hash;
-}
-
-export async function verifyPassword(password: string): Promise<boolean> {
-  return bcrypt.compare(password, passwordHash());
 }
 
 export async function createSession(): Promise<string> {

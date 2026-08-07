@@ -18,6 +18,24 @@ import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 const uuid = () => text("id").primaryKey().$defaultFn(() => crypto.randomUUID());
 
 /**
+ * The single shared password, as a bcrypt hash.
+ *
+ * Single-row table: `id` is always 1, a sentinel the upsert conflicts on rather
+ * than an identity. It lives here and not in AUTH_PASSWORD_HASH because a
+ * running app cannot rewrite its own .env — and under Docker that file is
+ * mounted from outside, so the change would not survive a restart either. The
+ * environment variable stays as the value this row is seeded from the first
+ * time, and is ignored from then on.
+ */
+export const auth = sqliteTable("auth", {
+  id: integer("id").primaryKey().default(1),
+  passwordHash: text("password_hash").notNull(),
+  updatedAt: text("updated_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+});
+
+/**
  * Whoever the documents are issued on behalf of: the declarant who signs the
  * applications and the company they run. The two are one row because every
  * document names them together, and each record picks one.
@@ -188,6 +206,7 @@ export const practices = sqliteTable("practices", {
     .default(sql`(datetime('now'))`),
 });
 
+export type Auth = typeof auth.$inferSelect;
 export type Client = typeof clients.$inferSelect;
 export type NewClient = typeof clients.$inferInsert;
 export type Vehicle = typeof vehicles.$inferSelect;

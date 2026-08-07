@@ -32,7 +32,7 @@ try {
   };
 
   await login(p, B);
-  await p.goto(`${B}/settings`);
+  await p.goto(`${B}/resources`);
   await p.waitForTimeout(700);
 
   // The Autofunebri card has an identical "Aggiungi" button and its own table:
@@ -89,7 +89,7 @@ try {
   check("5 compare nel Select del defunto", picked);
 
   // --- the flag, not the row, is what fills the Select ---
-  await p.goto(`${B}/settings`);
+  await p.goto(`${B}/resources`);
   await driverBox().waitFor({ timeout: 10000 });
   await driverBox().click();
   await p.waitForTimeout(800);
@@ -101,7 +101,7 @@ try {
   );
 
   // Put it back: the rest of the suite needs it selectable.
-  await p.goto(`${B}/settings`);
+  await p.goto(`${B}/resources`);
   await driverBox().waitFor({ timeout: 10000 });
   await driverBox().click();
   await p.waitForTimeout(800);
@@ -128,7 +128,7 @@ try {
   check("8 conducente nel documento 4", (await docText()).includes(DRIVER));
 
   // --- the check that justifies the copied column ---
-  await p.goto(`${B}/settings`);
+  await p.goto(`${B}/resources`);
   await card.locator("table").waitFor({ timeout: 10000 });
 
   // Delete the row for this bearer, not the first in the table: the list can
@@ -168,7 +168,7 @@ try {
 
   // Recreate the driver for pratiche.mjs and allegati.mjs, which run later and
   // pick it in the Select.
-  await p.goto(`${B}/settings`);
+  await p.goto(`${B}/resources`);
   await p.waitForTimeout(600);
   await p.fill("#bearerName", DRIVER);
   await p.click("#bearerIsDriver");

@@ -124,6 +124,25 @@ export const clientSchema = z.object({
   citizenship: optionalText,
 });
 
+/**
+ * Changing the shared password. Eight characters minimum, as scripts/hash-password.ts
+ * already requires: the two must not disagree on what an acceptable password is.
+ */
+export const passwordSchema = z
+  .object({
+    currentPassword: requiredText("Password attuale"),
+    newPassword: z
+      .string()
+      .min(8, "La nuova password deve essere di almeno 8 caratteri"),
+    confirmPassword: requiredText("Conferma"),
+  })
+  .refine((d) => d.newPassword === d.confirmPassword, {
+    message: "Le due password non coincidono",
+    // Without an explicit path the issue arrives with an empty one and
+    // `collectErrors` files it under "undefined", where no field renders it.
+    path: ["confirmPassword"],
+  });
+
 export const practiceSchema = z.object({
   // Required, unlike the hearse and the driver: without a client every document
   // comes out with no declarant and no company at all. `requiredText` rather
@@ -177,6 +196,7 @@ export const practiceSchema = z.object({
 });
 
 export type ClientInput = z.infer<typeof clientSchema>;
+export type PasswordInput = z.infer<typeof passwordSchema>;
 export type VehicleInput = z.infer<typeof vehicleSchema>;
 export type BearerInput = z.infer<typeof bearerSchema>;
 export type PracticeInput = z.infer<typeof practiceSchema>;

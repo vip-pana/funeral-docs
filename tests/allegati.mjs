@@ -27,7 +27,7 @@ try {
   };
 
   await login(p, B);
-  await p.goto(`${B}/settings`);
+  await p.goto(`${B}/resources`);
   await p.waitForTimeout(700);
 
   const card = p.locator('[data-slot=card]:has(#bearerName)');
@@ -92,7 +92,7 @@ try {
   check("  provincia di nascita ricavata", doc7.includes("(FG)"));
 
   // --- the check that justifies copying the names ---
-  await p.goto(`${B}/settings`);
+  await p.goto(`${B}/resources`);
   await card.locator("table").waitFor({ timeout: 10000 });
   const row = card.locator("tr", { hasText: BEARER });
   await row.getByRole("button", { name: "Elimina" }).click();
@@ -114,7 +114,7 @@ try {
   ]);
 
   // Recreate the bearer: pratiche.mjs runs later and downloads every document.
-  await p.goto(`${B}/settings`);
+  await p.goto(`${B}/resources`);
   await p.waitForTimeout(600);
   await p.fill("#bearerName", BEARER);
   await addBearer();

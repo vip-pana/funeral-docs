@@ -10,7 +10,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const suites = [
   "login.mjs",
   "interfaccia.mjs",
-  "impostazioni.mjs",
+  "risorse.mjs",
   // Before the suites that create a record: they need a client to pick.
   "clienti.mjs",
   "veicoli.mjs",
@@ -21,6 +21,10 @@ const suites = [
   "codice-fiscale.mjs",
   "api.mjs",
   "elimina.mjs",
+  // Last: it changes the shared password, which every other suite logs in
+  // with. It puts the original back, but a crash midway would lock out
+  // whatever ran after it.
+  "impostazioni.mjs",
 ];
 const base = process.env.BASE_URL ?? "http://localhost:3000";
 

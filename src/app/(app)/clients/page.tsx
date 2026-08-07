@@ -44,20 +44,20 @@ export default async function ClientiPage() {
                 <TableHead>Ragione sociale</TableHead>
                 <TableHead>Dichiarante</TableHead>
                 <TableHead>Comune sede</TableHead>
+                <TableHead className="text-right">Azioni</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {clients.map((c) => (
                 <TableRow key={c.id}>
-                  <TableCell className="font-medium">
-                    {/* The whole row would be nicer to click, but a link inside
-                        a cell is what the records list already does. */}
-                    <Link href={`/clients/${c.id}`} className="hover:underline">
-                      {c.companyName}
-                    </Link>
-                  </TableCell>
+                  <TableCell className="font-medium">{c.companyName}</TableCell>
                   <TableCell>{personName(c)}</TableCell>
                   <TableCell>{c.companyCity}</TableCell>
+                  <TableCell className="text-right">
+                    <Button asChild variant="ghost" size="sm">
+                      <Link href={`/clients/${c.id}`}>Apri</Link>
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

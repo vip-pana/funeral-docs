@@ -5,6 +5,10 @@
  *
  * The plaintext password is never written to disk: only the hash ends up in
  * the .env.
+ *
+ * Needed to set the first password, and to recover access if it is lost — in
+ * that case delete the `auth` row too, or the environment variable is ignored.
+ * Day to day the password is changed from Impostazioni.
  */
 import bcrypt from "bcryptjs";
 
@@ -31,4 +35,8 @@ const escaped = hash.replace(/\$/g, "\\$");
 
 console.log("\nAggiungi al .env — i \\$ sono necessari, non un errore:\n");
 console.log(`AUTH_PASSWORD_HASH="${escaped}"`);
+console.log(
+  "\nServe solo al primo avvio: da lì in poi la password vive nel database\n" +
+    "e si cambia da Impostazioni. Modificare questa riga non ha più effetto.",
+);
 console.log();

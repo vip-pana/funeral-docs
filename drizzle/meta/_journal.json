@@ -64,6 +64,13 @@
       "when": 1786119414917,
       "tag": "0008_unknown_scream",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1786119415917,
+      "tag": "0009_lucky_dreadnoughts",
+      "breakpoints": true
     }
   ]
 }

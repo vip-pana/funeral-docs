@@ -1,31 +1,17 @@
-import { listBearers } from "@/lib/bearers";
-import { listVehicles } from "@/lib/vehicles";
-
-import { BearersCard } from "./bearers-card";
-import { VehiclesCard } from "./vehicles-card";
+import { PasswordForm } from "./password-form";
 
 export const metadata = { title: "Impostazioni — Documenti funebri" };
 
-// Values come from the database and change on save.
-export const dynamic = "force-dynamic";
-
-export default async function ImpostazioniPage() {
-  const [vehicles, bearers] = await Promise.all([
-    listVehicles(),
-    listBearers(),
-  ]);
-
+export default function ImpostazioniPage() {
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Impostazioni</h1>
         <p className="text-muted-foreground text-sm">
-          Mezzi e personale, da scegliere per ogni defunto. Dichiarante e
-          impresa stanno nella scheda del cliente.
+          Accesso al gestionale. Mezzi e personale stanno in Risorse.
         </p>
       </div>
-      <VehiclesCard vehicles={vehicles} />
-      <BearersCard bearers={bearers} />
+      <PasswordForm />
     </div>
   );
 }

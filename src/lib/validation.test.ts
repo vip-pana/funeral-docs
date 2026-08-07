@@ -1,10 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { collectErrors } from "./form-errors";
 import { checkChar, computeTaxCode } from "./tax-code";
 import {
   bearerSchema,
   clientSchema,
   parseTaxCode,
+  passwordSchema,
   practiceSchema,
   vehicleSchema,
 } from "./validation";
@@ -335,6 +337,43 @@ describe("clientSchema", () => {
       ownerFirstName: "Mario",
     });
     expect(result.success).toBe(false);
+  });
+});
+
+describe("passwordSchema", () => {
+  const VALID = {
+    currentPassword: "vecchia-password",
+    newPassword: "nuova-password",
+    confirmPassword: "nuova-password",
+  };
+
+  const errorFor = (override: Record<string, string>) => {
+    const result = passwordSchema.safeParse({ ...VALID, ...override });
+    return result.success ? undefined : collectErrors(result.error.issues);
+  };
+
+  it("accepts a valid change", () => {
+    expect(passwordSchema.safeParse(VALID).success).toBe(true);
+  });
+
+  /** Same minimum as scripts/hash-password.ts, which sets the first one. */
+  it("refuses a new password under 8 characters", () => {
+    const errors = errorFor({ newPassword: "corta", confirmPassword: "corta" });
+    expect(errors?.newPassword).toBeDefined();
+  });
+
+  /**
+   * The message has to land on the confirmation field: a cross-field refine
+   * carries an empty path by default, and `collectErrors` would file it under
+   * "undefined", where no input renders it.
+   */
+  it("reports a mismatched confirmation on the confirmation field", () => {
+    const errors = errorFor({ confirmPassword: "altro-ancora" });
+    expect(errors?.confirmPassword).toBe("Le due password non coincidono");
+  });
+
+  it("requires the current password", () => {
+    expect(errorFor({ currentPassword: "" })?.currentPassword).toBeDefined();
   });
 });
 

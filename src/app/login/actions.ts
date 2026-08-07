@@ -3,12 +3,8 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import {
-  SESSION_COOKIE,
-  SESSION_MAX_AGE,
-  createSession,
-  verifyPassword,
-} from "@/lib/auth";
+import { SESSION_COOKIE, SESSION_MAX_AGE, createSession } from "@/lib/auth";
+import { verifyPassword } from "@/lib/password";
 
 /**
  * Minimum delay per attempt. Not a full rate limiter, but on a private network

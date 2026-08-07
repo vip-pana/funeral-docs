@@ -4,6 +4,7 @@ import {
   FileTextIcon,
   LogOutIcon,
   SettingsIcon,
+  TruckIcon,
   UsersIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -26,6 +27,9 @@ import { logout } from "@/app/login/actions";
 const LINKS = [
   { href: "/deceased", label: "Defunti", icon: FileTextIcon },
   { href: "/clients", label: "Clienti", icon: UsersIcon },
+  // Mezzi and personale: what the work is done with, not how the app is
+  // configured — which is why they are no longer under Impostazioni.
+  { href: "/resources", label: "Risorse", icon: TruckIcon },
   { href: "/settings", label: "Impostazioni", icon: SettingsIcon },
 ] as const;
 

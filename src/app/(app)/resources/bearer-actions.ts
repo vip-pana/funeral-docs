@@ -20,7 +20,7 @@ export type BearerFormState = {
 };
 
 function revalidateBearerViews() {
-  revalidatePath("/settings");
+  revalidatePath("/resources");
   // The second argument matters: without it /deceased/new and /deceased/[id]
   // would keep the stale list in their checkboxes.
   revalidatePath("/deceased", "layout");

@@ -37,7 +37,7 @@ try {
   const addVehicle = () => card.getByRole("button", { name: "Aggiungi" }).click();
 
   await login(p, B);
-  await p.goto(`${B}/settings`);
+  await p.goto(`${B}/resources`);
   await p.waitForTimeout(700);
 
   check("1 card Autofunebri presente", (await plateText()).includes("Autofunebri"));
@@ -105,7 +105,7 @@ try {
   check("6 targa nel documento 2", (await docText()).includes(PLATE));
 
   // --- the check that justifies the copied column ---
-  await p.goto(`${B}/settings`);
+  await p.goto(`${B}/resources`);
   await card.locator("table").waitFor({ timeout: 10000 });
 
   // Delete the row for this plate, not the first in the table: the list can
@@ -147,7 +147,7 @@ try {
   ]);
 
   // Recreate the hearse for pratiche.mjs, which runs later and uses it.
-  await p.goto(`${B}/settings`);
+  await p.goto(`${B}/resources`);
   await p.waitForTimeout(600);
   await p.fill("#name", NAME);
   await p.fill("#plate", PLATE);

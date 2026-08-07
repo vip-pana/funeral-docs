@@ -482,7 +482,7 @@ export function PracticeForm({
               {missingVehicle
                 ? `Mezzo non piu' in elenco. Targa registrata: ${practice?.vehiclePlate}`
                 : vehicles.length === 0
-                  ? "Nessuna autofunebre configurata: aggiungila in Impostazioni."
+                  ? "Nessuna autofunebre configurata: aggiungila in Risorse."
                   : "La targa finisce nei documenti 2, 3 e 4"}
             </FieldDescription>
           </FieldRoot>
@@ -506,7 +506,7 @@ export function PracticeForm({
               {missingDriver
                 ? `Conducente non piu' in elenco. Nome registrato: ${practice?.driverName}`
                 : drivers.length === 0
-                  ? "Nessun conducente: in Impostazioni spunta la casella Conducente su un necroforo."
+                  ? "Nessun conducente: in Risorse spunta la casella Conducente su un necroforo."
                   : "Il nome finisce nel documento 4"}
             </FieldDescription>
           </FieldRoot>
@@ -545,7 +545,7 @@ export function PracticeForm({
               {missingBearers
                 ? `Elenco cambiato. Nomi registrati: ${practice?.bearerNames}`
                 : bearers.length === 0
-                  ? "Nessun necroforo configurato: aggiungili in Impostazioni."
+                  ? "Nessun necroforo configurato: aggiungili in Risorse."
                   : "I nomi finiscono nel documento 7"}
             </FieldDescription>
           </FieldRoot>

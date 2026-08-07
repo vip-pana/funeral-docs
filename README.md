@@ -46,7 +46,7 @@ pnpm dev
 |---|---|
 | `pnpm dev` | server di sviluppo |
 | `pnpm build` | build di produzione |
-| `pnpm auth:hash '<password>'` | genera l'hash per `AUTH_PASSWORD_HASH` |
+| `pnpm auth:hash '<password>'` | genera l'hash per `AUTH_PASSWORD_HASH` (solo la prima) |
 | `pnpm db:generate` | crea una migrazione dallo schema |
 | `pnpm db:migrate` | applica le migrazioni |
 | `pnpm db:seed` | dati di esempio; `--reset` rifà le schede da zero |
@@ -80,10 +80,14 @@ A differenza della targa e del conducente, i dati del cliente non vengono
 copiati sulla scheda: i documenti li rileggono al momento della generazione,
 così correggere un indirizzo sistema tutto ciò che viene ristampato dopo.
 
-**Autofunebri**, **conducenti** e **necrofori** si elencano in Impostazioni ma
+**Autofunebri**, **conducenti** e **necrofori** si elencano in **Risorse** ma
 si scelgono per singolo defunto: targa e nomi vengono copiati sulla scheda al
 salvataggio, così i documenti già emessi restano corretti anche se una voce
 viene poi eliminata dall'elenco.
+
+**Impostazioni** contiene solo il cambio della password. È una sola, condivisa:
+la prima si imposta con `pnpm auth:hash` nel `.env`, poi finisce nel database e
+si cambia da lì — modificare il `.env` non ha più effetto.
 
 Gli **allegati 2 e 3** (documenti 6 e 7) della L.R. 34/2008 identificano per
 esteso il dichiarante: il suo documento d'identità e la residenza stanno nella

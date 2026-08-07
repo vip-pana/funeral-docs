@@ -66,6 +66,13 @@ await p.goto(`${B}/clients`);
 const listed = await p.$$eval('td', els => els.map(e => e.textContent));
 check('6 compare in elenco', listed.some(r => r?.includes(COMPANY)));
 
+// Every row opens from its own button, as in the records list.
+const opener = p.locator(`tr:has-text("${COMPANY}") a:has-text("Apri")`);
+check('  ha il tasto Apri', await opener.count() === 1);
+await opener.click();
+await p.waitForURL(new RegExp(`/clients/${id}$`), { timeout: 15000 });
+check('  Apri porta alla scheda', (await p.textContent('h1'))?.includes(COMPANY));
+
 await p.goto(`${B}/deceased/new`);
 await p.click('#clientId');
 const inPicker = await p

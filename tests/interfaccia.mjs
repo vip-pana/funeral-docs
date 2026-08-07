@@ -45,10 +45,10 @@ check("  nessuna navbar orizzontale", !(await p.isVisible("header nav")));
 const activeHref = await p.getAttribute('[data-active="true"] a, a[data-active="true"]', "href").catch(() => null);
 check("4 voce attiva su Defunti", activeHref === "/deceased", String(activeHref));
 
-await p.goto(`${B}/settings`);
+await p.goto(`${B}/resources`);
 await p.waitForTimeout(400);
 const active2 = await p.getAttribute('[data-active="true"] a, a[data-active="true"]', "href").catch(() => null);
-check("  voce attiva su Impostazioni", active2 === "/settings", String(active2));
+check("  voce attiva su Risorse", active2 === "/resources", String(active2));
 
 // the subpage keeps the parent entry active
 await p.goto(`${B}/deceased/new`);
