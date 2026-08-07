@@ -11,6 +11,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/migrate.ts",
     "auth:hash": "tsx scripts/hash-password.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:e2e": "node tests/run.mjs"
   },
   "dependencies": {
@@ -52,7 +54,8 @@
     "playwright-core": "^1.62.1",
     "tailwindcss": "^4",
     "tsx": "^4.23.9",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.10"
   },
   "packageManager": "pnpm@10.15.0"
 }

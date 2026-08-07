@@ -4,6 +4,10 @@ Guidano un browser vero contro un'istanza in esecuzione. Non sono unit test:
 servono a verificare che i percorsi principali funzionino davvero, compresa la
 generazione dei .docx.
 
+> I test della logica pura (codice fiscale, validazione, documenti, comuni)
+> stanno accanto al codice come `src/**/*.test.ts` e girano con `pnpm test`:
+> non serve né il browser né il server.
+
 ## Come si eseguono
 
 ```bash
