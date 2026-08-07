@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { db, schema } from "@/lib/db";
+import { collectErrors } from "@/lib/form-errors";
 import { vehicleSchema } from "@/lib/validation";
 
 /**
@@ -38,13 +39,10 @@ export async function addVehicle(
   });
 
   if (!parsed.success) {
-    const errors: Record<string, string> = {};
-    for (const issue of parsed.error.issues) {
-      const key = String(issue.path[0]);
-      // One message per field: the form shows a single one at a time.
-      errors[key] ??= issue.message;
-    }
-    return { errors, message: "Controlla i campi segnalati." };
+    return {
+      errors: collectErrors(parsed.error.issues),
+      message: "Controlla i campi segnalati.",
+    };
   }
 
   await db.insert(schema.vehicles).values(parsed.data);

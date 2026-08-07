@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { db, schema } from "@/lib/db";
+import { collectErrors } from "@/lib/form-errors";
 import { OWNER_ID } from "@/lib/owner";
 import { ownerSchema } from "@/lib/validation";
 
@@ -25,13 +26,10 @@ export async function saveOwner(
   const parsed = settingsSchema.safeParse(Object.fromEntries(formData));
 
   if (!parsed.success) {
-    const errors: Record<string, string> = {};
-    for (const issue of parsed.error.issues) {
-      const key = String(issue.path[0]);
-      // One message per field: the form shows a single one at a time.
-      errors[key] ??= issue.message;
-    }
-    return { errors, message: "Controlla i campi segnalati." };
+    return {
+      errors: collectErrors(parsed.error.issues),
+      message: "Controlla i campi segnalati.",
+    };
   }
 
   const values = parsed.data;

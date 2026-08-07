@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 
 import { db, schema } from "@/lib/db";
 import { getDriver } from "@/lib/drivers";
+import { collectErrors } from "@/lib/form-errors";
 import { practiceSchema, type PracticeInput } from "@/lib/validation";
 import { getVehicle } from "@/lib/vehicles";
 
@@ -39,16 +40,6 @@ async function withSelections(data: PracticeInput) {
     driverId: driver?.id ?? null,
     driverName: driver?.name ?? "",
   };
-}
-
-function collectErrors(issues: { path: PropertyKey[]; message: string }[]) {
-  const errors: Record<string, string> = {};
-  for (const issue of issues) {
-    const key = String(issue.path[0]);
-    // One message per field: the form shows a single one at a time.
-    errors[key] ??= issue.message;
-  }
-  return errors;
 }
 
 /** Creates a practice and opens its page straight away. */

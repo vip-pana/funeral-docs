@@ -17,12 +17,33 @@ const optionalText = z
   .optional()
   .transform((v) => v ?? "");
 
+/**
+ * `Date.parse` is not enough: V8 accepts "2026-02-31" and rolls it over to
+ * 2 March, so a non-existent day would reach the documents printed as
+ * 31/02/2026. Comparing the parsed date back to its parts rejects it.
+ */
 const isoDate = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, "Data non valida")
-  .refine((v) => !Number.isNaN(Date.parse(v)), "Data non valida");
+  .refine((v) => {
+    const [year, month, day] = v.split("-").map(Number);
+    const d = new Date(`${v}T00:00:00Z`);
+    return (
+      d.getUTCFullYear() === year &&
+      d.getUTCMonth() === month - 1 &&
+      d.getUTCDate() === day
+    );
+  }, "Data inesistente");
 
-const time = z.string().regex(/^\d{2}:\d{2}$/, "Ora non valida (hh:mm)");
+// The shape alone would accept "99:99": these are departure times written on
+// an official document, so the range is checked too.
+const time = z
+  .string()
+  .regex(/^\d{2}:\d{2}$/, "Ora non valida (hh:mm)")
+  .refine((v) => {
+    const [hours, minutes] = v.split(":").map(Number);
+    return hours < 24 && minutes < 60;
+  }, "Ora inesistente");
 
 /**
  * Digits can be replaced by letters in omocodia variants, so the digit

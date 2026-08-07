@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { db, schema } from "@/lib/db";
+import { collectErrors } from "@/lib/form-errors";
 import { driverSchema } from "@/lib/validation";
 
 /**
@@ -35,13 +36,12 @@ export async function addDriver(
   const parsed = driverSchema.safeParse({ name: formData.get("driverName") });
 
   if (!parsed.success) {
-    const errors: Record<string, string> = {};
-    for (const issue of parsed.error.issues) {
+    return {
       // Reported under the input's own name, which differs from the column so
       // it does not collide with the vehicle form's "name" field.
-      errors.driverName ??= issue.message;
-    }
-    return { errors, message: "Controlla i campi segnalati." };
+      errors: collectErrors(parsed.error.issues, { name: "driverName" }),
+      message: "Controlla i campi segnalati.",
+    };
   }
 
   await db.insert(schema.drivers).values(parsed.data);
