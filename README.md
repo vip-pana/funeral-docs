@@ -97,7 +97,7 @@ viene ricavata dal comune tramite il dataset ISTAT.
 
 ## Deploy sul server
 
-In produzione su **Victus**: <https://victus.tail134f9a.ts.net>, raggiungibile
+In produzione su **Victus**: <https://funeral-docs.tail134f9a.ts.net>, raggiungibile
 solo da dentro la tailnet.
 
 ```bash
@@ -106,7 +106,8 @@ git pull
 docker compose -f docker-compose.prod.yml up -d --build
 ```
 
-Il container ascolta solo su `127.0.0.1`; davanti c'è `tailscale serve`, che
-espone la :443 con certificato Let's Encrypt. Dettagli e prima configurazione
-in `DECISIONI-APERTE.md`, dove restano aperti **backup del database** e
+L'app ha un nodo Tailscale suo (un sidecar nel compose) con il proprio
+certificato Let's Encrypt, e non pubblica porte sull'host: si raggiunge solo dal
+suo nome. Serve una auth key reusable in `TS_AUTHKEY`. Dettagli in
+`DECISIONI-APERTE.md`, dove restano aperti **backup del database** e
 **cifratura del disco**.

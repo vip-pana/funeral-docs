@@ -5,22 +5,28 @@ Cose rimandate durante lo sviluppo. Da riprendere prima del deploy sul serverino
 ## 0. Docker e deploy — FATTO
 
 In produzione su **Victus**, raggiungibile dalla tailnet a
-**<https://victus.tail134f9a.ts.net>**.
+**<https://funeral-docs.tail134f9a.ts.net>**.
 
-Il container ascolta **solo su loopback** (`BIND_ADDRESS=127.0.0.1`) e l'unico
-ingresso è `tailscale serve`, che fa da reverse proxy sulla :443 con un
-certificato Let's Encrypt. Due conseguenze volute: l'app non è esposta
-direttamente nemmeno dentro la tailnet, e `COOKIE_SECURE=true` — in http su un
-indirizzo `100.x.y.z` il browser non memorizzava il cookie di sessione, che
-quindi viaggiava senza il flag.
+L'app ha un **nodo Tailscale suo**, non una porta sul nome della macchina: un
+sidecar `tailscale/tailscale` nel compose si registra con hostname
+`funeral-docs` e ottiene il proprio certificato. L'app gira nel suo stack di
+rete (`network_mode: service:tailscale`), quindi **non pubblica porte**: non è
+raggiungibile sull'host, nemmeno su loopback, e l'unico ingresso è la :443 del
+nodo. Lo stesso schema vale per wealth-tracker sulla stessa macchina, e il nome
+`victus` resta libero per Portainer.
 
-Se un giorno si torna ad accedere in http, `COOKIE_SECURE` va rimesso a `false`
-o l'accesso diventa impossibile.
+Serve una **auth key reusable e non ephemeral** in `TS_AUTHKEY` (nel `.env`, non
+nel compose che è tracciato): non ephemeral perché il nodo deve restare
+registrato anche a container fermo, altrimenti il nome slitterebbe a
+`funeral-docs-1` a ogni ricreazione. Lo stato del nodo sta nel volume
+`tailscale-state` per la stessa ragione.
+
+`COOKIE_SECURE=true`: con un nome e un certificato validi il cookie di sessione
+può avere il flag. Accedendo invece in http a un `100.x.y.z` il browser non
+memorizzerebbe un cookie `secure` e l'accesso sarebbe impossibile — lì va
+rimesso `false`, insieme a `BIND_ADDRESS` sull'indirizzo tailnet.
 
 ```bash
-# sul server, una volta sola
-sudo tailscale serve --bg 3000
-
 # aggiornamenti
 cd ~/funeral-docs && git pull && docker compose -f docker-compose.prod.yml up -d --build
 ```
