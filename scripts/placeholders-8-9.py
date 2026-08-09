@@ -10,6 +10,11 @@ Only the burial branch of the ashes destination is filled in: personal keeping
 and scattering stay as blank lines to be ticked and written by hand, like
 `Prot. n. ____` in every other form.
 
+Both forms arrived with the filled-in values in red, a leftover of the copy they
+were traced from. On a printed administrative act the colour is out of place, so
+`style_field_runs` drops it and marks every run holding a placeholder in bold
+instead: bold is what tells apart what the practice writes from the fixed text.
+
 Reads from templates/_backup/, writes templates/{8,9}.docx. Idempotent.
 """
 import re
@@ -169,6 +174,10 @@ BY_INDEX = {
 }
 
 WT_RE = re.compile(r"(<w:t(?: [^>]*)?>)([\s\S]*?)(</w:t>)")
+WR_RE = re.compile(r"(<w:r(?: [^>]*)?>)([\s\S]*?)(</w:r>)")
+RPR_RE = re.compile(r"<w:rPr>([\s\S]*?)</w:rPr>")
+COLOR_RE = re.compile(r"<w:color(?: [^>]*)?(?:/>|>[\s\S]*?</w:color>)")
+RFONTS_RE = re.compile(r"<w:rFonts(?: [^>]*)?(?:/>|>[\s\S]*?</w:rFonts>)")
 
 
 def texts(xml: str):
@@ -229,6 +238,59 @@ def join_split(xml: str, pieces: list, replacement: str) -> str:
     return xml
 
 
+def style_run_props(rpr_body: str, bold: bool) -> str:
+    """Drops the explicit colour, and turns bold on for the fields.
+
+    `<w:rPr>` children have a fixed order: `w:rFonts` comes first, then `w:b`
+    and `w:bCs`, and `w:color` much later. Removing the colour leaves the run on
+    the document's default (black), so nothing has to be hard-coded.
+    """
+    body = COLOR_RE.sub("", rpr_body)
+    if not bold:
+        return body
+    if "<w:b/>" not in body and "<w:b " not in body:
+        fonts = RFONTS_RE.search(body)
+        at = fonts.end() if fonts else 0
+        body = body[:at] + "<w:b/>" + body[at:]
+    if "<w:bCs/>" not in body and "<w:bCs " not in body:
+        b = re.search(r"<w:b(?: [^>]*)?/>", body)
+        at = b.end() if b else 0
+        body = body[:at] + "<w:bCs/>" + body[at:]
+    return body
+
+
+def style_field_runs(xml: str) -> str:
+    """Clears the leftover colours, and marks the fields in bold.
+
+    The colour goes from every run: the brackets around each province, the
+    punctuation after each value and the blank lines to be filled in by hand sit
+    in runs of their own, and leaving those red around a black field would look
+    worse than the original. Bold is narrower — it goes on the runs holding a
+    placeholder, so what the practice fills in stands out from the fixed text.
+    """
+    styled = [0]
+
+    def repl(m):
+        open_tag, body, close_tag = m.group(1), m.group(2), m.group(3)
+        rpr = RPR_RE.search(body)
+        bold = "{" in "".join(t.group(2) for t in WT_RE.finditer(body))
+        if bold:
+            styled[0] += 1
+        elif not rpr or "<w:color" not in rpr.group(1):
+            return m.group(0)
+        if rpr:
+            body = (body[:rpr.start()]
+                    + "<w:rPr>" + style_run_props(rpr.group(1), bold) + "</w:rPr>"
+                    + body[rpr.end():])
+        else:
+            body = "<w:rPr><w:b/><w:bCs/></w:rPr>" + body
+        return open_tag + body + close_tag
+
+    xml = WR_RE.sub(repl, xml)
+    print(f"   {styled[0]} run dei campi in nero e grassetto")
+    return xml
+
+
 def process(doc_id: str) -> set:
     src = TEMPLATES / f"{doc_id}.docx"
     backup = TEMPLATES / "_backup" / f"{doc_id}.docx"
@@ -247,6 +309,9 @@ def process(doc_id: str) -> set:
 
     xml = replace_exact(xml, PER_DOC[doc_id])
     xml = replace_exact(xml, COMMON)
+
+    # Last, once every placeholder is in place: the run styling keys off them.
+    xml = style_field_runs(xml)
 
     data["word/document.xml"] = xml.encode("utf-8")
 
