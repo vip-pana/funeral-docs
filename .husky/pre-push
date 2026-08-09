@@ -1,0 +1,3 @@
+# The e2e suites are left out on purpose: they need an instance already
+# listening and touch the real database (see tests/README.md).
+pnpm vitest run && pnpm tsc --noEmit && pnpm lint
