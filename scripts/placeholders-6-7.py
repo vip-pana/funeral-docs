@@ -85,7 +85,7 @@ PER_DOC = {
     "7": [
         ("CITTA DI SAN SEVERO", "CITTA DI {ownerCity}"),
         ("UFFIO STATO CIVILE", "UFFICIO STATO CIVILE"),  # typo in the original
-        ("INCARICATO", "{applicantRole}"),
+        # "INCARICATO" stays literal: the capacity never changes between records.
         ("CENTRO SERVIZI ELISEO", "{ownerCompanyName}"),
         ("FY363SA", "{ownerVehiclePlate}"),
         ("San Severo il", "{ownerCityName} il"),

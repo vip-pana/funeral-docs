@@ -91,8 +91,8 @@ si cambia da lì — modificare il `.env` non ha più effetto.
 
 Gli **allegati 2 e 3** (documenti 6 e 7) della L.R. 34/2008 identificano per
 esteso il dichiarante: il suo documento d'identità e la residenza stanno nella
-scheda del cliente, mentre la qualità con cui presenta la domanda e i
-necrofori si scelgono per ogni defunto. La provincia di nascita non è un campo:
+scheda del cliente, mentre i necrofori si scelgono per ogni defunto. La qualità
+con cui presenta la domanda è fissa nel modello. La provincia di nascita non è un campo:
 viene ricavata dal comune tramite il dataset ISTAT.
 
 ## Deploy sul server

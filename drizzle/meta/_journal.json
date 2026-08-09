@@ -71,6 +71,13 @@
       "when": 1786119415917,
       "tag": "0009_lucky_dreadnoughts",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1786282618003,
+      "tag": "0010_breezy_menace",
+      "breakpoints": true
     }
   ]
 }

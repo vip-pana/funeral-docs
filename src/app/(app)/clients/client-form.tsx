@@ -195,6 +195,75 @@ export function ClientForm({
         </CardContent>
       </Card>
 
+      {/* Not printed by any document: these are the details the office needs to
+          invoice the client. The labels are literal rather than FIELD_LABELS,
+          which only describes the .docx placeholders. */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Dati fiscali e contatti</CardTitle>
+          <CardDescription>
+            Servono per la fatturazione e per avere i recapiti a portata di mano:
+            non finiscono in nessun documento.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-2">
+          <Field
+            name="companyVatNumber"
+            label="Partita IVA"
+            defaultValue={client?.companyVatNumber}
+            error={err("companyVatNumber")}
+            hint="11 cifre"
+          />
+          <Field
+            name="companyTaxCode"
+            label="Codice fiscale"
+            defaultValue={client?.companyTaxCode}
+            error={err("companyTaxCode")}
+            hint="11 cifre per una societa', 16 caratteri per una persona"
+          />
+          <ComuneField
+            name="companyAddressCity"
+            label="Comune"
+            defaultValue={client?.companyAddressCity}
+            error={err("companyAddressCity")}
+          />
+          <Field
+            name="companyAddress"
+            label="Indirizzo"
+            defaultValue={client?.companyAddress}
+            error={err("companyAddress")}
+            hint="Via e numero civico"
+          />
+          <Field
+            name="companyPostalCode"
+            label="CAP"
+            defaultValue={client?.companyPostalCode}
+            error={err("companyPostalCode")}
+          />
+          <Field
+            name="companySdiCode"
+            label="Codice univoco"
+            defaultValue={client?.companySdiCode}
+            error={err("companySdiCode")}
+            hint="Codice destinatario SDI"
+          />
+          <Field
+            name="companyPec"
+            label="PEC"
+            type="email"
+            defaultValue={client?.companyPec}
+            error={err("companyPec")}
+          />
+          <Field
+            name="companyEmail"
+            label="Email"
+            type="email"
+            defaultValue={client?.companyEmail}
+            error={err("companyEmail")}
+          />
+        </CardContent>
+      </Card>
+
       <div className="flex justify-end">
         <Button type="submit" disabled={pending}>
           {pending ? "Salvataggio…" : submitLabel}

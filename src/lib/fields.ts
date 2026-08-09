@@ -59,7 +59,6 @@ export const PRACTICE_FIELDS = [
   "destinationProvince",
   "destinationCemetery",
   // Documents 6 and 7 only.
-  "applicantRole",
   "bearerNames",
   // Cremation, documents 8 and 9.
   "crematoryCity",
@@ -139,7 +138,6 @@ export const FIELD_LABELS: Record<TemplateField, string> = {
   destinationCity: "Comune di destinazione",
   destinationProvince: "Provincia",
   destinationCemetery: "Cimitero / forno crematorio",
-  applicantRole: "Qualità del richiedente",
   bearerNames: "Necrofori",
   crematoryCity: "Comune del forno crematorio",
   funeralStopCity: "Comune della sosta per le esequie",

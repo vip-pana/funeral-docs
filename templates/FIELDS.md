@@ -60,7 +60,6 @@ coincidano nei due sensi.
 | `ownerVehiclePlate` | Targa dell'autofunebre scelta per il defunto | 2,3,4,7,8,9 |
 | `ownerDriverName` | Nome del conducente scelto per il defunto | 4,7,8,9 |
 | `funeralChurch` | Chiesa per la sosta / esequie | 4 |
-| `applicantRole` | Qualita' del richiedente (es. INCARICATO) | 7,8 |
 | `bearerNames` | Necrofori scelti per il defunto, separati da virgola | 7,8,9 |
 
 ## Destinazione

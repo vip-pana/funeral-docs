@@ -13,6 +13,7 @@ import { fillPractice, login, pickSelect, SAMPLE } from "./helpers.mjs";
 
 const B = process.env.BASE_URL ?? "http://localhost:3000";
 const BEARER = "Paolo Neri";
+// Printed by the template as fixed text, not typed into the record.
 const ROLE = "INCARICATO";
 
 const b = await chromium.launch({ channel: "chrome" });
@@ -49,14 +50,13 @@ try {
   await card.locator("table", { hasText: BEARER }).waitFor({ timeout: 10000 });
   check("2 necroforo aggiunto", true, BEARER);
 
-  // --- the record picks it, plus the applicant role ---
+  // --- the record picks it ---
   await p.goto(`${B}/deceased/new`);
   await p.waitForTimeout(700);
   // fillPractice also picks the client, which is required.
   await fillPractice(p, SAMPLE);
   await pickSelect(p, "vehicleId", "FG123AB");
   await pickSelect(p, "driverId", "Giuseppe Bianchi");
-  await p.fill("#applicantRole", ROLE);
 
   // The bearer is a checkbox, not a Select: several are chosen at once.
   const box = p.locator(`label:has-text("${BEARER}") [role=checkbox]`).first();
@@ -87,7 +87,7 @@ try {
 
   const doc7 = await docText("7");
   check("5 necroforo nel documento 7", doc7.includes(BEARER));
-  check("  qualita del richiedente", doc7.includes(ROLE));
+  check("  qualita del richiedente fissa nel modello", doc7.includes(ROLE));
   // Derived from the birth municipality, never typed in.
   check("  provincia di nascita ricavata", doc7.includes("(FG)"));
 

@@ -75,8 +75,9 @@ PER_DOC = {
         # Mixed run: company name and its seat in the same `<w:t>`.
         ("CENTRO SERVIZI ELISEO sita in SAN SEVERO",
          "{ownerCompanyName} sita in {ownerCompanyCity}"),
+        # The capacity is literal, only the original's stray double spaces go.
         (" in qualità di  delegato del trasporto,  dalla Ditta Onoranze Funebri ",
-         " in qualità di {applicantRole}, dalla Ditta Onoranze Funebri "),
+         " in qualità di delegato del trasporto, dalla Ditta Onoranze Funebri "),
         # "resa dalla moglie" splits as "resa da" + "lla moglie". The relative
         # carries its own article, and the preposition has to agree with it
         # ("dalla moglie", "dal figlio"), so the whole phrase after "resa" is the

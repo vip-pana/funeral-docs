@@ -135,7 +135,7 @@ TEXT_FIXES = {
         (" documento di riconoscimento tipo CARTA D’IDENTITA n°AA1234567 rilasciata dal COMUNE DI SAN SEVERO il 10/06/2020",
          " documento di riconoscimento tipo [ownerIdType] n°[ownerIdNumber] rilasciata dal [ownerIdIssuer] il [ownerIdDate]"),
         (" in qualità di INCARICATO del/la defunto ANNA BIANCHI nato/a il 12/05/1939 a SAN SEVERO (FG)",
-         " in qualità di [applicantRole] del/la defunto [personFirstName] [personLastName] nato/a il [personBirthDate] a [personBirthCity] ([personBirthProvince])"),
+         " in qualità di INCARICATO del/la defunto [personFirstName] [personLastName] nato/a il [personBirthDate] a [personBirthCity] ([personBirthProvince])"),
         (", già residente in vita a SAN SEVERO in VIA DELLE ROSE n° 4, C.f. BNCNNA39E52H501C",
          ", già residente in vita a [personResidenceCity] in [personResidenceAddress], C.f. [personTaxCode]"),
         (", deceduto/a nel comune di SAN SEVERO in data 20/07/2026 alle ore 05:38.",
@@ -202,7 +202,6 @@ RENAME = {
     "ownerIdIssuer": "ownerIdIssuer",
     "ownerIdDate": "ownerIdDate",
     # scelti sulla singola scheda
-    "applicantRole": "applicantRole",
     "bearerNames": "bearerNames",
     "personBirthProvince": "personBirthProvince",
     # sistema
