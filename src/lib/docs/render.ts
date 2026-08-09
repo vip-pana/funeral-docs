@@ -78,7 +78,10 @@ export async function renderDocument(
   return renderer.getZip().generate({ type: "nodebuffer" }) as Buffer;
 }
 
-/** Readable file name: COGNOME_Nome_2026-08-06_1.docx */
+/**
+ * Readable file name, ending with the title shown in the generate panel:
+ * COGNOME_Nome_2026-08-06_1_Comunicazione-di-autorizzazione-al-trasporto.docx
+ */
 export function documentFileName(
   values: FieldValues,
   documentId: DocumentId,
@@ -94,8 +97,11 @@ export function documentFileName(
   const last = slug(values.personLastName ?? "").toUpperCase() || "SENZA-NOME";
   const first = slug(values.personFirstName ?? "");
   const date = values.personDeathDate || values.transportDate || "";
+  const title = slug(DOCUMENTS.find((d) => d.id === documentId)?.title ?? "");
 
-  return [last, first, date, documentId].filter(Boolean).join("_") + ".docx";
+  return (
+    [last, first, date, documentId, title].filter(Boolean).join("_") + ".docx"
+  );
 }
 
 // No archiving helper on purpose: the page downloads the documents one by

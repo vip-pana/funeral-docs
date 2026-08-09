@@ -82,7 +82,7 @@ describe("prepareValues", () => {
 });
 
 describe("documentFileName", () => {
-  it("builds COGNOME_Nome_data_documento.docx", () => {
+  it("builds COGNOME_Nome_data_documento_titolo.docx", () => {
     expect(
       documentFileName(
         {
@@ -92,7 +92,24 @@ describe("documentFileName", () => {
         },
         "1",
       ),
-    ).toBe("ROSSI_Mario_2026-08-04_1.docx");
+    ).toBe(
+      "ROSSI_Mario_2026-08-04_1_Comunicazione-di-autorizzazione-al-trasporto.docx",
+    );
+  });
+
+  it("keeps the B code of the documents that have one", () => {
+    expect(
+      documentFileName(
+        { personLastName: "Rossi", personDeathDate: "2026-08-04" },
+        "4",
+      ),
+    ).toBe("ROSSI_2026-08-04_4_B5-Modulo-di-chiusura-feretro.docx");
+  });
+
+  it("flattens the em dash of the Allegato titles", () => {
+    expect(documentFileName({ personLastName: "Rossi" }, "6")).toBe(
+      "ROSSI_6_Allegato-2-Richiesta-di-autorizzazione-al-trasporto.docx",
+    );
   });
 
   it("keeps the date in ISO, unlike the document contents", () => {
@@ -107,7 +124,7 @@ describe("documentFileName", () => {
         { personLastName: "D'Amico", personFirstName: "José Maria" },
         "3",
       ),
-    ).toBe("D-AMICO_Jose-Maria_3.docx");
+    ).toBe("D-AMICO_Jose-Maria_3_Domanda-di-autorizzazione-al-trasporto.docx");
   });
 
   it("falls back to the transport date when there is no death date", () => {
@@ -116,16 +133,18 @@ describe("documentFileName", () => {
         { personLastName: "Rossi", transportDate: "2026-01-02" },
         "3",
       ),
-    ).toBe("ROSSI_2026-01-02_3.docx");
+    ).toBe("ROSSI_2026-01-02_3_Domanda-di-autorizzazione-al-trasporto.docx");
   });
 
   it("names the file even with no data at all", () => {
-    expect(documentFileName({}, "4")).toBe("SENZA-NOME_4.docx");
+    expect(documentFileName({}, "4")).toBe(
+      "SENZA-NOME_4_B5-Modulo-di-chiusura-feretro.docx",
+    );
   });
 
   it("falls back when the surname has no usable characters", () => {
     expect(documentFileName({ personLastName: "---" }, "2")).toBe(
-      "SENZA-NOME_2.docx",
+      "SENZA-NOME_2_B4-Autorizzazione-al-trasporto-in-altro-comune.docx",
     );
   });
 
@@ -136,6 +155,6 @@ describe("documentFileName", () => {
         { personLastName: "Rossi", personDeathDate: "2026-08-04" },
         "5",
       ),
-    ).toBe("ROSSI_2026-08-04_5.docx");
+    ).toBe("ROSSI_2026-08-04_5_Riconoscimento-di-cadavere-e-suggellamento.docx");
   });
 });

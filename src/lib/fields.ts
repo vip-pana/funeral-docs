@@ -224,7 +224,7 @@ export const DOCUMENTS = [
   {
     id: "2",
     file: "2.docx",
-    title: "Autorizzazione al trasporto in altro comune",
+    title: "B4 Autorizzazione al trasporto in altro comune",
     description: "Rilasciata dal Sindaco",
   },
   {
@@ -236,7 +236,7 @@ export const DOCUMENTS = [
   {
     id: "4",
     file: "4.docx",
-    title: "Modulo di chiusura feretro",
+    title: "B5 Modulo di chiusura feretro",
     description: "Dichiarazione dell'addetto alla chiusura",
   },
   {
@@ -260,13 +260,13 @@ export const DOCUMENTS = [
   {
     id: "8",
     file: "8.docx",
-    title: "Richiesta di trasporto e cremazione",
+    title: "B7 Richiesta di trasporto e cremazione",
     description: "L.R. 34/2008 art. 12-13, presentata dalla ditta",
   },
   {
     id: "9",
     file: "9.docx",
-    title: "Autorizzazione al trasporto e cremazione",
+    title: "B6 Autorizzazione al trasporto e cremazione",
     description: "L.R. 34/2008 art. 12-13, rilasciata dal Comune",
   },
 ] as const;

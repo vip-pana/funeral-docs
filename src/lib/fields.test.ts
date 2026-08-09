@@ -95,4 +95,14 @@ describe("DOCUMENTS", () => {
   it("gives every document a title", () => {
     expect(DOCUMENTS.every((d) => d.title.trim().length > 0)).toBe(true);
   });
+
+  it("has titles that stay distinct once slugified into a file name", () => {
+    const slugs = DOCUMENTS.map((d) =>
+      d.title
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "")
+        .replace(/[^A-Za-z0-9]+/g, "-"),
+    );
+    expect(new Set(slugs).size).toBe(slugs.length);
+  });
 });
