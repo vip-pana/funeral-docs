@@ -99,8 +99,8 @@ export function GeneratePanel({ practiceId }: { practiceId: string }) {
       <CardHeader>
         <CardTitle>Genera documenti</CardTitle>
         <CardDescription>
-          Scegli quali stampare: ognuno viene scaricato come file .docx a se'
-          stante.
+          Scegli quali stampare: ognuno viene scaricato come file .docx a
+          s&eacute; stante.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
