@@ -2,13 +2,17 @@
 
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from "lucide-react"
+import { useTheme } from "next-themes"
 
 const Toaster = ({ ...props }: ToasterProps) => {
+  // Sonner renders outside the page's DOM tree and styles itself, so the `dark`
+  // class on <html> does not reach it: without this the toasts would stay on
+  // the theme they were born with.
+  const { theme = "dark" } = useTheme()
+
   return (
     <Sonner
-      // L'app e' sempre scura: con "system" i toast seguirebbero le preferenze
-      // del sistema operativo e uscirebbero chiari su fondo scuro.
-      theme="dark"
+      theme={theme as ToasterProps["theme"]}
       className="toaster group"
       icons={{
         success: (

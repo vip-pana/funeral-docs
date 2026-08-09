@@ -14,16 +14,24 @@ const check = (n, c, x = "") => {
   if (!c) fail++;
 };
 
+const isDark = () => p.evaluate(() => document.documentElement.classList.contains("dark"));
+// The palette is in oklch, so the browser reports the background as
+// `lab(L a b)` where L is a 0-100 lightness — not as `rgb()`.
+const bodyIsLight = async () => {
+  const c = await p.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  const l = Number(c.match(/[\d.]+/)?.[0]);
+  return [l > 50, c];
+};
+
 // --- dark theme ---
 await p.goto(`${B}/login`);
-check("1 classe dark sul root", await p.evaluate(() => document.documentElement.classList.contains("dark")));
+check("1 classe dark sul root", await isDark());
 check(
   "  color-scheme dark",
   (await p.evaluate(() => getComputedStyle(document.documentElement).colorScheme)) === "dark",
 );
-const bg = await p.evaluate(() => getComputedStyle(document.body).backgroundColor);
-const light = bg.match(/\d+/g)?.slice(0, 3).every((v) => Number(v) > 200);
-check("  sfondo scuro", !light, bg);
+const [light, bg] = await bodyIsLight();
+check("  sfondo scuro senza scelta salvata", !light, bg);
 
 // --- show password ---
 check("2 password nascosta all'inizio", (await p.getAttribute("#password", "type")) === "password");
@@ -56,11 +64,27 @@ await p.waitForTimeout(400);
 const active3 = await p.getAttribute('[data-active="true"] a, a[data-active="true"]', "href").catch(() => null);
 check("  sottopagina mantiene Defunti", active3 === "/deceased", String(active3));
 
-// --- collapse persists ---
+// --- theme switch in the sidebar ---
 await p.goto(`${B}/deceased`);
+await p.click('button:has-text("Tema chiaro")');
+await p.waitForTimeout(300);
+check("5 il tasto passa al chiaro", !(await isDark()));
+const [light2, bg2] = await bodyIsLight();
+check("  sfondo chiaro", light2, bg2);
+
+await p.reload();
+await p.waitForTimeout(600);
+check("  la scelta resta dopo il reload", !(await isDark()));
+
+// back to dark, so the checks that follow start from the usual theme
+await p.click('button:has-text("Tema scuro")');
+await p.waitForTimeout(300);
+check("  secondo clic torna allo scuro", await isDark());
+
+// --- collapse persists ---
 await p.click('button[data-sidebar="trigger"]');
 await p.waitForTimeout(600);
-check("5 cookie salvato", (await ctx.cookies()).some((c) => c.name === "sidebar_state" && c.value === "false"));
+check("6 cookie salvato", (await ctx.cookies()).some((c) => c.name === "sidebar_state" && c.value === "false"));
 
 await p.reload();
 await p.waitForTimeout(600);
@@ -72,7 +96,7 @@ await p.click('button[data-sidebar="trigger"]');
 await p.waitForTimeout(400);
 await p.click('button:has-text("Esci")');
 await p.waitForURL(/login/, { timeout: 10000 });
-check("6 logout dalla sidebar", p.url().includes("/login"));
+check("7 logout dalla sidebar", p.url().includes("/login"));
 
 await b.close();
 console.log(fail ? `\n=== ${fail} FALLITI ===` : "\n=== TUTTI OK ===");

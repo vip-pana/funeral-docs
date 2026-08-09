@@ -19,14 +19,14 @@ coincidano nei due sensi.
 | Doc | Modulo |
 |---|---|
 | 1 | Comunicazione di autorizzazione al trasporto |
-| 2 | Autorizzazione al trasporto in altro comune |
+| 2 | B4 Autorizzazione al trasporto in altro comune |
 | 3 | Domanda di autorizzazione al trasporto |
-| 4 | Modulo di chiusura feretro |
+| 4 | B5 Modulo di chiusura feretro |
 | 5 | Riconoscimento di cadavere e suggellamento |
-| 6 | Allegato 2 L.R. 34/2008 — richiesta di autorizzazione al trasporto |
-| 7 | Allegato 3 L.R. 34/2008 — autorizzazione al trasporto |
-| 8 | Richiesta di trasporto e cremazione (L.R. 34/2008 art. 12-13) |
-| 9 | Autorizzazione al trasporto e cremazione (L.R. 34/2008 art. 12-13) |
+| 6 | Allegato 2 — Richiesta di autorizzazione al trasporto (L.R. 34/2008) |
+| 7 | Allegato 3 — Autorizzazione al trasporto (L.R. 34/2008) |
+| 8 | B7 Richiesta di trasporto e cremazione (L.R. 34/2008 art. 12-13) |
+| 9 | B6 Autorizzazione al trasporto e cremazione (L.R. 34/2008 art. 12-13) |
 
 ## Defunto — anagrafica
 
@@ -60,7 +60,6 @@ coincidano nei due sensi.
 | `ownerVehiclePlate` | Targa dell'autofunebre scelta per il defunto | 2,3,4,7,8,9 |
 | `ownerDriverName` | Nome del conducente scelto per il defunto | 4,7,8,9 |
 | `funeralChurch` | Chiesa per la sosta / esequie | 4 |
-| `applicantRole` | Qualita' del richiedente (es. INCARICATO) | 7,8 |
 | `bearerNames` | Necrofori scelti per il defunto, separati da virgola | 7,8,9 |
 
 ## Destinazione

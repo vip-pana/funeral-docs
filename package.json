@@ -14,7 +14,8 @@
     "auth:hash": "tsx scripts/hash-password.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "node tests/run.mjs"
+    "test:e2e": "node tests/run.mjs",
+    "prepare": "husky"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.7.1",
@@ -51,6 +52,7 @@
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
+    "husky": "^9.1.7",
     "jszip": "^3.10.1",
     "playwright-core": "^1.62.1",
     "tailwindcss": "^4",

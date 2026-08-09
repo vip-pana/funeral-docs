@@ -64,6 +64,52 @@ const taxCode = z
     "Codice fiscale non valido: controlla di averlo copiato bene",
   );
 
+/**
+ * A company can be identified by an 11-digit numeric code rather than a
+ * person's alphanumeric one, so `taxCode` above is too strict here: it would
+ * reject a perfectly valid societa'.
+ */
+const companyTaxCode = z
+  .string()
+  .trim()
+  .toUpperCase()
+  .refine(
+    (v) => /^\d{11}$/.test(v) || taxCode.safeParse(v).success,
+    "Codice fiscale non valido: 11 cifre per una societa', 16 caratteri per una persona",
+  );
+
+const vatNumber = z
+  .string()
+  .trim()
+  .regex(/^\d{11}$/, "Partita IVA: 11 cifre");
+
+const postalCode = z
+  .string()
+  .trim()
+  .regex(/^\d{5}$/, "CAP: 5 cifre");
+
+/** Codice univoco / SDI: 6 alphanumeric characters, 7 for a PA office. */
+const sdiCode = z
+  .string()
+  .trim()
+  .toUpperCase()
+  .regex(/^[A-Z0-9]{6,7}$/, "Codice univoco: 6 o 7 caratteri");
+
+const email = z.email("Indirizzo non valido").trim().toLowerCase();
+
+/**
+ * Optional-with-a-shape: an empty field means "not filled in" and must not
+ * report a format error, but anything typed is checked. Same trick as
+ * `birthDate` below, which pairs `isoDate` with the empty string.
+ */
+const blankOr = (schema: z.ZodType<string, string>) =>
+  z
+    .string()
+    .trim()
+    .optional()
+    .transform((v) => v ?? "")
+    .pipe(z.union([z.literal(""), schema]));
+
 const province = z
   .string()
   .trim()
@@ -122,6 +168,18 @@ export const clientSchema = z.object({
   // Document 9 only. Optional like the fields above, and free text rather than
   // a list: the declarant may not be an Italian citizen.
   citizenship: optionalText,
+
+  // Billing details of the client company. No document prints them, so nothing
+  // here is required — but what is typed in is checked, since a wrong VAT number
+  // or PEC is worse than a blank one.
+  companyVatNumber: blankOr(vatNumber),
+  companyTaxCode: blankOr(companyTaxCode),
+  companyAddressCity: optionalText,
+  companyAddress: optionalText,
+  companyPostalCode: blankOr(postalCode),
+  companySdiCode: blankOr(sdiCode),
+  companyPec: blankOr(email),
+  companyEmail: blankOr(email),
 });
 
 /**
@@ -181,7 +239,6 @@ export const practiceSchema = z.object({
     .transform((v) =>
       (Array.isArray(v) ? v : v ? [v] : []).filter((s) => s.trim()),
     ),
-  applicantRole: optionalText,
   destinationCity: requiredText("Comune di destinazione"),
   destinationProvince: province,
   destinationCemetery: requiredText("Cimitero di destinazione"),

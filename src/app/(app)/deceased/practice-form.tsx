@@ -510,13 +510,6 @@ export function PracticeForm({
                   : "Il nome finisce nel documento 4"}
             </FieldDescription>
           </FieldRoot>
-          <Field
-            name="applicantRole"
-            label={FIELD_LABELS.applicantRole}
-            defaultValue={val("applicantRole")}
-            error={err("applicantRole")}
-            hint="Es. INCARICATO — documento 7"
-          />
           <FieldRoot className="sm:col-span-2">
             <FieldLabel>Necrofori</FieldLabel>
             {/* Checkboxes, not a Select: several are chosen at once. Radix's

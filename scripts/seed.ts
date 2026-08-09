@@ -269,7 +269,7 @@ function seedPractices() {
        person_death_city, person_death_place, transport_date, transport_time,
        transport_permit_date, funeral_church, destination_city,
        destination_province, destination_cemetery, vehicle_id, vehicle_plate,
-       driver_id, driver_name, bearer_ids, bearer_names, applicant_role,
+       driver_id, driver_name, bearer_ids, bearer_names,
        crematory_city, funeral_stop_city, ashes_city,
        cremation_consent_relative, burial_permit_date
      ) VALUES (
@@ -280,7 +280,7 @@ function seedPractices() {
        @deathCity, @deathPlace, @transportDate, @transportTime,
        @permitDate, @church, @destinationCity,
        @destinationProvince, @cemetery, @vehicleId, @vehiclePlate,
-       @driverId, @driverName, @bearerIds, @bearerNames, @applicantRole,
+       @driverId, @driverName, @bearerIds, @bearerNames,
        @crematoryCity, @funeralStopCity, @ashesCity,
        @consentRelative, @burialPermitDate
      )`,
@@ -365,7 +365,6 @@ function seedPractices() {
       // Four bearers each, as document 7 lists them.
       bearerIds: bearers.map((b) => b.id).join(","),
       bearerNames: bearers.map((b) => b.name).join(", "),
-      applicantRole: "INCARICATO",
       // Empty strings rather than null for the burials: the columns are NOT
       // NULL, and the documents print nothing either way.
       crematoryCity: p.cremation?.crematoryCity ?? "",

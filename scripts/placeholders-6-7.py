@@ -52,22 +52,24 @@ COMMON = [
 SPLIT = {
     "6": [
         # birth date 12/05/1939
-        (["12", "/", "05", "/19", "39"], "{personBirthDate}"),
+        (["04", "/", "05", "/19", "39"], "{personBirthDate}"),
         # death date 20/07/2026
         (["20", "/", "07", "/2026"], "{personDeathDate}"),
         # today 21/07/2026
         (["21", "/", "07", "/2026"], "{todayDate}"),
         # cemetery "CIMITERO DI SAN SEVERO."
-        ([" CIMITERO", " DI ", "SAN ", "SEVERO."], "{destinationCemetery}."),
+        # The leading space belongs to the sentence, not to the value: it has to
+        # be written back, because the whole first run is overwritten.
+        ([" CIMITERO", " DI ", "SAN ", "SEVERO."], " {destinationCemetery}."),
         # "VIA DELLE ROSE n° 4": street and number are one field, so the literal
         # "VIA" and "n°" go too — the value carries its own.
-        (["VIA", " DELLE ROSE", " ", "n°", " ", "4"], "{personResidenceAddress}"),
+        (["VIA", " DELLE ROSE", " ", "n°", " ", "27"], "{personResidenceAddress}"),
     ],
     "7": [
-        (["12", "/", "05", "/19", "39"], "{personBirthDate}"),
+        (["04", "/", "05", "/19", "39"], "{personBirthDate}"),
         (["20", "/07/2026"], "{personDeathDate}"),
         (["21", "/", "07", "/2026"], "{todayDate}"),
-        (["VIA", " DELLE ROSE", " ", "n°", " ", "4"], "{personResidenceAddress}"),
+        (["VIA", " DELLE ROSE", " ", "n°", " ", "27"], "{personResidenceAddress}"),
         (["ROSSI MARIO", " FRANCESCO"], "{ownerDriverName}"),
         (["NERI PAOLO", ", ", "GALLI LUCA, CARLO FERRARI",
           ", CONTI MARCO"], "{bearerNames}"),
@@ -85,7 +87,7 @@ PER_DOC = {
     "7": [
         ("CITTA DI SAN SEVERO", "CITTA DI {ownerCity}"),
         ("UFFIO STATO CIVILE", "UFFICIO STATO CIVILE"),  # typo in the original
-        ("INCARICATO", "{applicantRole}"),
+        # "INCARICATO" stays literal: the capacity never changes between records.
         ("CENTRO SERVIZI ELISEO", "{ownerCompanyName}"),
         ("FY363SA", "{ownerVehiclePlate}"),
         ("San Severo il", "{ownerCityName} il"),

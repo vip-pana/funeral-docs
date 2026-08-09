@@ -3,12 +3,15 @@
 import {
   FileTextIcon,
   LogOutIcon,
+  MoonIcon,
   SettingsIcon,
+  SunIcon,
   TruckIcon,
   UsersIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTheme } from "next-themes";
 
 import {
   Sidebar,
@@ -35,6 +38,7 @@ const LINKS = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const { resolvedTheme, setTheme } = useTheme();
 
   return (
     <Sidebar collapsible="icon">
@@ -71,6 +75,22 @@ export function AppSidebar() {
 
       <SidebarFooter>
         <SidebarMenu>
+          <SidebarMenuItem>
+            {/* Icon and label are swapped by the `dark:` variants rather than
+                by React state: the theme is only known on the client, so
+                rendering from it would either mismatch the server markup or
+                make this entry pop in a frame late. */}
+            <SidebarMenuButton
+              onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+              tooltip="Cambia tema"
+            >
+              <SunIcon className="hidden dark:block" />
+              <MoonIcon className="dark:hidden" />
+              <span className="hidden dark:inline">Tema chiaro</span>
+              <span className="dark:hidden">Tema scuro</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
           <SidebarMenuItem>
             {/* Logout clears the cookie server-side, so this has to stay a
                 form submission rather than a link. */}

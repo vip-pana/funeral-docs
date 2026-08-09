@@ -73,6 +73,21 @@ export const clients = sqliteTable("clients", {
   /** Printed beside the declarant's name by document 9. */
   citizenship: text("citizenship").notNull().default("italiana"),
 
+  // Billing and contact details of the client company. No document prints them
+  // — `clientValues` deliberately leaves them out — they are here so the office
+  // has them at hand. All optional: a client saved before them stays valid.
+  // Distinct from `address`/`postalCode` above, which are the declarant's
+  // residence and do reach documents 6 and 7.
+  companyVatNumber: text("company_vat_number").notNull().default(""),
+  companyTaxCode: text("company_tax_code").notNull().default(""),
+  companyAddressCity: text("company_address_city").notNull().default(""),
+  companyAddress: text("company_address").notNull().default(""),
+  companyPostalCode: text("company_postal_code").notNull().default(""),
+  /** Codice univoco / SDI, for electronic invoicing. */
+  companySdiCode: text("company_sdi_code").notNull().default(""),
+  companyPec: text("company_pec").notNull().default(""),
+  companyEmail: text("company_email").notNull().default(""),
+
   createdAt: text("created_at")
     .notNull()
     .default(sql`(datetime('now'))`),
@@ -171,9 +186,6 @@ export const practices = sqliteTable("practices", {
   // document 7 and they do not change when the list does.
   bearerIds: text("bearer_ids").notNull().default(""),
   bearerNames: text("bearer_names").notNull().default(""),
-
-  /** In what capacity the declarant applies, e.g. "INCARICATO". Document 7. */
-  applicantRole: text("applicant_role").notNull().default(""),
 
   destinationCity: text("destination_city").notNull(),
   destinationProvince: text("destination_province").notNull(),

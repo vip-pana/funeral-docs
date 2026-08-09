@@ -27,6 +27,16 @@ const CLIENT: Client = {
   idIssuer: "COMUNE DI SAN SEVERO",
   idDate: "2020-06-10",
   citizenship: "italiana",
+  // Billing details. Filled in on purpose: the assertion below is an exact
+  // match, so it fails the moment one of them leaks into a document.
+  companyVatNumber: "01234567890",
+  companyTaxCode: "01234567890",
+  companyAddressCity: "San Severo",
+  companyAddress: "Via Giuseppe Verdi 12",
+  companyPostalCode: "71016",
+  companySdiCode: "ABC1234",
+  companyPec: "oofrossi@pec.it",
+  companyEmail: "info@oofrossi.it",
   createdAt: "2026-08-07 10:00:00",
   updatedAt: "2026-08-07 10:00:00",
 };

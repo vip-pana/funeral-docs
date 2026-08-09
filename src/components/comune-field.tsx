@@ -61,7 +61,7 @@ export function ComuneField({
   const [internal, setInternal] = useState(defaultValue ?? "");
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [options, setOptions] = useState<Comune[]>([]);
+  const [fetched, setFetched] = useState<Comune[]>([]);
   const [loading, setLoading] = useState(false);
 
   // Controlled when the parent supplies a value, self-managing otherwise.
@@ -71,22 +71,26 @@ export function ComuneField({
     onChange?.(v);
   };
 
-  useEffect(() => {
-    if (!open || query.trim().length < 2) {
-      setOptions([]);
-      return;
-    }
+  // A closed field, or one with too short a query, has nothing to show: it is
+  // derived here rather than reset from the effect, which would render twice.
+  const searching = open && query.trim().length >= 2;
+  const options = searching ? fetched : [];
 
-    setLoading(true);
+  useEffect(() => {
+    if (!searching) return;
+
     // Debounce: without it every keystroke would be a request.
     const controller = new AbortController();
     const timer = setTimeout(async () => {
+      // Flagged here rather than in the effect body: during the debounce there
+      // is no request yet, and the empty list still reads as the last result.
+      setLoading(true);
       try {
         const res = await fetch(
           `/api/municipalities?q=${encodeURIComponent(query)}`,
           { signal: controller.signal },
         );
-        if (res.ok) setOptions(await res.json());
+        if (res.ok) setFetched(await res.json());
       } catch {
         // Request aborted or network down: typing still works.
       } finally {
@@ -98,7 +102,7 @@ export function ComuneField({
       clearTimeout(timer);
       controller.abort();
     };
-  }, [query, open]);
+  }, [query, searching]);
 
   function pick(comune: Comune) {
     setValue(comune.nome);

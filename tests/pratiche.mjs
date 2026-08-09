@@ -104,7 +104,7 @@ check('  nessuno zip', !names.some(n=>n.endsWith('.zip')));
 check('  nomi distinti', new Set(names).size===names.length);
 
 // document 4 uses every company field
-const d4 = got.find(d=>d.suggestedFilename().endsWith('_4.docx'));
+const d4 = got.find(d=>d.suggestedFilename().includes('_4_'));
 const f4 = `/tmp/dl_${d4.suggestedFilename()}`;
 await d4.saveAs(f4);
 const z4 = await JSZip.loadAsync(fs.readFileSync(f4));
