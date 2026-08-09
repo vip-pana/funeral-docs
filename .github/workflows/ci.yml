@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A new push to the same branch makes the previous run pointless.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# The same three checks as the pre-push hook, which a --no-verify skips and a
+# fresh clone does not have. The e2e suites stay out here too: they need an
+# instance already listening and a database to write to.
+jobs:
+  verifica:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # husky runs from the `prepare` script and has no hooks to install here.
+      - run: pnpm install --frozen-lockfile
+        env:
+          HUSKY: 0
+
+      - run: pnpm vitest run
+
+      # tsconfig includes .next/types, which only exists once Next has written
+      # it: without this the layouts fail on an unknown LayoutProps.
+      - run: pnpm next typegen
+      - run: pnpm tsc --noEmit
+
+      - run: pnpm lint
