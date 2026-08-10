@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { ComuneField } from "@/components/comune-field";
@@ -33,6 +33,7 @@ import { clientLabel } from "@/lib/client-name";
 import type { Bearer, Client, Practice, Vehicle } from "@/lib/db/schema";
 import { FIELD_LABELS } from "@/lib/fields";
 import { computeTaxCode } from "@/lib/tax-code";
+import { useFormReset } from "@/lib/use-form-reset";
 import { parseTaxCode } from "@/lib/validation";
 
 import type { PracticeFormState } from "./actions";
@@ -64,7 +65,9 @@ export function PracticeForm({
     action,
     {},
   );
-  const formRef = useRef<HTMLFormElement>(null);
+  // This form is never emptied on purpose: after creating a record the page
+  // navigates away, and an edit keeps showing what was saved.
+  const { ref: formRef } = useFormReset();
   // Tells the user which fields were derived from the tax code.
   const [fromTaxCode, setFromTaxCode] = useState({ birth: false, city: false });
   const [firstName, setFirstName] = useState(practice?.personFirstName ?? "");

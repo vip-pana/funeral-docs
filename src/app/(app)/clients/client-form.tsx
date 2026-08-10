@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/card";
 import type { Client } from "@/lib/db/schema";
 import { FIELD_LABELS } from "@/lib/fields";
+import { useFormReset } from "@/lib/use-form-reset";
 
 import type { ClientFormState } from "./actions";
 
@@ -52,8 +53,12 @@ export function ClientForm({
 
   const err = (name: string) => state.errors?.[name];
 
+  // Never emptied on purpose: creating navigates to the client, editing keeps
+  // showing what was saved.
+  const { ref: formRef } = useFormReset();
+
   return (
-    <form action={formAction} className="space-y-6">
+    <form ref={formRef} action={formAction} className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>Dichiarante</CardTitle>

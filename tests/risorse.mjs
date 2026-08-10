@@ -28,6 +28,21 @@ check('3 niente form dichiarante', !(await p.$('#companyName')));
 check('  niente campi owner', !(await p.$('#ownerFirstName')));
 check('  niente cambio password', !(await p.$('#newPassword')));
 
+// --- a rejected save keeps what was filled in ---
+// React empties the form after every action: on an error the plate typed and
+// the Conducente tick used to disappear without a word.
+await p.fill('#plate', 'AB123CD');
+await p.click('form:has(#plate) button[type=submit]');
+await p.waitForSelector('#name[aria-invalid=true]', { timeout: 12000 });
+check('5 targa non svuotata dopo errore', await p.inputValue('#plate') === 'AB123CD',
+      await p.inputValue('#plate'));
+
+await p.click('#bearerIsDriver');
+await p.click('form:has(#bearerName) button[type=submit]');
+await p.waitForSelector('#bearerName[aria-invalid=true]', { timeout: 12000 });
+check('6 spunta conducente resta', await p.getAttribute('#bearerIsDriver','data-state') === 'checked',
+      await p.getAttribute('#bearerIsDriver','data-state'));
+
 // --- the sidebar reaches the other three ---
 for (const [href, title] of [
   ['/clients', 'Clienti'],

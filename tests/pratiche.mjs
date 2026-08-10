@@ -131,10 +131,18 @@ check('9 compare in elenco', (await p.textContent('body')).includes('Rossi'));
 
 // --- validation ---
 await p.goto(`${B}/deceased/new`);
+// Chosen before submitting: React empties the form after the action, and these
+// two used to go back to "no client" and "male" without a word.
+await pickSelect(p, 'clientId', SEED_CLIENT);
+await pickSelect(p, 'personSex', 'Femminile');
 await p.click('button:has-text("Crea scheda")');
 await p.waitForFunction(()=>document.querySelectorAll('[role=alert]').length>3,null,{timeout:12000});
 check('10 validazione blocca vuoto', true);
 check('  resta su nuova', p.url().includes('/deceased/new'));
+check('  cliente non svuotato', (await p.textContent('#clientId')).includes(SEED_CLIENT),
+      await p.textContent('#clientId'));
+check('  sesso non azzerato', (await p.textContent('#personSex')).includes('Femminile'),
+      await p.textContent('#personSex'));
 
 // invalid tax code rejected
 await p.fill('#personTaxCode','ABC');
