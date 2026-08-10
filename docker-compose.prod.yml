@@ -1,7 +1,19 @@
 # Produzione: la macchina in ufficio che resta accesa, raggiungibile via
 # Tailscale.
 #
-#   docker compose -f docker-compose.prod.yml up -d --build
+#   docker compose -f docker-compose.prod.yml pull
+#   docker compose -f docker-compose.prod.yml up -d
+#
+# L'immagine arriva da ghcr.io, costruita da .github/workflows/deploy.yml quando
+# viene pubblicata una release. Sulla macchina non si compila nulla: l'immagine
+# in esecuzione e' identica a quella che la CI ha prodotto, e un deploy e' una
+# pull invece di un build che compila better-sqlite3 e Next contendendo la CPU
+# all'app ancora in servizio.
+#
+# Per costruire in locale — quando si lavora al Dockerfile, o si vuole far
+# girare codice mai rilasciato — si aggiunge l'override:
+#
+#   docker compose -f docker-compose.prod.yml -f docker-compose.build.yml up -d --build
 #
 services:
   # Nodo Tailscale dedicato a questa app: si registra nella tailnet col suo
@@ -42,9 +54,12 @@ services:
       start_period: 20s
 
   app:
-    build:
-      context: .
-      target: runner
+    # La versione rilasciata da eseguire, fissata nel .env. Fissarla invece di
+    # inseguire `latest` e' cio' che rende il rollback una riga piu' un `up -d`:
+    # l'immagine precedente e' ancora nello store locale, quindi tornare
+    # indietro non costa ne' build ne' rete. Con `latest`, poi, un semplice
+    # restart cambierebbe in silenzio la versione in esecuzione.
+    image: ghcr.io/vip-pana/funeral-docs:${APP_VERSION:-latest}
     restart: unless-stopped
     # Nessun `ports`: l'app non ha uno stack di rete proprio, usa quello del
     # sidecar. Quello pubblica la :443 sulla tailnet attraverso serve, quindi

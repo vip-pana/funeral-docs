@@ -48,12 +48,15 @@ fallisca se la cartella è vuota (stesso principio del DB in wealth-tracker).
 
 ## 2. Backup: solo locale o anche fuori dal serverino?
 
-**Ora**: niente backup automatico.
+**Ora**: una copia a ogni deploy. `scripts/deploy-release.sh` fa un
+`.backup()` di SQLite in `~/funeral-docs-backups` prima di sostituire il
+container, e rifiuta il deploy se non riesce. Retention 30 giorni
+(`FUNERAL_BACKUP_RETENTION_DAYS`).
 
-**Da fare**: cron notturno → `tar.gz` di SQLite + docx generati, retention 30
-giorni (come `BACKUP_RETENTION_DAYS` in wealth-tracker).
+**Da fare**: copre solo il momento del deploy — tra due release non c'è niente.
+Manca un cron notturno, e manca il backup dei `.docx` generati.
 
-**Aperto**: il backup finirebbe sullo stesso disco del DB. Se il disco muore,
+**Aperto**: il backup finisce sullo stesso disco del DB. Se il disco muore,
 muore tutto. Valutare una copia verso un secondo posto — NAS, altra macchina
 Tailscale, storage cifrato remoto.
 

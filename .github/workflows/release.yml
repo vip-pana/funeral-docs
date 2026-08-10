@@ -1,0 +1,25 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      # Keeps a rolling "release" PR up to date from conventional commits on main.
+      # Merging that PR bumps the version, updates CHANGELOG.md, tags the release
+      # and publishes it — which is what starts the deploy.
+      - uses: googleapis/release-please-action@v5
+        with:
+          # A PAT rather than the default GITHUB_TOKEN, so the release PR is
+          # authored by a real user: PRs opened by github-actions[bot] never
+          # trigger the CI workflow, and the release PR would sit unverified.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          config-file: .release-please-config.json
+          manifest-file: .release-please-manifest.json
