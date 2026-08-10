@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
 
 import { Field } from "@/components/field";
@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useFormReset } from "@/lib/use-form-reset";
 
 import { changePassword, type PasswordFormState } from "./actions";
 
@@ -20,18 +21,19 @@ export function PasswordForm() {
     PasswordFormState,
     FormData
   >(changePassword, {});
-  const formRef = useRef<HTMLFormElement>(null);
+  const { ref: formRef, reset } = useFormReset();
 
   useEffect(() => {
     if (state.ok) {
       toast.success(state.message ?? "Salvato.");
       // Without the reset the three fields keep the password just set, in
-      // clear as far as the browser is concerned.
-      formRef.current?.reset();
+      // clear as far as the browser is concerned. Only on success: a rejected
+      // change keeps them, so the whole thing is not typed again.
+      reset();
     } else if (state.message) {
       toast.error(state.message);
     }
-  }, [state]);
+  }, [state, reset]);
 
   const err = (name: string) => state.errors?.[name];
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
 
 import { Field } from "@/components/field";
@@ -22,6 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { Bearer } from "@/lib/db/schema";
+import { useFormReset } from "@/lib/use-form-reset";
 
 import {
   addBearer,
@@ -35,18 +36,19 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
     addBearer,
     {},
   );
-  const formRef = useRef<HTMLFormElement>(null);
+  const { ref: formRef, reset } = useFormReset();
 
   useEffect(() => {
     if (state.ok) {
       toast.success(state.message ?? "Salvato.");
       // Without the reset the row just inserted stays in the form and invites
-      // an identical second entry.
-      formRef.current?.reset();
+      // an identical second entry. Only here: after an error the name and the
+      // Conducente tick keep what was chosen, see useFormReset.
+      reset();
     } else if (state.message) {
       toast.error(state.message);
     }
-  }, [state]);
+  }, [state, reset]);
 
   const err = (name: string) => state.errors?.[name];
 

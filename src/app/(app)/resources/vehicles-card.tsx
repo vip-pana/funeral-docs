@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
 
 import { Field } from "@/components/field";
@@ -21,6 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { Vehicle } from "@/lib/db/schema";
+import { useFormReset } from "@/lib/use-form-reset";
 
 import { addVehicle, type VehicleFormState } from "./vehicle-actions";
 import { DeleteVehicleButton } from "./delete-vehicle-button";
@@ -30,18 +31,19 @@ export function VehiclesCard({ vehicles }: { vehicles: Vehicle[] }) {
     addVehicle,
     {},
   );
-  const formRef = useRef<HTMLFormElement>(null);
+  const { ref: formRef, reset } = useFormReset();
 
   useEffect(() => {
     if (state.ok) {
       toast.success(state.message ?? "Salvato.");
       // Without the reset the row just inserted stays in the form and invites
-      // an identical second entry.
-      formRef.current?.reset();
+      // an identical second entry. Only here: after an error the fields keep
+      // what was typed, see useFormReset.
+      reset();
     } else if (state.message) {
       toast.error(state.message);
     }
-  }, [state]);
+  }, [state, reset]);
 
   const err = (name: string) => state.errors?.[name];
 
