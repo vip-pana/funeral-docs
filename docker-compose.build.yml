@@ -1,0 +1,18 @@
+# Costruisce l'immagine di produzione in locale invece di scaricarla da ghcr.io.
+#
+#   docker compose -f docker-compose.prod.yml -f docker-compose.build.yml up -d --build
+#
+# Serve in due casi: quando si lavora al Dockerfile o all'entrypoint, e quando
+# si vuole far girare codice mai rilasciato (una correzione urgente su un ramo).
+# I deploy normali scaricano l'immagine costruita dalla CI e non toccano questo
+# file.
+#
+# `image:` di docker-compose.prod.yml continua a valere, quindi la build locale
+# prende lo stesso nome — il che significa che una `pull` successiva la
+# sovrascrive con la versione del registro. E' voluto: impedisce a un'immagine
+# costruita a mano di sopravvivere alla release che stava rimpiazzando.
+services:
+  app:
+    build:
+      context: .
+      target: runner

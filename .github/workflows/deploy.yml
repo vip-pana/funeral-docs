@@ -1,0 +1,83 @@
+name: Deploy
+
+# Fires when release-please's release PR is merged and it publishes the release.
+# Building here rather than on Victus means the deployed image is the one CI
+# produced, and the box never spends ten minutes compiling better-sqlite3 while
+# the app it is replacing is still serving.
+on:
+  release:
+    types: [published]
+  # Rebuild-and-republish an existing tag by hand: useful when a build failed
+  # for a transient reason, or to reproduce an image without cutting a release.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to build (e.g. v1.2.0)'
+        required: true
+
+permissions:
+  contents: read
+  # Pushing to ghcr.io needs no separate secret: GITHUB_TOKEN is enough.
+  packages: write
+
+jobs:
+  build:
+    name: Build and push image
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # The published tag, or the one typed into workflow_dispatch. Never
+          # the branch head — a release must build the code it was cut from.
+          ref: ${{ inputs.tag || github.event.release.tag_name }}
+
+      - name: Resolve version
+        id: meta
+        run: |
+          tag='${{ inputs.tag || github.event.release.tag_name }}'
+          # Image tags drop the leading v: ghcr.io/…:1.2.0 reads better as a
+          # version than :v1.2.0, and APP_VERSION in .env matches it verbatim.
+          echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Single platform on purpose: Victus is x86_64, and adding linux/arm64
+      # would build it under QEMU — which for the native better-sqlite3 compile
+      # and the Next build means tens of minutes to produce an image nothing
+      # pulls.
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: runner
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:${{ steps.meta.outputs.version }}
+            ghcr.io/${{ github.repository }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Only reached once the image exists, so the host never pulls a tag that was
+  # never published. The host script does the rest: it backs up the database,
+  # refuses the deploy if the release needs an .env key the machine lacks, and
+  # rolls back if the app does not answer.
+  deploy:
+    name: Deploy to production
+    needs: build
+    uses: ./.github/workflows/deploy-to-host.yml
+    with:
+      app: funeral-docs
+      version: ${{ needs.build.outputs.version }}
+      host: victus
+    secrets:
+      TS_OAUTH_CLIENT_ID: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+      TS_OAUTH_SECRET: ${{ secrets.TS_OAUTH_SECRET }}
