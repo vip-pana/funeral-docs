@@ -100,14 +100,75 @@ viene ricavata dal comune tramite il dataset ISTAT.
 In produzione su **Victus**: <https://funeral-docs.tail134f9a.ts.net>, raggiungibile
 solo da dentro la tailnet.
 
-```bash
-cd ~/funeral-docs
-git pull
-docker compose -f docker-compose.prod.yml up -d --build
-```
-
 L'app ha un nodo Tailscale suo (un sidecar nel compose) con il proprio
 certificato Let's Encrypt, e non pubblica porte sull'host: si raggiunge solo dal
 suo nome. Serve una auth key reusable in `TS_AUTHKEY`. Dettagli in
-`DECISIONI-APERTE.md`, dove restano aperti **backup del database** e
-**cifratura del disco**.
+`DECISIONI-APERTE.md`, dove resta aperta la **cifratura del disco**.
+
+### Rilasciare una versione
+
+Il deploy è il merge della release PR. `release-please` la tiene aggiornata da
+solo leggendo i commit convenzionali su `main`: mergiarla alza la versione,
+scrive il `CHANGELOG.md` e pubblica una release. Da lì parte tutto il resto.
+
+`.github/workflows/deploy.yml` costruisce l'immagine per quel tag, la pubblica su
+`ghcr.io/vip-pana/funeral-docs`, e solo dopo chiede a Victus di installarla.
+Sulla macchina non si compila più nulla: l'immagine in esecuzione è quella che la
+CI ha prodotto.
+
+I deploy automatici si evitano di solito per un buon motivo — una release che
+richiede una chiave `.env` nuova manderebbe giù l'app senza nessuno a guardare.
+Qui è la macchina a decidere, non il workflow: `scripts/deploy-release.sh`
+rifiuta una release le cui chiavi `.env` non ha, copia il database prima di
+toccare qualsiasi cosa, e se l'app non risponde rimette l'immagine precedente. Il
+workflow si limita a dire quale versione.
+
+### Come ci arriva un runner su una macchina senza porte aperte
+
+GitHub entra nella tailnet come nodo usa-e-getta con tag `tag:ci`, che la ACL
+lascia raggiungere un solo host su una sola porta:
+
+```json
+{ "src": ["tag:ci"], "dst": ["tag:prod"], "ip": ["tcp:22"] }
+```
+
+Si collega come utente `deploy`, la cui **login shell è
+`/usr/local/sbin/deploy-shell`** (`scripts/deploy-shell.sh`): un wrapper che
+accetta un solo comando, `deploy <app> <versione>`, controlla l'app contro una
+whitelist e la versione contro una regex, e lancia lo script attraverso una
+regola sudoers per singolo comando. Dietro quell'account non c'è nessuna shell
+interattiva, e non c'è nessuna chiave ssh da nessuna parte: è Tailscale SSH ad
+autenticare l'identità sulla tailnet.
+
+Lo stesso wrapper serve anche wealth-tracker sulla stessa macchina: l'app è un
+argomento, non un secondo utente Unix.
+
+### A mano
+
+Sempre disponibile, per una correzione urgente o quando è il workflow a essere
+rotto:
+
+```bash
+./scripts/deploy-release.sh 1.2.0
+```
+
+Fa le stesse cose: si sposta sul tag, controlla le chiavi `.env` nuove, copia il
+database in `~/funeral-docs-backups`, scarica l'immagine, ricrea **solo** il
+container `app` — mai il sidecar Tailscale, che ricreato perderebbe l'identità
+del nodo e slitterebbe a `funeral-docs-1` — e aspetta che la pagina di login
+risponda.
+
+Se non risponde entro due minuti rimette `APP_VERSION` al valore precedente e
+ricrea il container: il rollback non costa una build, l'immagine vecchia è ancora
+nello store locale. Il **database però non torna indietro**: le migrazioni della
+versione fallita sono già applicate. Lo script lo dice a chiare lettere e indica
+il backup appena preso; ripristinarlo resta una scelta manuale, perché
+riscrivere un database in automatico butterebbe via tutto quello che è stato
+salvato nel frattempo.
+
+Per costruire l'immagine in locale invece di scaricarla — lavorando al
+`Dockerfile`, o per far girare codice mai rilasciato:
+
+```bash
+docker compose -f docker-compose.prod.yml -f docker-compose.build.yml up -d --build
+```
