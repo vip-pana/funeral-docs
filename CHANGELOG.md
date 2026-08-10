@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/vip-pana/funeral-docs/compare/v0.2.0...v0.2.1) (2026-08-10)
+
+
+### Correzioni
+
+* keep the values already filled in when a save is rejected ([#4](https://github.com/vip-pana/funeral-docs/issues/4)) ([b18c78b](https://github.com/vip-pana/funeral-docs/commit/b18c78bfc17502418f2181e8dc88670859c62a6a))
+
 ## [0.2.0](https://github.com/vip-pana/funeral-docs/compare/v0.1.0...v0.2.0) (2026-08-10)
 
 
