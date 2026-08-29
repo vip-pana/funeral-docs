@@ -20,13 +20,32 @@ import {
   FieldLabel,
   FieldTitle,
 } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { DOCUMENTS, type DocumentId } from "@/lib/fields";
+
+/**
+ * Today's date in Rome as yyyy-mm-dd, the value an <input type="date"> wants.
+ * `toISOString` would answer in UTC, which is the day before between midnight
+ * and 01:00 (02:00 with daylight saving).
+ */
+function todayInRome(): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Rome",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
 
 export function GeneratePanel({ practiceId }: { practiceId: string }) {
   const [selected, setSelected] = useState<Set<DocumentId>>(
     () => new Set(DOCUMENTS.map((d) => d.id)),
   );
   const [downloading, setDownloading] = useState(false);
+  // Today's date only as a starting point: it is what is printed at the foot
+  // of every document, and reprinting an old practice usually means dating it
+  // back to the day it was filled in.
+  const [documentDate, setDocumentDate] = useState(todayInRome);
 
   function toggle(id: DocumentId) {
     setSelected((prev) => {
@@ -47,7 +66,7 @@ export function GeneratePanel({ practiceId }: { practiceId: string }) {
    * file. With blobs the page never navigates and the block never triggers.
    */
   async function handleDownload() {
-    if (!chosen.length || downloading) return;
+    if (!chosen.length || downloading || !documentDate) return;
     setDownloading(true);
 
     let done = 0;
@@ -55,7 +74,7 @@ export function GeneratePanel({ practiceId }: { practiceId: string }) {
     try {
       for (const doc of chosen) {
         const res = await fetch(
-          `/api/deceased/${practiceId}/generate?doc=${doc.id}`,
+          `/api/deceased/${practiceId}/generate?doc=${doc.id}&date=${documentDate}`,
         );
 
         if (!res.ok) {
@@ -124,6 +143,20 @@ export function GeneratePanel({ practiceId }: { practiceId: string }) {
           ))}
         </FieldGroup>
 
+        <FieldRoot className="max-w-60">
+          <FieldLabel htmlFor="documentDate">Data sui documenti</FieldLabel>
+          <Input
+            id="documentDate"
+            type="date"
+            value={documentDate}
+            onChange={(e) => setDocumentDate(e.target.value)}
+            aria-describedby="documentDate-hint"
+          />
+          <FieldDescription id="documentDate-hint">
+            La data di compilazione stampata in fondo a ogni documento.
+          </FieldDescription>
+        </FieldRoot>
+
         <div className="flex items-center justify-between gap-4">
           <p className="text-muted-foreground text-sm">
             {chosen.length === 0
@@ -132,7 +165,7 @@ export function GeneratePanel({ practiceId }: { practiceId: string }) {
           </p>
           <Button
             onClick={handleDownload}
-            disabled={!chosen.length || downloading}
+            disabled={!chosen.length || downloading || !documentDate}
           >
             {downloading
               ? "Scaricamento…"
