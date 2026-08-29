@@ -8,10 +8,23 @@ import { renderDocument, documentFileName } from "@/lib/docs/render";
 import { DOCUMENTS, type DocumentId } from "@/lib/fields";
 
 /**
+ * Today's date in Rome as yyyy-mm-dd. `toISOString` would answer in UTC, which
+ * is the day before between midnight and 01:00 (02:00 with daylight saving).
+ */
+function todayInRome(): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Rome",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
+
+/**
  * Generates one document of a practice.
  *
- *   GET /api/deceased/<uuid>/generate?doc=3   -> document 3 as .docx
- *   GET /api/deceased/<uuid>/generate         -> the first document
+ *   GET /api/deceased/<uuid>/generate?doc=3&date=2026-08-29 -> doc 3 as .docx
+ *   GET /api/deceased/<uuid>/generate                        -> the first one
  *
  * One file per request: the page asks for several in sequence, so each
  * document arrives as a separate .docx instead of inside an archive that has
@@ -47,6 +60,15 @@ export async function GET(
 
   const documentId = requested as DocumentId;
 
+  // The compilation date comes from the page: the user picks which date the
+  // documents carry, so a practice reprinted months later can still be dated
+  // the day it was filled in. Anything that is not a yyyy-mm-dd falls back to
+  // today in Rome, which is also what an older link without the parameter gets.
+  const requestedDate = request.nextUrl.searchParams.get("date") ?? "";
+  const documentDate = /^\d{4}-\d{2}-\d{2}$/.test(requestedDate)
+    ? requestedDate
+    : todayInRome();
+
   // Read live rather than copied onto the record: correcting a client's address
   // fixes every document reprinted afterwards. Null when the client was deleted
   // — the placeholders then come out empty, as they do for a record saved
@@ -78,8 +100,9 @@ export async function GET(
     ashesProvince: prov(practice.ashesCity),
     ownerBirthProvince: prov(client?.birthCity),
     ownerCompanyProvince: prov(client?.companyCity),
-    // The compilation date is today's, not the one from when it was saved.
-    todayDate: new Date().toISOString().slice(0, 10),
+    // The compilation date is the one chosen on the page, not the one from
+    // when the practice was saved.
+    todayDate: documentDate,
     // The request carries the transport date: that is when it is submitted.
     ownerRequestDate: practice.transportPermitDate,
   };
