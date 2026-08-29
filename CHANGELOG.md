@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/vip-pana/funeral-docs/compare/v0.2.1...v0.3.0) (2026-08-29)
+
+
+### Funzionalità
+
+* let the user pick the date printed on the documents ([#6](https://github.com/vip-pana/funeral-docs/issues/6)) ([a61167d](https://github.com/vip-pana/funeral-docs/commit/a61167dd8b918a22ef8e7d0e8ca694cb0ab1df94))
+
 ## [0.2.1](https://github.com/vip-pana/funeral-docs/compare/v0.2.0...v0.2.1) (2026-08-10)
 
 
