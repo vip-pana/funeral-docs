@@ -85,6 +85,13 @@
       "when": 1790096120445,
       "tag": "0011_large_whiplash",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1790098434379,
+      "tag": "0012_hot_whizzer",
+      "breakpoints": true
     }
   ]
 }

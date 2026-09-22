@@ -25,8 +25,9 @@ export async function getClient(id: string): Promise<Client | null> {
  * them inside the .docx would leave a hole in the printed documents. See
  * src/lib/fields.ts.
  *
- * The plate and the driver name are deliberately absent: they depend on the
- * hearse and the driver picked in the individual practice, not on the client.
+ * The hearse and the driver are deliberately absent: the plate, the make and
+ * the driver's name depend on what was picked in the individual practice, not
+ * on the client.
  */
 export function clientValues(client: Client | null): Record<string, string> {
   if (!client) return {};
@@ -50,5 +51,8 @@ export function clientValues(client: Client | null): Record<string, string> {
     ownerIdDate: client.idDate,
     // Document 9.
     ownerCitizenship: client.citizenship,
+    // Document 11 names the firm's registered office in full. It comes from
+    // the billing details, which reached no document until this one.
+    ownerCompanyAddress: client.companyAddress,
   };
 }

@@ -112,7 +112,7 @@ check('5 docx singolo', d1.suggestedFilename().endsWith('.docx'), d1.suggestedFi
 // content: is the real data in there?
 const z1 = await JSZip.loadAsync(fs.readFileSync(f1));
 const xml = await z1.file('word/document.xml').async('string');
-const txt = [...xml.matchAll(/<w:t[^>]*>([\s\S]*?)<\/w:t>/g)].map(m=>m[1]).join('');
+const txt = [...xml.matchAll(/<w:t(?: [^>]*)?>([\s\S]*?)<\/w:t>/g)].map(m=>m[1]).join('');
 check('6 nome nel documento', txt.includes('Mario') && txt.includes('Rossi'));
 check('  data italiana', txt.includes('12/03/1940'), txt.match(/\d{2}\/\d{2}\/\d{4}/g)?.slice(0,3).join(' '));
 // doc 1 is the Mayor's act: by design it carries no company data
@@ -140,7 +140,7 @@ const f4 = `/tmp/dl_${d4.suggestedFilename()}`;
 await d4.saveAs(f4);
 const z4 = await JSZip.loadAsync(fs.readFileSync(f4));
 const t4 = [...(await z4.file('word/document.xml').async('string'))
-  .matchAll(/<w:t[^>]*>([\s\S]*?)<\/w:t>/g)].map(m=>m[1]).join('');
+  .matchAll(/<w:t(?: [^>]*)?>([\s\S]*?)<\/w:t>/g)].map(m=>m[1]).join('');
 // Read live from the client picked above, not copied onto the record.
 check('  doc4 dati ditta', t4.includes(SEED_CLIENT), SEED_CLIENT);
 check('  doc4 targa autofunebre', t4.includes('FG123AB'), t4.match(/[A-Z]{2}\d{3}[A-Z]{2}/)?.[0] ?? 'assente');
@@ -154,7 +154,7 @@ const f10 = `/tmp/dl_${d10.suggestedFilename()}`;
 await d10.saveAs(f10);
 const z10 = await JSZip.loadAsync(fs.readFileSync(f10));
 const t10 = [...(await z10.file('word/document.xml').async('string'))
-  .matchAll(/<w:t[^>]*>([\s\S]*?)<\/w:t>/g)].map(m=>m[1]).join('');
+  .matchAll(/<w:t(?: [^>]*)?>([\s\S]*?)<\/w:t>/g)].map(m=>m[1]).join('');
 check('  doc10 mandante', t10.includes('Anna') && t10.includes('Bianchi'));
 check('  doc10 in qualita di', t10.includes('figlia'));
 check('  doc10 paternita e maternita',
@@ -175,6 +175,31 @@ check('  doc10 coniuge solo nel ramo spuntato',
 check('  doc10 concessione', t10.includes('perpetua') && t10.includes('1234'));
 check('  doc10 fatturazione', t10.includes('71016'));
 check('  doc10 nessun placeholder', !t10.match(/\{[^}]*\}/));
+
+// document 11 is the only one that names the firm's seat and the hearse model,
+// and the only one holding an image — whose XML carries GUIDs in braces.
+const d11 = got.find(d=>d.suggestedFilename().includes('_11_'));
+const f11 = `/tmp/dl_${d11.suggestedFilename()}`;
+await d11.saveAs(f11);
+const z11 = await JSZip.loadAsync(fs.readFileSync(f11));
+const t11 = [...(await z11.file('word/document.xml').async('string'))
+  .matchAll(/<w:t(?: [^>]*)?>([\s\S]*?)<\/w:t>/g)].map(m=>m[1]).join('');
+// Read live from the client, like every other company detail. It comes from the
+// billing card, which reached no document before this one.
+check('  doc11 sede della ditta', t11.includes('Viale 2 Giugno 264'),
+      t11.includes('Viale') ? '' : 'assente');
+// Copied onto the practice at save time, beside the plate.
+check('  doc11 tipo di autofunebre', t11.includes('Mercedes Vito'));
+check('  doc11 targa', t11.includes('FG123AB'));
+// The request is addressed to the municipality of death, and its heading is set
+// in capitals.
+check('  doc11 comune del decesso', t11.includes('San Severo'));
+check('  doc11 intestazione maiuscola', t11.includes('SAN SEVERO'),
+      t11.match(/COMUNE DI [^ ]+ ?[^ ]*/)?.[0] ?? 'assente');
+// The address fields carry their own "Via", so the form's fixed one was dropped:
+// "in via Via Roma 15" would read twice.
+check('  doc11 niente via doppia', !t11.includes('via Via'));
+check('  doc11 nessun placeholder', !t11.match(/\{[^}]*\}/));
 
 // --- editing ---
 await p.fill('#personDeathPlace','Abitazione');

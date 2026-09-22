@@ -122,7 +122,7 @@ try {
     const res = await p.request.get(`${B}/api/deceased/${id}/generate?doc=4`);
     const zip = await JSZip.loadAsync(await res.body());
     const xml = await zip.file("word/document.xml").async("string");
-    return [...xml.matchAll(/<w:t[^>]*>([\s\S]*?)<\/w:t>/g)].map((m) => m[1]).join("");
+    return [...xml.matchAll(/<w:t(?: [^>]*)?>([\s\S]*?)<\/w:t>/g)].map((m) => m[1]).join("");
   };
 
   check("8 conducente nel documento 4", (await docText()).includes(DRIVER));

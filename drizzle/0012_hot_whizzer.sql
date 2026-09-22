@@ -1,0 +1,1 @@
+ALTER TABLE `practices` ADD `vehicle_name` text DEFAULT '' NOT NULL;

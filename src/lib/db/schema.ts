@@ -73,11 +73,12 @@ export const clients = sqliteTable("clients", {
   /** Printed beside the declarant's name by document 9. */
   citizenship: text("citizenship").notNull().default("italiana"),
 
-  // Billing and contact details of the client company. No document prints them
-  // — `clientValues` deliberately leaves them out — they are here so the office
-  // has them at hand. All optional: a client saved before them stays valid.
-  // Distinct from `address`/`postalCode` above, which are the declarant's
-  // residence and do reach documents 6 and 7.
+  // Billing and contact details of the client company. They were added so the
+  // office has them at hand rather than for the documents, and `clientValues`
+  // still leaves most of them out — `companyAddress` is the exception, named by
+  // document 11 beside the municipality. All optional: a client saved before
+  // them stays valid. Distinct from `address`/`postalCode` above, which are the
+  // declarant's residence and do reach documents 6 and 7.
   companyVatNumber: text("company_vat_number").notNull().default(""),
   companyTaxCode: text("company_tax_code").notNull().default(""),
   companyAddressCity: text("company_address_city").notNull().default(""),
@@ -172,6 +173,12 @@ export const practices = sqliteTable("practices", {
     onDelete: "set null",
   }),
   vehiclePlate: text("vehicle_plate").notNull().default(""),
+  /**
+   * Make and model, as document 11 names it beside the plate. Copied for the
+   * same reason the plate is: renaming a hearse in the list must not change the
+   * documents already issued.
+   */
+  vehicleName: text("vehicle_name").notNull().default(""),
 
   // Same split as the vehicle above: the reference nulls itself out if the
   // driver is deleted, the name is copied so documents already issued keep it.

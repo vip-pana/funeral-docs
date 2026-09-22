@@ -1,26 +1,35 @@
 # Schema campi template
 
-100 campi, sintassi `{campo}` (docxtemplater). Originali intatti in `_backup/`.
+103 campi, sintassi `{campo}` (docxtemplater). Originali intatti in `_backup/`.
 Rigenerabile con `python3 scripts/normalize-templates.py` (documenti 1-5),
 `python3 scripts/placeholders-6-7.py` (allegati 2 e 3),
-`python3 scripts/placeholders-8-9.py` (moduli di cremazione) e
-`python3 scripts/placeholders-10.py` (conferimento del mandato): tutti partono
+`python3 scripts/placeholders-8-9.py` (moduli di cremazione),
+`python3 scripts/placeholders-10.py` (conferimento del mandato) e
+`python3 scripts/placeholders-11.py` (istanza art. 10bis): tutti partono
 da `_backup/`. `pnpm check:templates` verifica che i `.docx` e `fields.ts`
 coincidano nei due sensi.
 
-> Gli allegati 2 e 3 (documenti 6 e 7) e i due moduli di cremazione (8 e 9) sono
-> arrivati come moduli **gia' compilati** con i dati di una persona reale, non
-> come template: non avevano nessun `[campo]` da rinominare. I due script
-> sostituiscono i valori uno `<w:t>` alla volta, perche' i dati sono in grassetto
-> e il testo fisso no, e Word li tiene percio' in run separati che non si possono
-> fondere.
+> Gli allegati 2 e 3 (documenti 6 e 7), i due moduli di cremazione (8 e 9) e
+> l'istanza dell'art. 10bis (11) sono arrivati come moduli **gia' compilati** con
+> i dati di una persona reale, non come template: non avevano nessun `[campo]` da
+> rinominare. I tre script sostituiscono i valori uno `<w:t>` alla volta, perche'
+> i dati sono in grassetto e il testo fisso no, e Word li tiene percio' in run
+> separati che non si possono fondere.
 
 > Il conferimento del mandato (documento 10) e' arrivato invece come modulo in
 > bianco: ogni campo era un tratto di `____`, senza nessun dato da riconoscere.
 > Lo script lo converte indirizzando i run per posizione, verificando il
 > contenuto di ognuno prima di scriverlo: se Word rimescola il documento gli
 > indici scivolano e lo script si ferma invece di mettere il codice fiscale
-> dove va il telefono.
+> dove va il telefono. Il documento 11 usa la stessa tecnica, pur partendo da un
+> modulo compilato: i suoi valori si ripetono troppe volte per essere
+> riconosciuti uno per uno.
+
+> Il documento 11 e' l'unico che contiene un'immagine, e le sue coordinate XML
+> portano dei GUID fra parentesi graffe. Il controllo `check:templates` li
+> leggeva come placeholder perche' il suo regex `<w:t[^>]*>` cattura anche
+> `<w:tab>` e `<w:type>`: ora il tag va chiuso esplicitamente. Stesso errore
+> corretto nelle suite e2e che leggono i `.docx`.
 
 ## I documenti
 
@@ -36,46 +45,48 @@ coincidano nei due sensi.
 | 8 | B7 Richiesta di trasporto e cremazione (L.R. 34/2008 art. 12-13) |
 | 9 | B6 Autorizzazione al trasporto e cremazione (L.R. 34/2008 art. 12-13) |
 | 10 | Conferimento mandato di servizio funebre |
+| 11 | Istanza e rilascio di autorizzazione al trasporto di cadavere (L.R. 34/2008 art. 10bis) |
 
 ## Defunto — anagrafica
 
 | Campo | Descrizione | Doc |
 |---|---|---|
-| `personFirstName` | Nome | 1,2,3,4,5,6,7,8,9,10 |
-| `personLastName` | Cognome | 1,2,3,4,5,6,7,8,9,10 |
-| `personBirthDate` | Data di nascita (gg/mm/aaaa) | 1,2,3,4,6,7,8,9,10 |
-| `personBirthCity` | Comune di nascita | 1,4,6,7,8,9,10 |
-| `personTaxCode` | Codice fiscale | 4,6,7,8,9 |
-| `personResidenceCity` | Comune di residenza | 4,6,7,8,9 |
-| `personResidenceAddress` | Via e numero di residenza | 4,6,7,8,9 |
-| `personCitizenship` | Cittadinanza (default "italiana") | 9,10 |
+| `personFirstName` | Nome | 1,2,3,4,5,6,7,8,9,10,11 |
+| `personLastName` | Cognome | 1,2,3,4,5,6,7,8,9,10,11 |
+| `personBirthDate` | Data di nascita (gg/mm/aaaa) | 1,2,3,4,6,7,8,9,10,11 |
+| `personBirthCity` | Comune di nascita | 1,4,6,7,8,9,10,11 |
+| `personTaxCode` | Codice fiscale | 4,6,7,8,9,11 |
+| `personResidenceCity` | Comune di residenza | 4,6,7,8,9,11 |
+| `personResidenceAddress` | Via e numero di residenza | 4,6,7,8,9,11 |
+| `personCitizenship` | Cittadinanza (default "italiana") | 9,10,11 |
 
 ## Defunto — decesso
 
 | Campo | Descrizione | Doc |
 |---|---|---|
-| `personDeathDate` | Data del decesso (gg/mm/aaaa) | 2,3,4,5,6,7,8,9,10 |
-| `personDeathTime` | Ora del decesso (hh:mm) | 3,4,5,6,7,8,9,10 |
-| `personDeathCity` | Comune del decesso | 4,5,6,7,8,9 |
+| `personDeathDate` | Data del decesso (gg/mm/aaaa) | 2,3,4,5,6,7,8,9,10,11 |
+| `personDeathTime` | Ora del decesso (hh:mm) | 3,4,5,6,7,8,9,10,11 |
+| `personDeathCity` | Comune del decesso | 4,5,6,7,8,9,11 |
 | `personDeathPlace` | Luogo del decesso (es. ospedale) | 4,6,10 |
 
 ## Trasporto
 
 | Campo | Descrizione | Doc |
 |---|---|---|
-| `transportDate` | Data del trasporto | 3,4,10 |
+| `transportDate` | Data del trasporto | 3,4,10,11 |
 | `transportTime` | Ora di partenza (hh:mm) | 3,4,10 |
 | `transportPermitDate` | Data dell'autorizzazione al trasporto | 4 |
-| `ownerVehiclePlate` | Targa dell'autofunebre scelta per il defunto | 2,3,4,7,8,9 |
-| `ownerDriverName` | Nome del conducente scelto per il defunto | 4,7,8,9 |
-| `funeralChurch` | Chiesa per la sosta / esequie | 4,10 |
+| `ownerVehiclePlate` | Targa dell'autofunebre scelta per il defunto | 2,3,4,7,8,9,11 |
+| `ownerVehicleName` | Tipo di autofunebre (es. "Mercedes Vito") | 11 |
+| `ownerDriverName` | Nome del conducente scelto per il defunto | 4,7,8,9,11 |
+| `funeralChurch` | Chiesa per la sosta / esequie | 4,10,11 |
 | `bearerNames` | Necrofori scelti per il defunto, separati da virgola | 7,8,9 |
 
 ## Destinazione
 
 | Campo | Descrizione | Doc |
 |---|---|---|
-| `destinationCity` | Comune di destinazione | 1,2,3 |
+| `destinationCity` | Comune di destinazione | 1,2,3,11 |
 | `destinationProvince` | Provincia di destinazione (sigla) | 2 |
 | `destinationCemetery` | Cimitero / forno crematorio | 4,6,7,10 |
 
@@ -92,7 +103,7 @@ coincidano nei due sensi.
 | Campo | Descrizione | Doc |
 |---|---|---|
 | `crematoryCity` | Comune del forno crematorio | 8,9 |
-| `funeralStopCity` | Comune della sosta per le esequie | 8,9 |
+| `funeralStopCity` | Comune della sosta per le esequie | 8,9,11 |
 | `ashesCity` | Comune nel cui cimitero vengono tumulate le ceneri | 8,9 |
 | `cremationConsentRelative` | Chi ha reso la dichiarazione di volonta', preposizione inclusa (es. "dalla moglie") | 8 |
 | `burialPermitDate` | Data del permesso di seppellimento | 8 |
@@ -204,30 +215,35 @@ coincidano nei due sensi.
 > scritti dentro i `.docx` — rinominarli in `fields.ts` senza rinominarli nei
 > template lascerebbe un buco nei documenti stampati.
 >
-> `ownerVehiclePlate` e `ownerDriverName` non arrivano nemmeno dal cliente: sono
-> l'autofunebre e il conducente scelti per il singolo defunto (tabelle
-> `vehicles` e `bearers`), copiati sulla scheda al salvataggio. I dati del
-> cliente invece no: vengono riletti a ogni generazione.
+> `ownerVehiclePlate`, `ownerVehicleName` e `ownerDriverName` non arrivano
+> nemmeno dal cliente: sono l'autofunebre e il conducente scelti per il singolo
+> defunto (tabelle `vehicles` e `bearers`), copiati sulla scheda al salvataggio.
+> I dati del cliente invece no: vengono riletti a ogni generazione.
+>
+> `ownerCompanyAddress` viene dai dati di fatturazione della scheda cliente, che
+> erano stati registrati perche' l'ufficio li avesse a portata di mano e non
+> raggiungevano nessun documento finche' non e' arrivato l'11.
 
 | Campo | Descrizione | Doc |
 |---|---|---|
-| `ownerFirstName` | Nome del dichiarante | 2,3,4,5,6,7,8,9 |
+| `ownerFirstName` | Nome del dichiarante | 2,3,4,5,6,7,8,9,11 |
 | `ownerMiddleName` | Secondo nome / iniziale | 2,3,4,5,6,7,8,9 |
-| `ownerLastName` | Cognome del dichiarante | 2,3,4,5,6,7,8,9 |
-| `ownerCompanyName` | Ragione sociale | 4,7,8,9,10 |
-| `ownerCompanyCity` | Comune sede della ditta | 4,6,7,8,9 |
+| `ownerLastName` | Cognome del dichiarante | 2,3,4,5,6,7,8,9,11 |
+| `ownerCompanyName` | Ragione sociale | 4,7,8,9,10,11 |
+| `ownerCompanyCity` | Comune sede della ditta | 4,6,7,8,9,11 |
 | `ownerCity` | Comune che rilascia l'autorizzazione | 3,5,6,7,8,9 |
 | `ownerCityName` | Comune di partenza del trasporto | 2,6,7,8,9,10 |
 | `ownerRequestDate` | Data di presentazione della domanda | 2 |
-| `ownerBirthDate` | Data di nascita del dichiarante | 6,7,8,9 |
-| `ownerBirthCity` | Comune di nascita del dichiarante | 6,7,8,9 |
-| `ownerAddress` | Via e numero di residenza del dichiarante | 6,7,9 |
+| `ownerBirthDate` | Data di nascita del dichiarante | 6,7,8,9,11 |
+| `ownerBirthCity` | Comune di nascita del dichiarante | 6,7,8,9,11 |
+| `ownerAddress` | Via e numero di residenza del dichiarante | 6,7,9,11 |
 | `ownerPostalCode` | CAP del dichiarante | 6,7,8 |
-| `ownerIdType` | Tipo di documento (es. CARTA D'IDENTITA) | 6,7,8 |
-| `ownerIdNumber` | Numero del documento | 6,7,8 |
-| `ownerIdIssuer` | Ente che ha rilasciato il documento | 6,7,8 |
-| `ownerIdDate` | Data di rilascio del documento | 6,7,8 |
+| `ownerIdType` | Tipo di documento (es. CARTA D'IDENTITA) | 6,7,8,11 |
+| `ownerIdNumber` | Numero del documento | 6,7,8,11 |
+| `ownerIdIssuer` | Ente che ha rilasciato il documento | 6,7,8,11 |
+| `ownerIdDate` | Data di rilascio del documento | 6,7,8,11 |
 | `ownerCitizenship` | Cittadinanza del dichiarante (default "italiana") | 9 |
+| `ownerCompanyAddress` | Via e numero della sede della ditta | 11 |
 
 ## Sistema — ricavati, mai salvati
 
@@ -237,7 +253,7 @@ coincidano nei due sensi.
 
 | Campo | Descrizione | Doc |
 |---|---|---|
-| `todayDate` | Data di compilazione | 1,2,3,4,5,6,7,8,9,10 |
+| `todayDate` | Data di compilazione | 1,2,3,4,5,6,7,8,9,10,11 |
 | `personBirthProvince` | Provincia di nascita del defunto | 6,7,8,9 |
 | `personResidenceProvince` | Provincia di residenza del defunto | 8,9 |
 | `personDeathProvince` | Provincia del decesso | 8,9 |
@@ -247,6 +263,7 @@ coincidano nei due sensi.
 | `ownerBirthProvince` | Provincia di nascita del dichiarante | 8,9 |
 | `ownerCompanyProvince` | Provincia della sede della ditta | 8,9 |
 | `personAge` | Eta' del defunto, anni compiuti alla data del decesso | 10 |
+| `personDeathCityUpper` | Comune del decesso in maiuscolo, per l'intestazione | 11 |
 
 ---
 
@@ -313,3 +330,4 @@ Non sono placeholder: vanno compilati a mano o promossi a campi dell'app.
   pratica registra il codice fiscale, non una carta; il piè di pagina
   dell'impresa (licenza di P.S. e data, autorizzazione amministrativa, partita
   IVA, codice fiscale); le due righe di firma
+- **Doc 11**: `Prot. n.`, che scrive l'ufficio; le due righe di firma

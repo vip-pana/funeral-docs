@@ -41,6 +41,9 @@ const CLIENTS = [
     idIssuer: "COMUNE DI SAN SEVERO",
     idDate: "2020-06-10",
     citizenship: "italiana",
+    // Document 11 names the firm's seat in full. Deliberately different from
+    // `address` above, which is where the declarant lives.
+    companyAddress: "Viale 2 Giugno 264",
   },
   {
     firstName: "Michele",
@@ -59,6 +62,7 @@ const CLIENTS = [
     idIssuer: "COMUNE DI TORREMAGGIORE",
     idDate: "2021-05-06",
     citizenship: "italiana",
+    companyAddress: "Corso Matteotti 45",
   },
 ];
 
@@ -199,11 +203,13 @@ function seedClients(): number {
     `INSERT INTO clients (id, first_name, middle_name, last_name,
        company_name, company_city, city, city_name,
        birth_date, birth_city, address, postal_code,
-       id_type, id_number, id_issuer, id_date, citizenship)
+       id_type, id_number, id_issuer, id_date, citizenship,
+       company_address)
      VALUES (@id, @firstName, @middleName, @lastName,
        @companyName, @companyCity, @city, @cityName,
        @birthDate, @birthCity, @address, @postalCode,
-       @idType, @idNumber, @idIssuer, @idDate, @citizenship)`,
+       @idType, @idNumber, @idIssuer, @idDate, @citizenship,
+       @companyAddress)`,
   );
 
   // The id is generated here for the same reason as in `seedList` below: this
@@ -269,6 +275,7 @@ function seedPractices() {
        person_death_city, person_death_place, transport_date, transport_time,
        transport_permit_date, funeral_church, destination_city,
        destination_province, destination_cemetery, vehicle_id, vehicle_plate,
+       vehicle_name,
        driver_id, driver_name, bearer_ids, bearer_names,
        crematory_city, funeral_stop_city, ashes_city,
        cremation_consent_relative, burial_permit_date
@@ -280,6 +287,7 @@ function seedPractices() {
        @deathCity, @deathPlace, @transportDate, @transportTime,
        @permitDate, @church, @destinationCity,
        @destinationProvince, @cemetery, @vehicleId, @vehiclePlate,
+       @vehicleName,
        @driverId, @driverName, @bearerIds, @bearerNames,
        @crematoryCity, @funeralStopCity, @ashesCity,
        @consentRelative, @burialPermitDate
@@ -292,8 +300,8 @@ function seedPractices() {
     .prepare("SELECT id, company_name FROM clients ORDER BY last_name")
     .all() as { id: string; company_name: string }[];
   const vehicles = db
-    .prepare("SELECT id, plate FROM vehicles ORDER BY name")
-    .all() as { id: string; plate: string }[];
+    .prepare("SELECT id, name, plate FROM vehicles ORDER BY name")
+    .all() as { id: string; name: string; plate: string }[];
   const drivers = db
     .prepare("SELECT id, name FROM bearers WHERE is_driver = 1 ORDER BY name")
     .all() as { id: string; name: string }[];
@@ -360,6 +368,7 @@ function seedPractices() {
       cemetery: p.cemetery,
       vehicleId: vehicle?.id ?? null,
       vehiclePlate: vehicle?.plate ?? "",
+      vehicleName: vehicle?.name ?? "",
       driverId: driver?.id ?? null,
       driverName: driver?.name ?? "",
       // Four bearers each, as document 7 lists them.
