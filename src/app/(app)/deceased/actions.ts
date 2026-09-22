@@ -48,8 +48,10 @@ async function withSelections(data: PracticeInput) {
     vehicleId: vehicle?.id ?? null,
     // Clearing the vehicle clears the plate — the user is saying "no hearse".
     // Changing it updates the plate, otherwise the field would be misleading:
-    // you edit it and nothing happens.
+    // you edit it and nothing happens. The make and model follow it: document
+    // 11 prints the two side by side.
     vehiclePlate: vehicle?.plate ?? "",
+    vehicleName: vehicle?.name ?? "",
     driverId: driver?.id ?? null,
     driverName: driver?.name ?? "",
     // Ids so reopening the record can tick the right boxes, names because those

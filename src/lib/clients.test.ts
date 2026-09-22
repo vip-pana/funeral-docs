@@ -32,7 +32,10 @@ const CLIENT: Client = {
   companyVatNumber: "01234567890",
   companyTaxCode: "01234567890",
   companyAddressCity: "San Severo",
-  companyAddress: "Via Giuseppe Verdi 12",
+  // Deliberately different from `address` above: that is where the
+  // declarant lives, this is where the firm has its seat. Identical
+  // values would hide the two being swapped.
+  companyAddress: "Viale 2 Giugno 264",
   companyPostalCode: "71016",
   companySdiCode: "ABC1234",
   companyPec: "oofrossi@pec.it",
@@ -68,6 +71,8 @@ describe("clientValues", () => {
       ownerIdDate: "2020-06-10",
       // Document 9.
       ownerCitizenship: "italiana",
+      // Document 11 names the firm's seat in full.
+      ownerCompanyAddress: "Viale 2 Giugno 264",
     });
   });
 

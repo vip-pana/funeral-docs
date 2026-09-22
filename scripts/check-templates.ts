@@ -28,7 +28,13 @@ function placeholdersOf(file: string): Set<string> {
     // Visible text only: the rest of the XML contains braces that are not
     // placeholders. `[\s\S]` rather than the `s` flag because the text can
     // contain newlines.
-    const text = [...xml.matchAll(/<w:t[^>]*>([\s\S]*?)<\/w:t>/g)]
+    //
+    // The opening tag has to be closed explicitly: `<w:t[^>]*>` also matches
+    // `<w:tab>`, `<w:tabs>` and `<w:type>`, and what it then captures is the
+    // markup that follows rather than any text. Document 11 embeds an image
+    // whose attributes carry GUIDs in braces, and they were read as
+    // placeholders.
+    const text = [...xml.matchAll(/<w:t(?: [^>]*)?>([\s\S]*?)<\/w:t>/g)]
       .map((m) => m[1])
       .join("");
     for (const m of text.matchAll(/\{([^{}]+)\}/g)) found.add(m[1].trim());

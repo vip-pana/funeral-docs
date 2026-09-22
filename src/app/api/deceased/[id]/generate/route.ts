@@ -113,16 +113,18 @@ export async function GET(
   const values = {
     ...practice,
     ...clientValues(client),
-    // The template placeholders are still called {ownerVehiclePlate} and
-    // {ownerDriverName}, but the values are the ones copied onto the practice at
-    // save time. They sit after both spreads because the later assignment wins:
-    // this is their only source, and what makes a months-old practice
-    // reprintable.
+    // The template placeholders still carry the `owner` prefix, but these three
+    // values are the ones copied onto the practice at save time. They sit after
+    // both spreads because the later assignment wins: this is their only
+    // source, and what makes a months-old practice reprintable.
     ownerVehiclePlate: practice.vehiclePlate,
+    ownerVehicleName: practice.vehicleName,
     ownerDriverName: practice.driverName,
     personBirthProvince: prov(practice.personBirthCity),
     personResidenceProvince: prov(practice.personResidenceCity),
     personDeathProvince: prov(practice.personDeathCity),
+    // The heading of the authorisation in document 11 is set in capitals.
+    personDeathCityUpper: practice.personDeathCity.toUpperCase(),
     crematoryProvince: prov(practice.crematoryCity),
     funeralStopProvince: prov(practice.funeralStopCity),
     ashesProvince: prov(practice.ashesCity),

@@ -19,10 +19,12 @@ export const OWNER_FIELDS = [
   "ownerCompanyCity",
   "ownerCity",
   "ownerCityName",
-  // These two do not even come from the client: they are the hearse and the
+  // These three do not even come from the client: they are the hearse and the
   // driver picked in the individual practice, and are copied onto it at save
   // time. See src/app/api/deceased/[id]/generate/route.ts
   "ownerVehiclePlate",
+  /** Make and model of the hearse, e.g. "Mercedes Vito". Document 11. */
+  "ownerVehicleName",
   "ownerDriverName",
   "ownerRequestDate",
   // Identify the declarant in full, as attachments 2 and 3 of L.R. 34/2008
@@ -37,6 +39,13 @@ export const OWNER_FIELDS = [
   "ownerIdDate",
   // Document 9 only, which states the citizenship of the declarant.
   "ownerCitizenship",
+  /**
+   * Street and number of the firm's registered office, which document 11 names
+   * beside the municipality. It comes from the billing details on the client
+   * card: those were recorded for the office to have at hand and reached no
+   * document until this one.
+   */
+  "ownerCompanyAddress",
 ] as const;
 
 export const PRACTICE_FIELDS = [
@@ -149,6 +158,13 @@ export const SYSTEM_FIELDS = [
   "personAge",
 
   /**
+   * The municipality of death in capitals, for the heading of the second half
+   * of document 11 ("COMUNE DI X SERVIZI DEMOGRAFICI"), which is set that way.
+   * Uppercased here rather than stored twice, so the two can never disagree.
+   */
+  "personDeathCityUpper",
+
+  /**
    * The tick boxes of document 10, one per option of its two exclusive groups.
    * Each carries "☒" or "□" and is expanded from `personMaritalStatus` and
    * `bodyDestination` when the document is filled. They are fields, not form
@@ -207,6 +223,7 @@ export const FIELD_LABELS: Record<TemplateField, string> = {
   ownerCity: "Comune che rilascia l'autorizzazione",
   ownerCityName: "Comune di partenza",
   ownerVehiclePlate: "Targa autofunebre",
+  ownerVehicleName: "Tipo di autofunebre",
   ownerDriverName: "Conducente",
   ownerRequestDate: "Data della domanda",
   ownerBirthDate: "Data di nascita",
@@ -218,6 +235,7 @@ export const FIELD_LABELS: Record<TemplateField, string> = {
   ownerIdIssuer: "Rilasciato da",
   ownerIdDate: "Data di rilascio",
   ownerCitizenship: "Cittadinanza",
+  ownerCompanyAddress: "Indirizzo della sede",
   personFirstName: "Nome",
   personLastName: "Cognome",
   personTaxCode: "Codice fiscale",
@@ -278,6 +296,7 @@ export const FIELD_LABELS: Record<TemplateField, string> = {
   billingTaxCode: "Codice fiscale",
   billingPhone: "Recapiti telefonici",
   personAge: "Età del defunto",
+  personDeathCityUpper: "Comune del decesso in maiuscolo",
   maritalSingleBox: "Casella celibe/nubile",
   maritalMarriedBox: "Casella coniugato/a",
   maritalSeparatedBox: "Casella separato/a",
@@ -471,6 +490,12 @@ export const DOCUMENTS = [
     file: "10.docx",
     title: "Conferimento mandato di servizio funebre",
     description: "Delega della famiglia all'impresa",
+  },
+  {
+    id: "11",
+    file: "11.docx",
+    title: "Istanza e autorizzazione al trasporto di cadavere",
+    description: "L.R. 34/2008 art. 10bis comma 1, richiesta e rilascio",
   },
 ] as const;
 
