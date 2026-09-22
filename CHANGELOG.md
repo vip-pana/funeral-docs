@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/vip-pana/funeral-docs/compare/v0.5.0...v0.6.0) (2026-09-22)
+
+
+### Funzionalità
+
+* find foreign states alongside the Italian municipalities ([#12](https://github.com/vip-pana/funeral-docs/issues/12)) ([bb50116](https://github.com/vip-pana/funeral-docs/commit/bb501169645e2d9c3107df18ac6b8b0dfbece6cb))
+
 ## [0.5.0](https://github.com/vip-pana/funeral-docs/compare/v0.4.0...v0.5.0) (2026-09-22)
 
 
