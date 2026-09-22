@@ -27,12 +27,12 @@ import type { Comune } from "@/lib/comuni";
 import { cn } from "@/lib/utils";
 
 /**
- * Searchable municipality picker.
+ * Searchable place picker: Italian municipalities and foreign states together.
  *
- * The full list stays on the server (~200 KB): results come from `/api/municipalities`
- * while typing. The field stays free-form — a municipality not in the list can
- * still be confirmed, because rejecting it would block the work over data the
- * app happens not to know.
+ * The full list stays on the server (~230 KB): results come from `/api/municipalities`
+ * while typing. The field stays free-form — a place not in the list can still be
+ * confirmed, because rejecting it would block the work over data the app happens
+ * not to know.
  */
 export function ComuneField({
   name,
@@ -52,7 +52,7 @@ export function ComuneField({
   onChange?: (value: string) => void;
   error?: string;
   hint?: string;
-  /** Called when a municipality is picked from the list. */
+  /** Called when a place is picked from the list. */
   onPick?: (comune: Comune) => void;
 }) {
   // The id matches the field name so the <label> points at a predictable
@@ -111,7 +111,7 @@ export function ComuneField({
     setQuery("");
   }
 
-  /** Accepts the typed text even if it matches no municipality. */
+  /** Accepts the typed text even if it matches nothing in the list. */
   function acceptTyped() {
     const typed = query.trim();
     if (!typed) return;
@@ -158,7 +158,7 @@ export function ComuneField({
               would discard them a second time. */}
           <Command shouldFilter={false}>
             <CommandInput
-              placeholder="Cerca un comune…"
+              placeholder="Cerca un comune o uno stato estero…"
               value={query}
               onValueChange={setQuery}
               onKeyDown={(e) => {
@@ -175,7 +175,7 @@ export function ComuneField({
                   ? "Scrivi almeno due lettere."
                   : loading
                     ? "Ricerca…"
-                    : "Nessun comune trovato. Premi Invio per usare il testo scritto."}
+                    : "Nessun risultato. Premi Invio per usare il testo scritto."}
               </CommandEmpty>
               <CommandGroup>
                 {options.map((c) => (
@@ -191,8 +191,15 @@ export function ComuneField({
                       )}
                     />
                     <span className="flex-1 truncate">{c.nome}</span>
+                    {/* The province for a municipality; for a state the word
+                        itself, because "EE" means nothing to read even though it
+                        is what the documents print. */}
                     <span className="text-muted-foreground text-xs">
-                      {c.provincia}
+                      {c.estero
+                        ? c.storico
+                          ? "Estero · cessato"
+                          : "Estero"
+                        : c.provincia}
                     </span>
                   </CommandItem>
                 ))}

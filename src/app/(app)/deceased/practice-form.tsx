@@ -77,7 +77,8 @@ export function PracticeForm({
   const [birthDate, setBirthDate] = useState(practice?.personBirthDate ?? "");
   const [birthCity, setBirthCity] = useState(practice?.personBirthCity ?? "");
   // The tax code computation needs the cadastral code, not the name, so it is
-  // kept whenever the municipality is picked from the list.
+  // kept whenever a place is picked from the list — a municipality, or the
+  // country of birth for someone born abroad.
   const [birthCode, setBirthCode] = useState("");
   const [computed, setComputed] = useState(false);
   const [destinationCity, setDestinationCity] = useState(
@@ -148,8 +149,8 @@ export function PracticeForm({
 
   /**
    * The cadastral code is deliberately not required here: when it is missing —
-   * which happens on reopening a saved practice, where only the municipality
-   * name survives — it is looked up on click instead.
+   * which happens on reopening a saved practice, where only the place name
+   * survives — it is looked up on click instead.
    */
   const canCompute = Boolean(
     firstName.trim() && lastName.trim() && birthDate && birthCity.trim(),
@@ -163,8 +164,8 @@ export function PracticeForm({
   async function handleCompute() {
     let code = birthCode;
 
-    // Municipality typed by hand, or practice reopened: recover the cadastral
-    // code from the name, which is the only thing stored.
+    // Place typed by hand, or practice reopened: recover the cadastral code
+    // from the name, which is the only thing stored.
     if (!code && birthCity.trim()) {
       const res = await fetch(
         `/api/municipalities?q=${encodeURIComponent(birthCity.trim())}`,
@@ -193,7 +194,7 @@ export function PracticeForm({
       toast.error(
         code
           ? "Dati insufficienti per calcolare il codice fiscale."
-          : `Comune «${birthCity}» non riconosciuto: scegline uno dall'elenco.`,
+          : `«${birthCity}» non riconosciuto: scegli un comune o uno stato dall'elenco.`,
       );
       return;
     }
