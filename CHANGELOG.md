@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/vip-pana/funeral-docs/compare/v0.3.0...v0.4.0) (2026-09-22)
+
+
+### Funzionalità
+
+* add the funeral service mandate as document 10 ([#8](https://github.com/vip-pana/funeral-docs/issues/8)) ([99c3285](https://github.com/vip-pana/funeral-docs/commit/99c328558a399273f7e3deb242646c39835d3424))
+
 ## [0.3.0](https://github.com/vip-pana/funeral-docs/compare/v0.2.1...v0.3.0) (2026-08-29)
 
 
