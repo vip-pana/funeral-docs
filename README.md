@@ -65,7 +65,7 @@ docxtemplater.
 | `templates/FIELDS.md` | i 40 campi e le correzioni fatte ai modelli |
 | `src/lib/fields.ts` | definizione dei campi — unica fonte di verità |
 | `src/lib/docs/render.ts` | riempimento dei documenti |
-| `src/lib/comuni.ts` | 7.904 comuni ISTAT per l'autocompletamento |
+| `src/lib/comuni.ts` | 7.904 comuni ISTAT e 270 stati esteri per l'autocompletamento |
 | `scripts/normalize-templates.py` | normalizza i placeholder nei documenti 1-5 |
 | `scripts/placeholders-6-7.py` | trasforma in template gli allegati 2 e 3 |
 | `tests/` | suite end-to-end su browser |
@@ -94,6 +94,15 @@ esteso il dichiarante: il suo documento d'identità e la residenza stanno nella
 scheda del cliente, mentre i necrofori si scelgono per ogni defunto. La qualità
 con cui presenta la domanda è fissa nel modello. La provincia di nascita non è un campo:
 viene ricavata dal comune tramite il dataset ISTAT.
+
+Accanto ai comuni si cercano i **270 stati esteri** con il loro codice
+catastale, quello che compare nel codice fiscale di chi è nato fuori Italia
+(`Z112` per la Germania). Scegliendone uno la provincia diventa `EE`, come la
+scrive l'anagrafe, e il calcolo del codice fiscale funziona come per un comune.
+Ci sono anche gli stati che non esistono più — URSS, Cecoslovacchia, Iugoslavia
+— perché i loro codici restano validi nei codici fiscali già emessi; nella
+ricerca vengono dopo gli altri. L'elenco si rigenera con
+`python3 scripts/build-stati.py`.
 
 ## Deploy sul server
 

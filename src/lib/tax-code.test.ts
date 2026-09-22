@@ -38,6 +38,17 @@ describe("computeTaxCode", () => {
     expect(computeTaxCode(MARIO)?.slice(3, 6)).toBe("MRA");
   });
 
+  /**
+   * Someone born abroad carries the code of their country of birth where a
+   * municipality's would be. Nothing in the algorithm treats it differently —
+   * what was missing was the country in the list.
+   */
+  it("accepts the code of a foreign country of birth", () => {
+    expect(computeTaxCode({ ...MARIO, cadastralCode: "Z112" })).toBe(
+      "RSSMRA40C12Z112F",
+    );
+  });
+
   it("pads short names with X", () => {
     expect(computeTaxCode({ ...MARIO, firstName: "Al", lastName: "Fo" })).toBe(
       "FOXLAX40C12D643G",
