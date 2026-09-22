@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getClient, clientValues } from "@/lib/clients";
 import { provinciaOf } from "@/lib/comuni";
 import { db, schema } from "@/lib/db";
-import { renderDocument, documentFileName } from "@/lib/docs/render";
+import { ageAt, renderDocument, documentFileName } from "@/lib/docs/render";
 import { DOCUMENTS, type DocumentId } from "@/lib/fields";
 
 /**
@@ -82,6 +82,34 @@ export async function GET(
   const prov = (city: string | undefined) =>
     city ? (provinciaOf(city) ?? "") : "";
 
+  // Document 10 has two groups of tick boxes, one option each. The practice
+  // stores the choice; the glyphs are derived here so an unanswered question
+  // still prints four empty boxes rather than four blanks.
+  const box = (chosen: boolean) => (chosen ? "☒" : "□");
+  const marital = practice.personMaritalStatus;
+  const destination = practice.bodyDestination;
+
+  /**
+   * The spouse is asked for under three of the four marital status boxes, and
+   * the practice stores one set of details because only one box can be ticked.
+   * Each branch has its own placeholders, so the details go to the branch that
+   * was chosen and the other two print blank — otherwise the same name would
+   * appear on all three lines, under boxes carrying no tick.
+   */
+  const spouseIn = (branch: string) =>
+    marital === branch
+      ? {
+          name: practice.spouseName,
+          birthDate: practice.spouseBirthDate,
+          birthCity: practice.spouseBirthCity,
+          residenceCity: practice.spouseResidenceCity,
+        }
+      : { name: "", birthDate: "", birthCity: "", residenceCity: "" };
+
+  const married = spouseIn("coniugato");
+  const separated = spouseIn("separato");
+  const widowed = spouseIn("vedovo");
+
   const values = {
     ...practice,
     ...clientValues(client),
@@ -105,6 +133,34 @@ export async function GET(
     todayDate: documentDate,
     // The request carries the transport date: that is when it is submitted.
     ownerRequestDate: practice.transportPermitDate,
+    // Document 10.
+    personAge: ageAt(practice.personBirthDate, practice.personDeathDate),
+    maritalSingleBox: box(marital === "celibe"),
+    maritalMarriedBox: box(marital === "coniugato"),
+    maritalSeparatedBox: box(marital === "separato"),
+    maritalWidowedBox: box(marital === "vedovo"),
+    destBuriedBox: box(destination === "inumata"),
+    destEntombedBox: box(destination === "tumulata"),
+    destEntombedNewBox: box(destination === "tumulataNuova"),
+    destCrematedBox: box(destination === "cremata"),
+    marriedSpouseName: married.name,
+    marriedSpouseBirthDate: married.birthDate,
+    marriedSpouseBirthCity: married.birthCity,
+    marriedSpouseResidenceCity: married.residenceCity,
+    // The three dates belong to one branch each, so they are blanked the same
+    // way: a separation date printed under an unticked box is as misleading as
+    // a name.
+    marriageDate: marital === "coniugato" ? practice.marriageDate : "",
+    separatedSpouseName: separated.name,
+    separatedSpouseBirthDate: separated.birthDate,
+    separatedSpouseBirthCity: separated.birthCity,
+    separatedSpouseResidenceCity: separated.residenceCity,
+    separationDate: marital === "separato" ? practice.separationDate : "",
+    widowedSpouseName: widowed.name,
+    widowedSpouseDeathDate:
+      marital === "vedovo" ? practice.widowedSpouseDeathDate : "",
+    widowedSpouseDeathCity:
+      marital === "vedovo" ? practice.widowedSpouseDeathCity : "",
   };
 
   const buffer = await renderDocument(documentId, values);

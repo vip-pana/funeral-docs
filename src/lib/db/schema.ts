@@ -210,6 +210,85 @@ export const practices = sqliteTable("practices", {
   /** Printed beside the deceased's name by document 9. */
   personCitizenship: text("person_citizenship").notNull().default("italiana"),
 
+  // The mandate, document 10. Whoever confers it is neither the deceased nor
+  // the client company — usually a relative, and a different one for every
+  // practice, which is why they are columns here and not a table of their own.
+  // All default to empty, like the cremation block above: a practice saved
+  // before document 10 existed stays valid and the other nine print nothing.
+  mandateFirstName: text("mandate_first_name").notNull().default(""),
+  mandateLastName: text("mandate_last_name").notNull().default(""),
+  mandateBirthDate: text("mandate_birth_date").notNull().default(""),
+  mandateBirthCity: text("mandate_birth_city").notNull().default(""),
+  mandateResidenceCity: text("mandate_residence_city").notNull().default(""),
+  mandatePhone: text("mandate_phone").notNull().default(""),
+  mandateTaxCode: text("mandate_tax_code").notNull().default(""),
+  mandateIdType: text("mandate_id_type").notNull().default(""),
+  mandateIdNumber: text("mandate_id_number").notNull().default(""),
+  /** In what capacity the mandate is given, e.g. "figlio", "coniuge". */
+  mandateRelationship: text("mandate_relationship").notNull().default(""),
+
+  // The deceased as document 10 alone describes them, and which it marks
+  // optional on the form itself.
+  personFatherName: text("person_father_name").notNull().default(""),
+  personMotherName: text("person_mother_name").notNull().default(""),
+  personProfession: text("person_profession").notNull().default(""),
+
+  /**
+   * Marital status. Unlike `personSex` the empty string is a legal value: it
+   * means the question was not answered, which is what every practice that does
+   * not print document 10 holds. It is never printed as such — the document has
+   * one tick box per option, filled in at generation time.
+   */
+  personMaritalStatus: text("person_marital_status", {
+    enum: ["", "celibe", "coniugato", "separato", "vedovo"],
+  })
+    .notNull()
+    .default(""),
+
+  // The spouse, under whichever of the three branches is ticked. Married,
+  // separated and widowed ask for the same details in the same positions and
+  // exclude one another, so one group of columns serves all three.
+  spouseName: text("spouse_name").notNull().default(""),
+  spouseBirthDate: text("spouse_birth_date").notNull().default(""),
+  spouseBirthCity: text("spouse_birth_city").notNull().default(""),
+  spouseResidenceCity: text("spouse_residence_city").notNull().default(""),
+  marriageDate: text("marriage_date").notNull().default(""),
+  separationDate: text("separation_date").notNull().default(""),
+  widowedSpouseDeathDate: text("widowed_spouse_death_date")
+    .notNull()
+    .default(""),
+  widowedSpouseDeathCity: text("widowed_spouse_death_city")
+    .notNull()
+    .default(""),
+
+  // The route as document 10 details it. The date, the departure time, the
+  // church and the cemetery are the ones the other documents already use.
+  transportDeparturePlace: text("transport_departure_place")
+    .notNull()
+    .default(""),
+  funeralStopTime: text("funeral_stop_time").notNull().default(""),
+
+  /** What becomes of the body. Tick boxes again, like the marital status. */
+  bodyDestination: text("body_destination", {
+    enum: ["", "inumata", "tumulata", "tumulataNuova", "cremata"],
+  })
+    .notNull()
+    .default(""),
+  concessionType: text("concession_type").notNull().default(""),
+  concessionNumber: text("concession_number").notNull().default(""),
+  /** The crematorium's furnace, when the body is cremated first. */
+  crematoryAra: text("crematory_ara").notNull().default(""),
+
+  // Who the invoice is made out to. Often the person conferring the mandate,
+  // but not always: whoever pays does not have to be the one who signs.
+  billingName: text("billing_name").notNull().default(""),
+  billingAddress: text("billing_address").notNull().default(""),
+  billingStreetNumber: text("billing_street_number").notNull().default(""),
+  billingPostalCode: text("billing_postal_code").notNull().default(""),
+  billingCity: text("billing_city").notNull().default(""),
+  billingTaxCode: text("billing_tax_code").notNull().default(""),
+  billingPhone: text("billing_phone").notNull().default(""),
+
   createdAt: text("created_at")
     .notNull()
     .default(sql`(datetime('now'))`),

@@ -67,6 +67,60 @@ export const PRACTICE_FIELDS = [
   "cremationConsentRelative",
   "burialPermitDate",
   "personCitizenship",
+
+  // Document 10 only, the mandate the family signs. Whoever confers it is
+  // neither the deceased nor the client company: usually a relative, and a
+  // different one for every practice, so they live here rather than in
+  // `clients`.
+  "mandateFirstName",
+  "mandateLastName",
+  "mandateBirthDate",
+  "mandateBirthCity",
+  "mandateResidenceCity",
+  "mandatePhone",
+  "mandateTaxCode",
+  "mandateIdType",
+  "mandateIdNumber",
+  /** In what capacity the mandate is given, e.g. "figlio", "coniuge". */
+  "mandateRelationship",
+
+  // The deceased, as document 10 alone asks for them. Optional by design.
+  "personFatherName",
+  "personMotherName",
+  "personProfession",
+
+  /**
+   * The spouse, under whichever of the three branches is ticked. Married,
+   * legally separated and widowed ask for the same details in the same
+   * positions, and only one can be chosen, so the practice stores one group
+   * rather than three that would always be empty. The document has a separate
+   * placeholder per branch — see the `*Spouse*` system fields — because the two
+   * branches that were not ticked have to print blank.
+   *
+   * None of the stored spouse columns appears here: nothing in any template is
+   * called `spouseName` or `marriageDate`. They are what the system fields are
+   * computed from, like `personMaritalStatus`.
+   */
+
+  // Transport, as document 10 details it. The date, the departure time, the
+  // church and the cemetery are the ones the other documents already use.
+  "transportDeparturePlace",
+  "funeralStopTime",
+
+  "concessionType",
+  "concessionNumber",
+  /** The crematorium's furnace, when the body is cremated first. */
+  "crematoryAra",
+
+  // Who the invoice is made out to. Often the person conferring the mandate,
+  // but not always: whoever pays does not have to be the one who signs.
+  "billingName",
+  "billingAddress",
+  "billingStreetNumber",
+  "billingPostalCode",
+  "billingCity",
+  "billingTaxCode",
+  "billingPhone",
 ] as const;
 
 /**
@@ -87,6 +141,50 @@ export const SYSTEM_FIELDS = [
   "ashesProvince",
   "ownerBirthProvince",
   "ownerCompanyProvince",
+
+  /**
+   * Document 10 prints the age of the deceased. Derived from the two dates
+   * rather than typed, so it cannot contradict them.
+   */
+  "personAge",
+
+  /**
+   * The tick boxes of document 10, one per option of its two exclusive groups.
+   * Each carries "☒" or "□" and is expanded from `personMaritalStatus` and
+   * `bodyDestination` when the document is filled. They are fields, not form
+   * inputs: the form asks for the choice, not for eight glyphs.
+   */
+  "maritalSingleBox",
+  "maritalMarriedBox",
+  "maritalSeparatedBox",
+  "maritalWidowedBox",
+  "destBuriedBox",
+  "destEntombedBox",
+  "destEntombedNewBox",
+  "destCrematedBox",
+
+  /**
+   * The spouse, once per branch of the marital status. The practice stores a
+   * single set of details — only one branch can be true — but the document
+   * repeats the same questions under each box, and the two branches that were
+   * not ticked have to come out blank. So the details are copied into the
+   * chosen branch's fields at generation time and the others are left empty:
+   * one shared placeholder would print the spouse's name on all three lines,
+   * under boxes that carry no tick.
+   */
+  "marriedSpouseName",
+  "marriedSpouseBirthDate",
+  "marriedSpouseBirthCity",
+  "marriedSpouseResidenceCity",
+  "marriageDate",
+  "separatedSpouseName",
+  "separatedSpouseBirthDate",
+  "separatedSpouseBirthCity",
+  "separatedSpouseResidenceCity",
+  "separationDate",
+  "widowedSpouseName",
+  "widowedSpouseDeathDate",
+  "widowedSpouseDeathCity",
 ] as const;
 
 export type OwnerField = (typeof OWNER_FIELDS)[number];
@@ -154,10 +252,73 @@ export const FIELD_LABELS: Record<TemplateField, string> = {
   ashesProvince: "Provincia di destinazione delle ceneri",
   ownerBirthProvince: "Provincia di nascita del dichiarante",
   ownerCompanyProvince: "Provincia della sede della ditta",
+  mandateFirstName: "Nome",
+  mandateLastName: "Cognome",
+  mandateBirthDate: "Data di nascita",
+  mandateBirthCity: "Comune di nascita",
+  mandateResidenceCity: "Comune di residenza",
+  mandatePhone: "Recapito telefonico",
+  mandateTaxCode: "Codice fiscale",
+  mandateIdType: "Tipo di documento",
+  mandateIdNumber: "Numero del documento",
+  mandateRelationship: "In qualità di",
+  personFatherName: "Paternità",
+  personMotherName: "Maternità",
+  personProfession: "Professione",
+  transportDeparturePlace: "Luogo di partenza",
+  funeralStopTime: "Ora della sosta",
+  concessionType: "Tipo di concessione",
+  concessionNumber: "Numero della concessione",
+  crematoryAra: "Ara crematoria",
+  billingName: "Intestatario",
+  billingAddress: "Via",
+  billingStreetNumber: "Numero civico",
+  billingPostalCode: "CAP",
+  billingCity: "Comune",
+  billingTaxCode: "Codice fiscale",
+  billingPhone: "Recapiti telefonici",
+  personAge: "Età del defunto",
+  maritalSingleBox: "Casella celibe/nubile",
+  maritalMarriedBox: "Casella coniugato/a",
+  maritalSeparatedBox: "Casella separato/a",
+  maritalWidowedBox: "Casella vedovo/a",
+  destBuriedBox: "Casella inumata",
+  destEntombedBox: "Casella tumulata in tomba esistente",
+  destEntombedNewBox: "Casella tumulata in sepoltura da prenotare",
+  destCrematedBox: "Casella cremata",
+  marriedSpouseName: "Nome del coniuge",
+  marriedSpouseBirthDate: "Data di nascita del coniuge",
+  marriedSpouseBirthCity: "Comune di nascita del coniuge",
+  marriedSpouseResidenceCity: "Comune di residenza del coniuge",
+  marriageDate: "Data del matrimonio",
+  separatedSpouseName: "Nome del coniuge separato",
+  separatedSpouseBirthDate: "Data di nascita del coniuge separato",
+  separatedSpouseBirthCity: "Comune di nascita del coniuge separato",
+  separatedSpouseResidenceCity: "Comune di residenza del coniuge separato",
+  separationDate: "Data della separazione",
+  widowedSpouseName: "Nome del coniuge defunto",
+  widowedSpouseDeathDate: "Data del decesso del coniuge",
+  widowedSpouseDeathCity: "Comune del decesso del coniuge",
 };
 
 /** Sections of the practice form, in the order they appear. */
 export const PRACTICE_SECTIONS = [
+  {
+    id: "mandante",
+    title: "Mandante",
+    fields: [
+      "mandateFirstName",
+      "mandateLastName",
+      "mandateRelationship",
+      "mandateBirthDate",
+      "mandateBirthCity",
+      "mandateResidenceCity",
+      "mandatePhone",
+      "mandateTaxCode",
+      "mandateIdType",
+      "mandateIdNumber",
+    ],
+  },
   {
     id: "defunto",
     title: "Defunto",
@@ -170,8 +331,17 @@ export const PRACTICE_SECTIONS = [
       "personResidenceCity",
       "personResidenceAddress",
       "personCitizenship",
+      // Document 10 alone asks for these, and states they are optional.
+      "personFatherName",
+      "personMotherName",
+      "personProfession",
     ],
   },
+  // There is no "Stato civile" section: the card exists in the form, but none
+  // of what it asks for is a template field. The choice and the spouse's
+  // details are columns the `*Box` and `*Spouse*` system fields are computed
+  // from, the same way `personSex` feeds the tax code without ever being
+  // printed.
   {
     id: "decesso",
     title: "Decesso",
@@ -190,12 +360,26 @@ export const PRACTICE_SECTIONS = [
       "transportTime",
       "transportPermitDate",
       "funeralChurch",
+      // Document 10 details the route: where the hearse leaves from and at what
+      // time it stops for the service.
+      "transportDeparturePlace",
+      "funeralStopTime",
     ],
   },
   {
     id: "destinazione",
     title: "Destinazione",
-    fields: ["destinationCity", "destinationProvince", "destinationCemetery"],
+    fields: [
+      "destinationCity",
+      "destinationProvince",
+      "destinationCemetery",
+      // What becomes of the body, document 10. The choice itself
+      // (`bodyDestination`) is not a field, for the reason given above the
+      // marital status section: it prints as tick boxes.
+      "concessionType",
+      "concessionNumber",
+      "crematoryAra",
+    ],
   },
   {
     id: "cremazione",
@@ -206,6 +390,19 @@ export const PRACTICE_SECTIONS = [
       "ashesCity",
       "cremationConsentRelative",
       "burialPermitDate",
+    ],
+  },
+  {
+    id: "fatturazione",
+    title: "Fatturazione",
+    fields: [
+      "billingName",
+      "billingAddress",
+      "billingStreetNumber",
+      "billingPostalCode",
+      "billingCity",
+      "billingTaxCode",
+      "billingPhone",
     ],
   },
 ] as const satisfies readonly {
@@ -268,6 +465,12 @@ export const DOCUMENTS = [
     file: "9.docx",
     title: "B6 Autorizzazione al trasporto e cremazione",
     description: "L.R. 34/2008 art. 12-13, rilasciata dal Comune",
+  },
+  {
+    id: "10",
+    file: "10.docx",
+    title: "Conferimento mandato di servizio funebre",
+    description: "Delega della famiglia all'impresa",
   },
 ] as const;
 

@@ -38,12 +38,41 @@ const v = {
   funeralChurch:'Chiesa San Severino',
   destinationCity:'Foggia',
   destinationCemetery:'Cimitero Comunale',
+  // The mandate, document 10. The spouse's details and the crematorium's
+  // furnace are left out here: they only appear once the marital status and
+  // the destination are picked, which happens below.
+  mandateFirstName:'Anna', mandateLastName:'Bianchi',
+  mandateRelationship:'figlia',
+  mandateBirthDate:'1970-05-02', mandateBirthCity:'San Severo',
+  mandateResidenceCity:'San Severo',
+  mandatePhone:'3331234567', mandateTaxCode:'BNCNNA70E42I158O',
+  mandateIdType:"Carta d'identita", mandateIdNumber:'CA1577CS',
+  personFatherName:'Giuseppe', personMotherName:'Lucia Verdi',
+  personProfession:'Contadino',
+  transportDeparturePlace:'Obitorio comunale', funeralStopTime:'09:30',
+  billingName:'Anna Bianchi', billingAddress:'Sant Agostino',
+  billingStreetNumber:'3', billingPostalCode:'71016',
+  billingCity:'San Severo', billingTaxCode:'BNCNNA70E42I158O',
+  billingPhone:'3331234567',
 };
 // The client is required, and fillPractice picks it: without one the form does
 // not save at all, so this is checked before the optional hearse and driver.
 await fillPractice(p, v);
 const hasClient = await p.$eval('#clientId', el => (el.textContent ?? '').trim());
 check('3a cliente selezionato', hasClient.includes(SEED_CLIENT), hasClient);
+
+// Document 10's two tick-box groups. Picking one reveals the fields that
+// belong to it: the other branches stay out of the form, which is what keeps
+// the card readable, so they can only be filled after the choice.
+await pickSelect(p, 'personMaritalStatus', 'Coniugato/a');
+await fillPractice(p, {
+  spouseName:'Carla Neri', marriageDate:'1965-06-20',
+  spouseBirthDate:'1944-01-15', spouseBirthCity:'Torremaggiore',
+  spouseResidenceCity:'San Severo',
+}, {client:false});
+await pickSelect(p, 'bodyDestination', 'Tumulata in tomba');
+await fillPractice(p, {concessionType:'perpetua', concessionNumber:'1234'},
+                   {client:false});
 // Hearse and driver are left behind by veicoli.mjs and conducenti.mjs, which
 // run first: without them plate and name would not reach the document and the
 // checks below would be pointless.
@@ -95,7 +124,9 @@ p.on('download', d => got.push(d));
 for (let i=0;i<nDocs;i++) await docBoxes.nth(i).check();
 await p.waitForTimeout(300);
 await p.click('button:has-text("Scarica")');
-for (let i=0; i<60 && got.length<nDocs; i++) await p.waitForTimeout(250);
+// Scaled to the number of templates rather than fixed: the panel fetches them
+// one at a time, so the wait has to grow as documents are added.
+for (let i=0; i<nDocs*15 && got.length<nDocs; i++) await p.waitForTimeout(250);
 
 check(`7 ${nDocs} download separati`, got.length===nDocs, `${got.length}/${nDocs}`);
 const names = got.map(d=>d.suggestedFilename());
@@ -116,6 +147,34 @@ check('  doc4 targa autofunebre', t4.includes('FG123AB'), t4.match(/[A-Z]{2}\d{3
 check('  doc4 conducente', t4.includes('Giuseppe Bianchi'), '');
 check('  doc4 codice fiscale', t4.includes('RSSMRA40C12D643D'));
 check('  doc4 nessun placeholder', !t4.match(/\{[^}]*\}/));
+
+// document 10 is the mandate: the only one with tick boxes and a derived age
+const d10 = got.find(d=>d.suggestedFilename().includes('_10_'));
+const f10 = `/tmp/dl_${d10.suggestedFilename()}`;
+await d10.saveAs(f10);
+const z10 = await JSZip.loadAsync(fs.readFileSync(f10));
+const t10 = [...(await z10.file('word/document.xml').async('string'))
+  .matchAll(/<w:t[^>]*>([\s\S]*?)<\/w:t>/g)].map(m=>m[1]).join('');
+check('  doc10 mandante', t10.includes('Anna') && t10.includes('Bianchi'));
+check('  doc10 in qualita di', t10.includes('figlia'));
+check('  doc10 paternita e maternita',
+      t10.includes('Giuseppe') && t10.includes('Lucia Verdi'));
+// 12/03/1940 to 04/08/2026: the birthday had already come round.
+check('  doc10 eta calcolata', t10.includes('di anni 86'),
+      t10.match(/di anni [^ ]*/)?.[0] ?? 'assente');
+// One tick and three empty boxes per group, so eight in all.
+check('  doc10 una spunta per gruppo',
+      (t10.match(/☒/g) ?? []).length === 2, `${(t10.match(/☒/g) ?? []).length} spunte`);
+check('  doc10 caselle non spuntate',
+      (t10.match(/□/g) ?? []).length === 6, `${(t10.match(/□/g) ?? []).length} vuote`);
+// The spouse is stored once but printed under the chosen branch only: the two
+// lines that carry no tick have to stay blank.
+check('  doc10 coniuge solo nel ramo spuntato',
+      (t10.match(/Carla Neri/g) ?? []).length === 1,
+      `${(t10.match(/Carla Neri/g) ?? []).length} occorrenze`);
+check('  doc10 concessione', t10.includes('perpetua') && t10.includes('1234'));
+check('  doc10 fatturazione', t10.includes('71016'));
+check('  doc10 nessun placeholder', !t10.match(/\{[^}]*\}/));
 
 // --- editing ---
 await p.fill('#personDeathPlace','Abitazione');

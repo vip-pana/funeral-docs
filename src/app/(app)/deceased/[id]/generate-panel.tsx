@@ -97,6 +97,13 @@ export function GeneratePanel({ practiceId }: { practiceId: string }) {
         // Release the blob: otherwise the memory stays held until reload.
         URL.revokeObjectURL(url);
         done++;
+
+        // Chrome drops downloads fired too close together, even from blobs: at
+        // ten documents the last one silently never arrived. A pause between
+        // clicks is enough, and costs a second in all on a full set.
+        if (done < chosen.length) {
+          await new Promise((resolve) => setTimeout(resolve, 150));
+        }
       }
 
       if (done) {
