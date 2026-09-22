@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/vip-pana/funeral-docs/compare/v0.4.0...v0.5.0) (2026-09-22)
+
+
+### Funzionalità
+
+* add the art. 10bis transport authorisation as document 11 ([#10](https://github.com/vip-pana/funeral-docs/issues/10)) ([0c59ab0](https://github.com/vip-pana/funeral-docs/commit/0c59ab032c2d8c3cbbc00fd973c4b59955d5033b))
+
 ## [0.4.0](https://github.com/vip-pana/funeral-docs/compare/v0.3.0...v0.4.0) (2026-09-22)
 
 
