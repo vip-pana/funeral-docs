@@ -90,6 +90,17 @@ export function PracticeForm({
     practice?.clientId ?? (clients.length === 1 ? clients[0].id : ""),
   );
 
+  // Document 10. Both drive which sub-fields are shown: they are the first
+  // conditional fields in the form, and the alternative — twelve inputs that
+  // contradict one another, all but three of them always empty — reads far
+  // worse than the card it would save.
+  const [maritalStatus, setMaritalStatus] = useState(
+    practice?.personMaritalStatus ?? "",
+  );
+  const [bodyDestination, setBodyDestination] = useState(
+    practice?.bodyDestination ?? "",
+  );
+
   // The client may have been deleted after saving: the record keeps the name,
   // but the list no longer has an entry to select.
   const missingClient = Boolean(
@@ -197,6 +208,33 @@ export function PracticeForm({
     practice ? (practice[name] as string) : undefined;
 
   /**
+   * Fills the invoice details from the mandator's. A one-off copy rather than
+   * derived state: the two coincide often enough to be worth a click, but the
+   * person paying is not always the one signing, so what lands in the fields
+   * stays editable.
+   *
+   * Read straight off the form because these inputs are uncontrolled, as most
+   * of this form is. The municipality is the exception — `ComuneField` keeps
+   * its own state and only syncs a hidden input, so it cannot be written this
+   * way and is left for the user to pick.
+   */
+  function copyMandateToBilling() {
+    const form = formRef.current;
+    if (!form) return;
+
+    const get = (name: string) =>
+      (form.elements.namedItem(name) as HTMLInputElement | null)?.value ?? "";
+    const set = (name: string, value: string) => {
+      const input = form.elements.namedItem(name) as HTMLInputElement | null;
+      if (input) input.value = value;
+    };
+
+    set("billingName", `${get("mandateFirstName")} ${get("mandateLastName")}`.trim());
+    set("billingTaxCode", get("mandateTaxCode"));
+    set("billingPhone", get("mandatePhone"));
+  }
+
+  /**
    * The tax code carries birth date and municipality. They are filled in
    * automatically, but only where the field is still empty — a hand-entered
    * value must not be overwritten.
@@ -268,6 +306,85 @@ export function PracticeForm({
               </FieldDescription>
             )}
           </FieldRoot>
+        </CardContent>
+      </Card>
+
+      {/* Only document 10 uses this card. Whoever confers the mandate is
+          usually a relative of the deceased — neither the client company nor
+          the deceased — so the details live on the practice. */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Mandante</CardTitle>
+          <CardDescription>
+            Chi conferisce il mandato. Serve solo al documento 10.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-2">
+          <Field
+            name="mandateFirstName"
+            label={FIELD_LABELS.mandateFirstName}
+            defaultValue={val("mandateFirstName")}
+            error={err("mandateFirstName")}
+          />
+          <Field
+            name="mandateLastName"
+            label={FIELD_LABELS.mandateLastName}
+            defaultValue={val("mandateLastName")}
+            error={err("mandateLastName")}
+          />
+          <Field
+            name="mandateRelationship"
+            label={FIELD_LABELS.mandateRelationship}
+            defaultValue={val("mandateRelationship")}
+            error={err("mandateRelationship")}
+            hint="Es. figlio, coniuge, fratello"
+          />
+          <Field
+            name="mandateBirthDate"
+            label={FIELD_LABELS.mandateBirthDate}
+            type="date"
+            defaultValue={val("mandateBirthDate")}
+            error={err("mandateBirthDate")}
+          />
+          <ComuneField
+            name="mandateBirthCity"
+            label={FIELD_LABELS.mandateBirthCity}
+            defaultValue={val("mandateBirthCity")}
+            error={err("mandateBirthCity")}
+          />
+          <ComuneField
+            name="mandateResidenceCity"
+            label={FIELD_LABELS.mandateResidenceCity}
+            defaultValue={val("mandateResidenceCity")}
+            error={err("mandateResidenceCity")}
+          />
+          <Field
+            name="mandatePhone"
+            label={FIELD_LABELS.mandatePhone}
+            type="tel"
+            defaultValue={val("mandatePhone")}
+            error={err("mandatePhone")}
+          />
+          <Field
+            name="mandateTaxCode"
+            label={FIELD_LABELS.mandateTaxCode}
+            defaultValue={val("mandateTaxCode")}
+            error={err("mandateTaxCode")}
+            inputClassName="uppercase"
+          />
+          <Field
+            name="mandateIdType"
+            label={FIELD_LABELS.mandateIdType}
+            defaultValue={val("mandateIdType")}
+            error={err("mandateIdType")}
+            hint="Es. carta d'identità"
+          />
+          <Field
+            name="mandateIdNumber"
+            label={FIELD_LABELS.mandateIdNumber}
+            defaultValue={val("mandateIdNumber")}
+            error={err("mandateIdNumber")}
+          />
         </CardContent>
       </Card>
 
@@ -385,6 +502,153 @@ export function PracticeForm({
             error={err("personCitizenship")}
             hint="Documento 9"
           />
+          {/* Document 10 alone asks for these, and marks them optional on the
+              printed form itself. */}
+          <Field
+            name="personFatherName"
+            label={FIELD_LABELS.personFatherName}
+            defaultValue={val("personFatherName")}
+            error={err("personFatherName")}
+            hint="Facoltativo, documento 10"
+          />
+          <Field
+            name="personMotherName"
+            label={FIELD_LABELS.personMotherName}
+            defaultValue={val("personMotherName")}
+            error={err("personMotherName")}
+            hint="Facoltativo, documento 10"
+          />
+          <Field
+            name="personProfession"
+            label={FIELD_LABELS.personProfession}
+            defaultValue={val("personProfession")}
+            error={err("personProfession")}
+            hint="Facoltativo, documento 10"
+          />
+        </CardContent>
+      </Card>
+
+      {/* Document 10 prints one tick box per option, so only the details of the
+          chosen one are asked for: the three branches share the same fields and
+          exclude one another. */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Stato civile</CardTitle>
+          <CardDescription>
+            Facoltativo. Serve solo al documento 10.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-2">
+          <FieldRoot>
+            <FieldLabel htmlFor="personMaritalStatus">Stato civile</FieldLabel>
+            {/* Radix forbids a SelectItem with an empty value, so "not stated"
+                stays the placeholder rather than an entry. Nothing extra is
+                needed to post it: the hidden native select Radix keeps in the
+                form adds an empty option of its own while the placeholder is
+                showing, so the field arrives as "". */}
+            <Select
+              name="personMaritalStatus"
+              value={maritalStatus}
+              onValueChange={(v) =>
+                setMaritalStatus(v as typeof maritalStatus)
+              }
+            >
+              <SelectTrigger id="personMaritalStatus" className="w-full">
+                <SelectValue placeholder="Non indicato" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="celibe">Celibe / Nubile</SelectItem>
+                <SelectItem value="coniugato">Coniugato/a</SelectItem>
+                <SelectItem value="separato">Separato/a legalmente</SelectItem>
+                <SelectItem value="vedovo">Vedovo/a</SelectItem>
+              </SelectContent>
+            </Select>
+            <FieldDescription>
+              Spunta la casella corrispondente nel documento 10
+            </FieldDescription>
+          </FieldRoot>
+
+          {maritalStatus === "coniugato" && (
+            <Field
+              name="marriageDate"
+              label={FIELD_LABELS.marriageDate}
+              type="date"
+              defaultValue={val("marriageDate")}
+              error={err("marriageDate")}
+            />
+          )}
+          {maritalStatus === "separato" && (
+            <Field
+              name="separationDate"
+              label={FIELD_LABELS.separationDate}
+              type="date"
+              defaultValue={val("separationDate")}
+              error={err("separationDate")}
+            />
+          )}
+          {maritalStatus === "vedovo" && (
+            <>
+              <Field
+                name="widowedSpouseDeathDate"
+                label={FIELD_LABELS.widowedSpouseDeathDate}
+                type="date"
+                defaultValue={val("widowedSpouseDeathDate")}
+                error={err("widowedSpouseDeathDate")}
+              />
+              <ComuneField
+                name="widowedSpouseDeathCity"
+                label={FIELD_LABELS.widowedSpouseDeathCity}
+                defaultValue={val("widowedSpouseDeathCity")}
+                error={err("widowedSpouseDeathCity")}
+              />
+            </>
+          )}
+
+          {/* All three branches ask the same questions about the spouse in the
+              same positions, and only one can be true, so the form asks once.
+              The document has a placeholder per branch: the answers are copied
+              into the chosen one when it is filled. The labels are written out
+              here rather than taken from FIELD_LABELS, which names those
+              per-branch fields and not this shared group. */}
+          {maritalStatus !== "" && maritalStatus !== "celibe" && (
+            <>
+              <Field
+                name="spouseName"
+                label={
+                  maritalStatus === "vedovo"
+                    ? "Nome del coniuge defunto"
+                    : "Nome del coniuge"
+                }
+                defaultValue={val("spouseName")}
+                error={err("spouseName")}
+              />
+              {/* The widowed branch does not ask where the spouse was born or
+                  lived, only where and when they died. */}
+              {maritalStatus !== "vedovo" && (
+                <>
+                  <Field
+                    name="spouseBirthDate"
+                    label="Data di nascita del coniuge"
+                    type="date"
+                    defaultValue={val("spouseBirthDate")}
+                    error={err("spouseBirthDate")}
+                  />
+                  <ComuneField
+                    name="spouseBirthCity"
+                    label="Comune di nascita del coniuge"
+                    defaultValue={val("spouseBirthCity")}
+                    error={err("spouseBirthCity")}
+                  />
+                  <ComuneField
+                    name="spouseResidenceCity"
+                    label="Comune di residenza del coniuge"
+                    defaultValue={val("spouseResidenceCity")}
+                    error={err("spouseResidenceCity")}
+                  />
+                </>
+              )}
+            </>
+          )}
         </CardContent>
       </Card>
 
@@ -455,6 +719,23 @@ export function PracticeForm({
             defaultValue={val("funeralChurch")}
             error={err("funeralChurch")}
             hint="Facoltativo"
+          />
+          {/* Document 10 details the route: where the hearse leaves from and at
+              what time it stops for the service. */}
+          <Field
+            name="transportDeparturePlace"
+            label={FIELD_LABELS.transportDeparturePlace}
+            defaultValue={val("transportDeparturePlace")}
+            error={err("transportDeparturePlace")}
+            hint="Facoltativo, documento 10"
+          />
+          <Field
+            name="funeralStopTime"
+            label={FIELD_LABELS.funeralStopTime}
+            type="time"
+            defaultValue={val("funeralStopTime")}
+            error={err("funeralStopTime")}
+            hint="Facoltativo, documento 10"
           />
           <FieldRoot>
             <FieldLabel htmlFor="vehicleId">Autofunebre</FieldLabel>
@@ -580,6 +861,67 @@ export function PracticeForm({
             defaultValue={val("destinationCemetery")}
             error={err("destinationCemetery")}
           />
+          {/* What becomes of the body: four tick boxes in document 10, of which
+              two ask for details. Same placeholder-as-"not stated" trick as the
+              marital status above. */}
+          <FieldRoot className="sm:col-span-3">
+            <FieldLabel htmlFor="bodyDestination">
+              Destinazione della salma
+            </FieldLabel>
+            <Select
+              name="bodyDestination"
+              value={bodyDestination}
+              onValueChange={(v) =>
+                setBodyDestination(v as typeof bodyDestination)
+              }
+            >
+              <SelectTrigger id="bodyDestination" className="w-full">
+                <SelectValue placeholder="Non indicata" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="inumata">
+                  Inumata nel cimitero indicato
+                </SelectItem>
+                <SelectItem value="tumulata">
+                  Tumulata in tomba già esistente
+                </SelectItem>
+                <SelectItem value="tumulataNuova">
+                  Tumulata in sepoltura da prenotare
+                </SelectItem>
+                <SelectItem value="cremata">
+                  Preventivamente cremata
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <FieldDescription>
+              Spunta la casella corrispondente nel documento 10
+            </FieldDescription>
+          </FieldRoot>
+
+          {bodyDestination === "tumulata" && (
+            <>
+              <Field
+                name="concessionType"
+                label={FIELD_LABELS.concessionType}
+                defaultValue={val("concessionType")}
+                error={err("concessionType")}
+              />
+              <Field
+                name="concessionNumber"
+                label={FIELD_LABELS.concessionNumber}
+                defaultValue={val("concessionNumber")}
+                error={err("concessionNumber")}
+              />
+            </>
+          )}
+          {bodyDestination === "cremata" && (
+            <Field
+              name="crematoryAra"
+              label={FIELD_LABELS.crematoryAra}
+              defaultValue={val("crematoryAra")}
+              error={err("crematoryAra")}
+            />
+          )}
         </CardContent>
       </Card>
 
@@ -625,6 +967,89 @@ export function PracticeForm({
             type="date"
             defaultValue={val("burialPermitDate")}
             error={err("burialPermitDate")}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Who the invoice is made out to, document 10. Usually the person
+          conferring the mandate, but whoever pays does not have to be the one
+          who signs, so the two are separate. */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Fatturazione</CardTitle>
+          <CardDescription>
+            A chi intestare la fattura. Serve solo al documento 10.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-2">
+          <FieldRoot className="sm:col-span-2">
+            <div className="flex items-center gap-2">
+              {/* Copies the mandator's details into the fields once, rather
+                  than deriving them: the two coincide often enough to be worth
+                  a click, and what lands here stays editable. */}
+              <Checkbox
+                id="billingSameAsMandate"
+                onCheckedChange={(checked) => {
+                  if (checked !== true) return;
+                  copyMandateToBilling();
+                }}
+              />
+              <FieldLabel htmlFor="billingSameAsMandate" className="font-normal">
+                Copia i dati del mandante
+              </FieldLabel>
+            </div>
+            <FieldDescription>
+              Nome, codice fiscale e telefono. L&apos;indirizzo di fatturazione
+              non è fra i dati del mandante: va scritto qui.
+            </FieldDescription>
+          </FieldRoot>
+          <Field
+            name="billingName"
+            label={FIELD_LABELS.billingName}
+            className="sm:col-span-2"
+            defaultValue={val("billingName")}
+            error={err("billingName")}
+            hint="Nome e cognome, o ragione sociale"
+          />
+          <Field
+            name="billingAddress"
+            label={FIELD_LABELS.billingAddress}
+            defaultValue={val("billingAddress")}
+            error={err("billingAddress")}
+          />
+          <Field
+            name="billingStreetNumber"
+            label={FIELD_LABELS.billingStreetNumber}
+            defaultValue={val("billingStreetNumber")}
+            error={err("billingStreetNumber")}
+          />
+          <Field
+            name="billingPostalCode"
+            label={FIELD_LABELS.billingPostalCode}
+            defaultValue={val("billingPostalCode")}
+            error={err("billingPostalCode")}
+            maxLength={5}
+          />
+          <ComuneField
+            name="billingCity"
+            label={FIELD_LABELS.billingCity}
+            defaultValue={val("billingCity")}
+            error={err("billingCity")}
+          />
+          <Field
+            name="billingTaxCode"
+            label={FIELD_LABELS.billingTaxCode}
+            defaultValue={val("billingTaxCode")}
+            error={err("billingTaxCode")}
+            inputClassName="uppercase"
+            hint="16 caratteri, o 11 cifre per una società"
+          />
+          <Field
+            name="billingPhone"
+            label={FIELD_LABELS.billingPhone}
+            type="tel"
+            defaultValue={val("billingPhone")}
+            error={err("billingPhone")}
           />
         </CardContent>
       </Card>

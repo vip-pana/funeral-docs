@@ -213,6 +213,66 @@ describe("practiceSchema", () => {
     expect(result.success && result.data.destinationProvince).toBe("FG");
   });
 
+  /**
+   * Document 10 is one of ten: a practice that never prints it must still save,
+   * so the whole mandate block has to pass while empty.
+   */
+  it("accepts a practice with no mandate data", () => {
+    const result = parse();
+    expect(result.success && result.data.mandateFirstName).toBe("");
+    expect(result.success && result.data.mandateTaxCode).toBe("");
+    expect(result.success && result.data.billingName).toBe("");
+  });
+
+  /**
+   * The empty string is a legal answer, not a missing one: it means the
+   * question was not put. An unanswered Select posts exactly that.
+   */
+  it("leaves the marital status and the body destination unstated", () => {
+    const result = parse();
+    expect(result.success && result.data.personMaritalStatus).toBe("");
+    expect(result.success && result.data.bodyDestination).toBe("");
+  });
+
+  it("rejects a marital status that is not one of the four boxes", () => {
+    expect(
+      errorOn(parse({ personMaritalStatus: "divorziato" }), "personMaritalStatus"),
+    ).toBeDefined();
+  });
+
+  it("rejects a body destination that is not one of the four boxes", () => {
+    expect(
+      errorOn(parse({ bodyDestination: "dispersa" }), "bodyDestination"),
+    ).toBeDefined();
+  });
+
+  /** Blank is fine, but a tax code that is typed in is checked. */
+  it("checks the mandator's tax code only when there is one", () => {
+    expect(parse({ mandateTaxCode: "" }).success).toBe(true);
+    expect(errorOn(parse({ mandateTaxCode: "XXX" }), "mandateTaxCode"))
+      .toBeDefined();
+    expect(parse({ mandateTaxCode: valid("RSSMRA80A01H501") }).success).toBe(
+      true,
+    );
+  });
+
+  /** The invoice can be made out to a company, which has an 11-digit code. */
+  it("accepts either kind of tax code for the invoice", () => {
+    expect(parse({ billingTaxCode: "12345678901" }).success).toBe(true);
+    expect(parse({ billingTaxCode: valid("RSSMRA80A01H501") }).success).toBe(
+      true,
+    );
+    expect(errorOn(parse({ billingTaxCode: "1234" }), "billingTaxCode"))
+      .toBeDefined();
+  });
+
+  it("checks the stop time only when there is one", () => {
+    expect(parse({ funeralStopTime: "" }).success).toBe(true);
+    expect(parse({ funeralStopTime: "15:30" }).success).toBe(true);
+    expect(errorOn(parse({ funeralStopTime: "99:99" }), "funeralStopTime"))
+      .toBeDefined();
+  });
+
   it("rejects a province that is not two letters", () => {
     expect(errorOn(parse({ destinationProvince: "Foggia" }), "destinationProvince"))
       .toMatch(/2 lettere/);

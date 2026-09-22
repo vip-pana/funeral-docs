@@ -250,6 +250,57 @@ export const practiceSchema = z.object({
   cremationConsentRelative: optionalText,
   burialPermitDate: isoDate.optional().or(z.literal("")),
   personCitizenship: optionalText,
+
+  // Document 10, the mandate the family signs. Nothing here is required: it is
+  // one document out of ten, and whoever does not print it must not be stopped
+  // from saving. What is typed in is still checked, though — a wrong tax code
+  // on a mandate is worse than a blank one.
+  mandateFirstName: optionalText,
+  mandateLastName: optionalText,
+  mandateBirthDate: isoDate.optional().or(z.literal("")),
+  mandateBirthCity: optionalText,
+  mandateResidenceCity: optionalText,
+  mandatePhone: optionalText,
+  mandateTaxCode: blankOr(taxCode),
+  mandateIdType: optionalText,
+  mandateIdNumber: optionalText,
+  mandateRelationship: optionalText,
+
+  personFatherName: optionalText,
+  personMotherName: optionalText,
+  personProfession: optionalText,
+
+  // The empty string is a legal choice: it means the question was not answered.
+  personMaritalStatus: z
+    .enum(["", "celibe", "coniugato", "separato", "vedovo"])
+    .default(""),
+  spouseName: optionalText,
+  spouseBirthDate: isoDate.optional().or(z.literal("")),
+  spouseBirthCity: optionalText,
+  spouseResidenceCity: optionalText,
+  marriageDate: isoDate.optional().or(z.literal("")),
+  separationDate: isoDate.optional().or(z.literal("")),
+  widowedSpouseDeathDate: isoDate.optional().or(z.literal("")),
+  widowedSpouseDeathCity: optionalText,
+
+  transportDeparturePlace: optionalText,
+  funeralStopTime: blankOr(time),
+
+  bodyDestination: z
+    .enum(["", "inumata", "tumulata", "tumulataNuova", "cremata"])
+    .default(""),
+  concessionType: optionalText,
+  concessionNumber: optionalText,
+  crematoryAra: optionalText,
+
+  billingName: optionalText,
+  billingAddress: optionalText,
+  billingStreetNumber: optionalText,
+  billingPostalCode: blankOr(postalCode),
+  billingCity: optionalText,
+  // The invoice can be made out to a company, which has an 11-digit code.
+  billingTaxCode: blankOr(companyTaxCode),
+  billingPhone: optionalText,
 });
 
 export type ClientInput = z.infer<typeof clientSchema>;

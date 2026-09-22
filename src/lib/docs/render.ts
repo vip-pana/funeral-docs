@@ -30,6 +30,31 @@ export function formatDate(iso: string): string {
   return `${d}/${mo}/${y}`;
 }
 
+/**
+ * Years completed between two ISO dates, as document 10 prints them ("di anni
+ * 81"). Derived rather than typed, so it cannot contradict the two dates it
+ * comes from; empty whenever either one is missing or malformed, which is what
+ * every practice that does not print document 10 holds.
+ */
+export function ageAt(birthIso: string, deathIso: string): string {
+  const iso = /^(\d{4})-(\d{2})-(\d{2})$/;
+  const birth = iso.exec(birthIso.trim());
+  const death = iso.exec(deathIso.trim());
+  if (!birth || !death) return "";
+
+  const [, by, bm, bd] = birth.map(Number);
+  const [, dy, dm, dd] = death.map(Number);
+
+  // Comparing month and day as one number avoids a Date round trip and the
+  // timezone questions that come with it.
+  let years = dy - by;
+  if (dm * 100 + dd < bm * 100 + bd) years -= 1;
+
+  // A death before the birth is data entry gone wrong: print nothing rather
+  // than a negative age on an official document.
+  return years < 0 ? "" : String(years);
+}
+
 const DATE_FIELDS = new Set<TemplateField>([
   "personBirthDate",
   "personDeathDate",
@@ -42,6 +67,14 @@ const DATE_FIELDS = new Set<TemplateField>([
   "ownerIdDate",
   // Cremation, document 8.
   "burialPermitDate",
+  // The mandate, document 10. The spouse's birth date appears once per branch
+  // of the marital status, so each of the three needs converting.
+  "mandateBirthDate",
+  "marriageDate",
+  "marriedSpouseBirthDate",
+  "separationDate",
+  "separatedSpouseBirthDate",
+  "widowedSpouseDeathDate",
 ]);
 
 export type FieldValues = Partial<Record<TemplateField, string>>;

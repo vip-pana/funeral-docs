@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { ALL_FIELDS } from "@/lib/fields";
 
-import { documentFileName, formatDate, prepareValues } from "./render";
+import { ageAt, documentFileName, formatDate, prepareValues } from "./render";
 
 /**
  * `renderDocument` is left out: it reads the .docx files from disk and is
@@ -24,6 +24,35 @@ describe("formatDate", () => {
 
   it("drops surrounding spaces when it converts", () => {
     expect(formatDate(" 1940-03-12 ")).toBe("12/03/1940");
+  });
+});
+
+describe("ageAt", () => {
+  it("counts the years completed by the date of death", () => {
+    expect(ageAt("1940-03-12", "2026-08-04")).toBe("86");
+  });
+
+  it("does not count a birthday that had not come round yet", () => {
+    expect(ageAt("1940-08-05", "2026-08-04")).toBe("85");
+    // On the birthday itself the year is complete.
+    expect(ageAt("1940-08-04", "2026-08-04")).toBe("86");
+  });
+
+  it("handles someone born on 29 February", () => {
+    // The birthday had not come round in a year without a 29th.
+    expect(ageAt("1940-02-29", "2026-02-28")).toBe("85");
+    expect(ageAt("1940-02-29", "2026-03-01")).toBe("86");
+  });
+
+  it("gives nothing when either date is missing or malformed", () => {
+    expect(ageAt("", "2026-08-04")).toBe("");
+    expect(ageAt("1940-03-12", "")).toBe("");
+    expect(ageAt("12/03/1940", "2026-08-04")).toBe("");
+  });
+
+  /** Data entry gone wrong: better a blank than "di anni -3" on a mandate. */
+  it("gives nothing when the death comes before the birth", () => {
+    expect(ageAt("2026-08-04", "1940-03-12")).toBe("");
   });
 });
 

@@ -64,6 +64,13 @@ export async function fillPractice(page, values, { client = SEED_CLIENT } = {}) 
     "personResidenceCity",
     "personDeathCity",
     "destinationCity",
+    // The mandate, document 10.
+    "mandateBirthCity",
+    "mandateResidenceCity",
+    "spouseBirthCity",
+    "spouseResidenceCity",
+    "widowedSpouseDeathCity",
+    "billingCity",
   ]);
 
   for (const [name, value] of Object.entries(values)) {
