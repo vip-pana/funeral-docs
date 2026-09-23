@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/vip-pana/funeral-docs/compare/v0.6.0...v0.7.0) (2026-09-23)
+
+
+### Funzionalità
+
+* record the deceased's identity document, drop the invoice block ([#14](https://github.com/vip-pana/funeral-docs/issues/14)) ([d45d3e4](https://github.com/vip-pana/funeral-docs/commit/d45d3e4f88db6b2af66d387d1dd25ab648a9528c))
+
 ## [0.6.0](https://github.com/vip-pana/funeral-docs/compare/v0.5.0...v0.6.0) (2026-09-22)
 
 
