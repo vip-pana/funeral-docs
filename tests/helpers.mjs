@@ -70,7 +70,6 @@ export async function fillPractice(page, values, { client = SEED_CLIENT } = {}) 
     "spouseBirthCity",
     "spouseResidenceCity",
     "widowedSpouseDeathCity",
-    "billingCity",
   ]);
 
   for (const [name, value] of Object.entries(values)) {

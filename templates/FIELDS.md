@@ -1,6 +1,6 @@
 # Schema campi template
 
-103 campi, sintassi `{campo}` (docxtemplater). Originali intatti in `_backup/`.
+98 campi, sintassi `{campo}` (docxtemplater). Originali intatti in `_backup/`.
 Rigenerabile con `python3 scripts/normalize-templates.py` (documenti 1-5),
 `python3 scripts/placeholders-6-7.py` (allegati 2 e 3),
 `python3 scripts/placeholders-8-9.py` (moduli di cremazione),
@@ -135,6 +135,8 @@ coincidano nei due sensi.
 | `personFatherName` | Paternita' (facoltativo) | 10 |
 | `personMotherName` | Maternita' (facoltativo) | 10 |
 | `personProfession` | Professione (facoltativo) | 10 |
+| `personIdType` | Tipo di documento, preimpostato a "Carta d'identita'" | 10 |
+| `personIdNumber` | Numero del documento | 10 |
 
 ## Stato civile e destinazione della salma — solo documento 10
 
@@ -189,22 +191,6 @@ coincidano nei due sensi.
 |---|---|---|
 | `transportDeparturePlace` | Luogo di partenza del trasporto | 10 |
 | `funeralStopTime` | Ora della sosta per le esequie | 10 |
-
-## Fatturazione — solo documento 10
-
-> A chi intestare la fattura. Spesso il mandante, non sempre: chi paga non deve
-> per forza essere chi firma. Il codice fiscale accetta sia i 16 caratteri di
-> una persona sia le 11 cifre di una societa'.
-
-| Campo | Descrizione | Doc |
-|---|---|---|
-| `billingName` | Intestatario | 10 |
-| `billingAddress` | Via | 10 |
-| `billingStreetNumber` | Numero civico | 10 |
-| `billingPostalCode` | CAP | 10 |
-| `billingCity` | Comune | 10 |
-| `billingTaxCode` | Codice fiscale | 10 |
-| `billingPhone` | Recapiti telefonici | 10 |
 
 ## Dichiarante e impresa — dalla scheda del cliente
 
@@ -326,8 +312,8 @@ Non sono placeholder: vanno compilati a mano o promossi a campi dell'app.
   dichiarazione di volonta' (testamento, iscrizione ad associazione, estratto di
   morte, attestazione ASL) si barrano a mano; affidamento personale e dispersione
   delle ceneri con tutti i dati dell'affidatario; righe di firma
-- **Doc 10**: il documento d'identificazione del defunto (tipo e numero) — la
-  pratica registra il codice fiscale, non una carta; il piè di pagina
-  dell'impresa (licenza di P.S. e data, autorizzazione amministrativa, partita
-  IVA, codice fiscale); le due righe di firma
+- **Doc 10**: le due righe dell'intestatario della fattura — il modulo le
+  chiede, ma in pratica non le compila nessuno; il piè di pagina dell'impresa
+  (licenza di P.S. e data, autorizzazione amministrativa, partita IVA, codice
+  fiscale); le due righe di firma
 - **Doc 11**: `Prot. n.`, che scrive l'ufficio; le due righe di firma

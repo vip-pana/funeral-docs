@@ -19,7 +19,9 @@ Not every underscore becomes a field. `prepareValues` writes an empty string for
 anything not filled in, so a placeholder left empty makes the line vanish
 instead of leaving a gap to complete by hand. The footer of the company (licence,
 administrative authorisation, VAT, tax code) and the two signature lines stay
-literal for that reason, as `Prot. n. ____` does in documents 8 and 9.
+literal for that reason, as `Prot. n. ____` does in documents 8 and 9. The two
+lines naming who the invoice is made out to stay literal too: the form asks for
+it, but in practice nobody ever fills it in.
 
 Reads from templates/_backup/10.docx, writes templates/10.docx. Idempotent.
 """
@@ -67,9 +69,13 @@ BY_INDEX = {
         " nato/a il _________________________________ a __________________________________________",
         " nato/a il {personBirthDate} a {personBirthCity}",
     ),
-    # The deceased's own identity document is not modelled: the practice records
-    # the tax code, not a card. Left literal, to be completed by hand.
-    # (run 16 untouched)
+    # The deceased's identity document. The practice records their tax code,
+    # not a card, so these two fields exist only because this form asks for
+    # them; the type is prefilled with the one it is in practice.
+    16: (
+        "(documento d'identificazione: tipo _________________________ nr. ____________________",
+        "(documento d'identificazione: tipo {personIdType} nr. {personIdNumber}",
+    ),
 
     # Optional: paternity, maternity, profession.
     19: ("___________ Maternit", "{personFatherName} Maternit"),
@@ -136,15 +142,9 @@ BY_INDEX = {
         "Preventivamente cremata presso l'ara di {crematoryAra} ",
     ),
 
-    # Who the invoice is made out to. Often the mandator, not always.
-    52: (
-        "Nome e Cognome _________________________________________________________________",
-        "Nome e Cognome {billingName}",
-    ),
-    53: (
-        "residente in Via _______________ n. __________ c.a.p. _____ Comune _____________ cod. fiscale ___________________ recapiti telefonici ________________",
-        "residente in Via {billingAddress} n. {billingStreetNumber} c.a.p. {billingPostalCode} Comune {billingCity} cod. fiscale {billingTaxCode} recapiti telefonici {billingPhone}",
-    ),
+    # Runs 52 and 53, who the invoice is made out to, stay literal: the form
+    # asks for it but nobody ever filled it in, so the two lines are completed
+    # by hand like the footer below.
 
     # Place and date of signature.
     54: ("__________ l", "{ownerCityName} l"),

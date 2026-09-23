@@ -239,6 +239,15 @@ export const practices = sqliteTable("practices", {
   personFatherName: text("person_father_name").notNull().default(""),
   personMotherName: text("person_mother_name").notNull().default(""),
   personProfession: text("person_profession").notNull().default(""),
+  /**
+   * The deceased's identity document, named by document 10. The practice
+   * records their tax code, not a card, so these exist only for that form. The
+   * type defaults to the one it is in practice, like `person_citizenship`
+   * defaults to "italiana": a practice saved before them still prints something
+   * sensible, and it stays editable for a passport.
+   */
+  personIdType: text("person_id_type").notNull().default("Carta d'identità"),
+  personIdNumber: text("person_id_number").notNull().default(""),
 
   /**
    * Marital status. Unlike `personSex` the empty string is a legal value: it
@@ -285,16 +294,6 @@ export const practices = sqliteTable("practices", {
   concessionNumber: text("concession_number").notNull().default(""),
   /** The crematorium's furnace, when the body is cremated first. */
   crematoryAra: text("crematory_ara").notNull().default(""),
-
-  // Who the invoice is made out to. Often the person conferring the mandate,
-  // but not always: whoever pays does not have to be the one who signs.
-  billingName: text("billing_name").notNull().default(""),
-  billingAddress: text("billing_address").notNull().default(""),
-  billingStreetNumber: text("billing_street_number").notNull().default(""),
-  billingPostalCode: text("billing_postal_code").notNull().default(""),
-  billingCity: text("billing_city").notNull().default(""),
-  billingTaxCode: text("billing_tax_code").notNull().default(""),
-  billingPhone: text("billing_phone").notNull().default(""),
 
   createdAt: text("created_at")
     .notNull()

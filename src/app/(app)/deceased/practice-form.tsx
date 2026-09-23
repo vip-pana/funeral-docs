@@ -209,33 +209,6 @@ export function PracticeForm({
     practice ? (practice[name] as string) : undefined;
 
   /**
-   * Fills the invoice details from the mandator's. A one-off copy rather than
-   * derived state: the two coincide often enough to be worth a click, but the
-   * person paying is not always the one signing, so what lands in the fields
-   * stays editable.
-   *
-   * Read straight off the form because these inputs are uncontrolled, as most
-   * of this form is. The municipality is the exception — `ComuneField` keeps
-   * its own state and only syncs a hidden input, so it cannot be written this
-   * way and is left for the user to pick.
-   */
-  function copyMandateToBilling() {
-    const form = formRef.current;
-    if (!form) return;
-
-    const get = (name: string) =>
-      (form.elements.namedItem(name) as HTMLInputElement | null)?.value ?? "";
-    const set = (name: string, value: string) => {
-      const input = form.elements.namedItem(name) as HTMLInputElement | null;
-      if (input) input.value = value;
-    };
-
-    set("billingName", `${get("mandateFirstName")} ${get("mandateLastName")}`.trim());
-    set("billingTaxCode", get("mandateTaxCode"));
-    set("billingPhone", get("mandatePhone"));
-  }
-
-  /**
    * The tax code carries birth date and municipality. They are filled in
    * automatically, but only where the field is still empty — a hand-entered
    * value must not be overwritten.
@@ -525,6 +498,22 @@ export function PracticeForm({
             defaultValue={val("personProfession")}
             error={err("personProfession")}
             hint="Facoltativo, documento 10"
+          />
+          {/* Prefilled with what it is in practice, and still editable: the
+              form asks for the type because a passport would do too. */}
+          <Field
+            name="personIdType"
+            label={FIELD_LABELS.personIdType}
+            defaultValue={practice?.personIdType ?? "Carta d'identità"}
+            error={err("personIdType")}
+            hint="Documento 10"
+          />
+          <Field
+            name="personIdNumber"
+            label={FIELD_LABELS.personIdNumber}
+            defaultValue={val("personIdNumber")}
+            error={err("personIdNumber")}
+            hint="Documento 10"
           />
         </CardContent>
       </Card>
@@ -968,89 +957,6 @@ export function PracticeForm({
             type="date"
             defaultValue={val("burialPermitDate")}
             error={err("burialPermitDate")}
-          />
-        </CardContent>
-      </Card>
-
-      {/* Who the invoice is made out to, document 10. Usually the person
-          conferring the mandate, but whoever pays does not have to be the one
-          who signs, so the two are separate. */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Fatturazione</CardTitle>
-          <CardDescription>
-            A chi intestare la fattura. Serve solo al documento 10.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
-          <FieldRoot className="sm:col-span-2">
-            <div className="flex items-center gap-2">
-              {/* Copies the mandator's details into the fields once, rather
-                  than deriving them: the two coincide often enough to be worth
-                  a click, and what lands here stays editable. */}
-              <Checkbox
-                id="billingSameAsMandate"
-                onCheckedChange={(checked) => {
-                  if (checked !== true) return;
-                  copyMandateToBilling();
-                }}
-              />
-              <FieldLabel htmlFor="billingSameAsMandate" className="font-normal">
-                Copia i dati del mandante
-              </FieldLabel>
-            </div>
-            <FieldDescription>
-              Nome, codice fiscale e telefono. L&apos;indirizzo di fatturazione
-              non è fra i dati del mandante: va scritto qui.
-            </FieldDescription>
-          </FieldRoot>
-          <Field
-            name="billingName"
-            label={FIELD_LABELS.billingName}
-            className="sm:col-span-2"
-            defaultValue={val("billingName")}
-            error={err("billingName")}
-            hint="Nome e cognome, o ragione sociale"
-          />
-          <Field
-            name="billingAddress"
-            label={FIELD_LABELS.billingAddress}
-            defaultValue={val("billingAddress")}
-            error={err("billingAddress")}
-          />
-          <Field
-            name="billingStreetNumber"
-            label={FIELD_LABELS.billingStreetNumber}
-            defaultValue={val("billingStreetNumber")}
-            error={err("billingStreetNumber")}
-          />
-          <Field
-            name="billingPostalCode"
-            label={FIELD_LABELS.billingPostalCode}
-            defaultValue={val("billingPostalCode")}
-            error={err("billingPostalCode")}
-            maxLength={5}
-          />
-          <ComuneField
-            name="billingCity"
-            label={FIELD_LABELS.billingCity}
-            defaultValue={val("billingCity")}
-            error={err("billingCity")}
-          />
-          <Field
-            name="billingTaxCode"
-            label={FIELD_LABELS.billingTaxCode}
-            defaultValue={val("billingTaxCode")}
-            error={err("billingTaxCode")}
-            inputClassName="uppercase"
-            hint="16 caratteri, o 11 cifre per una società"
-          />
-          <Field
-            name="billingPhone"
-            label={FIELD_LABELS.billingPhone}
-            type="tel"
-            defaultValue={val("billingPhone")}
-            error={err("billingPhone")}
           />
         </CardContent>
       </Card>
