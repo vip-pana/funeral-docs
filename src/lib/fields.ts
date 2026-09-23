@@ -480,6 +480,8 @@ export const DOCUMENTS = [
     file: "11.docx",
     title: "Istanza e autorizzazione al trasporto di cadavere",
     description: "L.R. 34/2008 art. 10bis comma 1, richiesta e rilascio",
+    // Only the Torremaggiore office uses this form: shown in bold in the list.
+    note: "Solo per il Comune di Torremaggiore",
   },
 ] as const;
 

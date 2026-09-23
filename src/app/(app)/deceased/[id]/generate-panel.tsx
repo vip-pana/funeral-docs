@@ -144,6 +144,9 @@ export function GeneratePanel({ practiceId }: { practiceId: string }) {
                 <FieldContent>
                   <FieldTitle>{doc.title}</FieldTitle>
                   <FieldDescription>{doc.description}</FieldDescription>
+                  {"note" in doc && (
+                    <p className="text-sm font-semibold">{doc.note}</p>
+                  )}
                 </FieldContent>
               </FieldRoot>
             </FieldLabel>
