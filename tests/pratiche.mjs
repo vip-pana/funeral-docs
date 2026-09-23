@@ -50,10 +50,9 @@ const v = {
   personFatherName:'Giuseppe', personMotherName:'Lucia Verdi',
   personProfession:'Contadino',
   transportDeparturePlace:'Obitorio comunale', funeralStopTime:'09:30',
-  billingName:'Anna Bianchi', billingAddress:'Sant Agostino',
-  billingStreetNumber:'3', billingPostalCode:'71016',
-  billingCity:'San Severo', billingTaxCode:'BNCNNA70E42I158O',
-  billingPhone:'3331234567',
+  // Il documento d'identita' del defunto: il tipo e' gia' precompilato, cosi'
+  // il test verifica anche che il default arrivi fino al documento stampato.
+  personIdNumber:'CA9988776',
 };
 // The client is required, and fillPractice picks it: without one the form does
 // not save at all, so this is checked before the optional hearse and driver.
@@ -173,7 +172,14 @@ check('  doc10 coniuge solo nel ramo spuntato',
       (t10.match(/Carla Neri/g) ?? []).length === 1,
       `${(t10.match(/Carla Neri/g) ?? []).length} occorrenze`);
 check('  doc10 concessione', t10.includes('perpetua') && t10.includes('1234'));
-check('  doc10 fatturazione', t10.includes('71016'));
+// Il tipo arriva dal default della colonna, il numero dal form. L'apostrofo e'
+// scritto `&apos;` nell'XML, che qui non viene decodificato.
+check('  doc10 documento identita',
+      /Carta d(&apos;|')identità/.test(t10) && t10.includes('CA9988776'),
+      t10.match(/tipo .{0,30}nr\. [^ ]*/)?.[0] ?? 'assente');
+// L'intestatario della fattura torna un tratto da penna: nessuno lo compilava.
+check('  doc10 fatturazione a penna', t10.includes('Nome e Cognome ____'),
+      t10.includes('Nome e Cognome') ? '' : 'riga assente');
 check('  doc10 nessun placeholder', !t10.match(/\{[^}]*\}/));
 
 // document 11 is the only one that names the firm's seat and the hearse model,

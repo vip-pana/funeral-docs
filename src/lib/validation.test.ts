@@ -221,7 +221,7 @@ describe("practiceSchema", () => {
     const result = parse();
     expect(result.success && result.data.mandateFirstName).toBe("");
     expect(result.success && result.data.mandateTaxCode).toBe("");
-    expect(result.success && result.data.billingName).toBe("");
+    expect(result.success && result.data.personIdNumber).toBe("");
   });
 
   /**
@@ -254,16 +254,6 @@ describe("practiceSchema", () => {
     expect(parse({ mandateTaxCode: valid("RSSMRA80A01H501") }).success).toBe(
       true,
     );
-  });
-
-  /** The invoice can be made out to a company, which has an 11-digit code. */
-  it("accepts either kind of tax code for the invoice", () => {
-    expect(parse({ billingTaxCode: "12345678901" }).success).toBe(true);
-    expect(parse({ billingTaxCode: valid("RSSMRA80A01H501") }).success).toBe(
-      true,
-    );
-    expect(errorOn(parse({ billingTaxCode: "1234" }), "billingTaxCode"))
-      .toBeDefined();
   });
 
   it("checks the stop time only when there is one", () => {

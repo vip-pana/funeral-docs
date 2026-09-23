@@ -97,6 +97,12 @@ export const PRACTICE_FIELDS = [
   "personFatherName",
   "personMotherName",
   "personProfession",
+  /**
+   * The deceased's identity document. The practice records their tax code, not
+   * a card, so these two exist only because document 10 asks for them by name.
+   */
+  "personIdType",
+  "personIdNumber",
 
   /**
    * The spouse, under whichever of the three branches is ticked. Married,
@@ -121,15 +127,9 @@ export const PRACTICE_FIELDS = [
   /** The crematorium's furnace, when the body is cremated first. */
   "crematoryAra",
 
-  // Who the invoice is made out to. Often the person conferring the mandate,
-  // but not always: whoever pays does not have to be the one who signs.
-  "billingName",
-  "billingAddress",
-  "billingStreetNumber",
-  "billingPostalCode",
-  "billingCity",
-  "billingTaxCode",
-  "billingPhone",
+  // No invoice block: document 10 asks who to make the invoice out to, but in
+  // practice nobody ever filled it in, so those two lines go back to being
+  // completed by hand like the rest of the form's footer.
 ] as const;
 
 /**
@@ -283,18 +283,13 @@ export const FIELD_LABELS: Record<TemplateField, string> = {
   personFatherName: "Paternità",
   personMotherName: "Maternità",
   personProfession: "Professione",
+  personIdType: "Tipo di documento",
+  personIdNumber: "Numero del documento",
   transportDeparturePlace: "Luogo di partenza",
   funeralStopTime: "Ora della sosta",
   concessionType: "Tipo di concessione",
   concessionNumber: "Numero della concessione",
   crematoryAra: "Ara crematoria",
-  billingName: "Intestatario",
-  billingAddress: "Via",
-  billingStreetNumber: "Numero civico",
-  billingPostalCode: "CAP",
-  billingCity: "Comune",
-  billingTaxCode: "Codice fiscale",
-  billingPhone: "Recapiti telefonici",
   personAge: "Età del defunto",
   personDeathCityUpper: "Comune del decesso in maiuscolo",
   maritalSingleBox: "Casella celibe/nubile",
@@ -354,6 +349,8 @@ export const PRACTICE_SECTIONS = [
       "personFatherName",
       "personMotherName",
       "personProfession",
+      "personIdType",
+      "personIdNumber",
     ],
   },
   // There is no "Stato civile" section: the card exists in the form, but none
@@ -409,19 +406,6 @@ export const PRACTICE_SECTIONS = [
       "ashesCity",
       "cremationConsentRelative",
       "burialPermitDate",
-    ],
-  },
-  {
-    id: "fatturazione",
-    title: "Fatturazione",
-    fields: [
-      "billingName",
-      "billingAddress",
-      "billingStreetNumber",
-      "billingPostalCode",
-      "billingCity",
-      "billingTaxCode",
-      "billingPhone",
     ],
   },
 ] as const satisfies readonly {

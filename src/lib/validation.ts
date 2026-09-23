@@ -269,6 +269,8 @@ export const practiceSchema = z.object({
   personFatherName: optionalText,
   personMotherName: optionalText,
   personProfession: optionalText,
+  personIdType: optionalText,
+  personIdNumber: optionalText,
 
   // The empty string is a legal choice: it means the question was not answered.
   personMaritalStatus: z
@@ -293,14 +295,6 @@ export const practiceSchema = z.object({
   concessionNumber: optionalText,
   crematoryAra: optionalText,
 
-  billingName: optionalText,
-  billingAddress: optionalText,
-  billingStreetNumber: optionalText,
-  billingPostalCode: blankOr(postalCode),
-  billingCity: optionalText,
-  // The invoice can be made out to a company, which has an 11-digit code.
-  billingTaxCode: blankOr(companyTaxCode),
-  billingPhone: optionalText,
 });
 
 export type ClientInput = z.infer<typeof clientSchema>;
