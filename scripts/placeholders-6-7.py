@@ -76,21 +76,19 @@ SPLIT = {
     ],
 }
 
+# The heading ("COMUNE DI SAN SEVERO", "CITTA DI SAN SEVERO") and the place
+# before the closing date ("San Severo il") stay literal: both forms are always
+# issued by San Severo, whatever the client's municipality.
 PER_DOC = {
     "6": [
-        ("ALL’UFFICIALE DELLO STATO CIVILE COMUNE DI SAN SEVERO",
-         "ALL’UFFICIALE DELLO STATO CIVILE COMUNE DI {ownerCity}"),
-        ("San Severo il ", "{ownerCityName} il "),
         # The province is only printed in this form as a literal "(FG)".
         ("FG", "{personBirthProvince}"),
     ],
     "7": [
-        ("CITTA DI SAN SEVERO", "CITTA DI {ownerCity}"),
         ("UFFIO STATO CIVILE", "UFFICIO STATO CIVILE"),  # typo in the original
         # "INCARICATO" stays literal: the capacity never changes between records.
         ("CENTRO SERVIZI ELISEO", "{ownerCompanyName}"),
         ("FY363SA", "{ownerVehiclePlate}"),
-        ("San Severo il", "{ownerCityName} il"),
     ],
 }
 

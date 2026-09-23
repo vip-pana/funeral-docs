@@ -217,8 +217,8 @@ coincidano nei due sensi.
 | `ownerLastName` | Cognome del dichiarante | 2,3,4,5,6,7,8,9,11 |
 | `ownerCompanyName` | Ragione sociale | 4,7,8,9,10,11 |
 | `ownerCompanyCity` | Comune sede della ditta | 4,6,7,8,9,11 |
-| `ownerCity` | Comune che rilascia l'autorizzazione | 3,5,6,7,8,9 |
-| `ownerCityName` | Comune di partenza del trasporto | 2,6,7,8,9,10 |
+| `ownerCity` | Comune che rilascia l'autorizzazione | 3,5,8,9 |
+| `ownerCityName` | Comune di partenza del trasporto | 2,8,9,10 |
 | `ownerRequestDate` | Data di presentazione della domanda | 2 |
 | `ownerBirthDate` | Data di nascita del dichiarante | 6,7,8,9,11 |
 | `ownerBirthCity` | Comune di nascita del dichiarante | 6,7,8,9,11 |

@@ -83,6 +83,10 @@ try {
     check(`4 documento ${doc} generato`, txt.includes("Rossi") && txt.includes("Mario"));
     // The raw placeholder surviving means a field is declared but never filled.
     check(`  ${doc} nessun placeholder`, !txt.match(/\{[^}]*\}/), txt.match(/\{[^}]*\}/g)?.join(" ") ?? "");
+    // Both forms are issued by San Severo: fixed text, not the client's city.
+    const heading = doc === "6" ? "COMUNE DI SAN SEVERO" : "CITTA DI SAN SEVERO";
+    check(`  ${doc} intestazione fissa`, txt.includes(heading));
+    check(`  ${doc} luogo della data fisso`, txt.includes("San Severo il "));
   }
 
   const doc7 = await docText("7");
