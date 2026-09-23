@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/vip-pana/funeral-docs/compare/v0.7.0...v0.7.1) (2026-09-23)
+
+
+### Correzioni
+
+* print San Severo as fixed text in attachments 2 and 3 ([#16](https://github.com/vip-pana/funeral-docs/issues/16)) ([0f40ca2](https://github.com/vip-pana/funeral-docs/commit/0f40ca2f07d57b621f1f0b29efeeebc3c53d6c1e))
+
 ## [0.7.0](https://github.com/vip-pana/funeral-docs/compare/v0.6.0...v0.7.0) (2026-09-23)
 
 
