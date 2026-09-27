@@ -73,7 +73,7 @@ SPLIT = {
 
 PER_DOC = {
     "8": [
-        ("CITTA’ DI SAN SEVERO", "CITTA’ DI {ownerCity}"),
+        ("CITTA’ DI SAN SEVERO", "CITTA’ DI {ownerCityUpper}"),
         ("C.I.", "{ownerIdType}"),
         (" 15/03/1980", " {ownerBirthDate}"),
         ("11:48", "{personDeathTime}"),
@@ -96,7 +96,7 @@ PER_DOC = {
         ("San Severo, lì ", "{ownerCityName}, lì "),
     ],
     "9": [
-        ("CITTA’ DI SAN SEVERO", "CITTA’ DI {ownerCity}"),
+        ("CITTA’ DI SAN SEVERO", "CITTA’ DI {ownerCityUpper}"),
         ("Comune di SAN SEVERO", "Comune di {ownerCity}"),
         ("15/03/1980", "{ownerBirthDate}"),
         # Municipality and province share a single run in this document.

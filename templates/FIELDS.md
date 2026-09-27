@@ -250,6 +250,7 @@ coincidano nei due sensi.
 | `ownerCompanyProvince` | Provincia della sede della ditta | 8,9 |
 | `personAge` | Eta' del defunto, anni compiuti alla data del decesso | 10 |
 | `personDeathCityUpper` | Comune del decesso in maiuscolo, per l'intestazione | 11 |
+| `ownerCityUpper` | Comune che rilascia l'autorizzazione in maiuscolo, per l'intestazione | 8,9 |
 
 ---
 

@@ -165,6 +165,12 @@ export const SYSTEM_FIELDS = [
   "personDeathCityUpper",
 
   /**
+   * The municipality the request is addressed to, in capitals, for the
+   * "CITTA' DI X" heading of documents 8 and 9, which is set that way.
+   */
+  "ownerCityUpper",
+
+  /**
    * The tick boxes of document 10, one per option of its two exclusive groups.
    * Each carries "☒" or "□" and is expanded from `personMaritalStatus` and
    * `bodyDestination` when the document is filled. They are fields, not form
@@ -292,6 +298,7 @@ export const FIELD_LABELS: Record<TemplateField, string> = {
   crematoryAra: "Ara crematoria",
   personAge: "Età del defunto",
   personDeathCityUpper: "Comune del decesso in maiuscolo",
+  ownerCityUpper: "Comune che rilascia l'autorizzazione in maiuscolo",
   maritalSingleBox: "Casella celibe/nubile",
   maritalMarriedBox: "Casella coniugato/a",
   maritalSeparatedBox: "Casella separato/a",
