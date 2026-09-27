@@ -125,6 +125,8 @@ export async function GET(
     personDeathProvince: prov(practice.personDeathCity),
     // The heading of the authorisation in document 11 is set in capitals.
     personDeathCityUpper: practice.personDeathCity.toUpperCase(),
+    // Likewise the "CITTA' DI X" heading of documents 8 and 9.
+    ownerCityUpper: (client?.city ?? "").toUpperCase(),
     crematoryProvince: prov(practice.crematoryCity),
     funeralStopProvince: prov(practice.funeralStopCity),
     ashesProvince: prov(practice.ashesCity),
