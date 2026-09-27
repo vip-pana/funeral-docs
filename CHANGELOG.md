@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.2](https://github.com/vip-pana/funeral-docs/compare/v0.7.1...v0.7.2) (2026-09-27)
+
+
+### Correzioni
+
+* print the municipality in capitals in the heading of B6 and B7 ([#18](https://github.com/vip-pana/funeral-docs/issues/18)) ([615d82e](https://github.com/vip-pana/funeral-docs/commit/615d82e826912aa884bd6eec668ba738183e8306))
+
 ## [0.7.1](https://github.com/vip-pana/funeral-docs/compare/v0.7.0...v0.7.1) (2026-09-23)
 
 
