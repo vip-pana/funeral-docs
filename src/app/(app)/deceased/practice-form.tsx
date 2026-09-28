@@ -238,7 +238,7 @@ export function PracticeForm({
   }
 
   return (
-    <form ref={formRef} action={formAction} className="space-y-6">
+    <form ref={formRef} action={formAction} className="space-y-4">
       {/* First, before the deceased: it decides the declarant and the company
           named at the top of every document. */}
       <Card>
@@ -293,7 +293,7 @@ export function PracticeForm({
             Chi conferisce il mandato. Serve solo al documento 10.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
+        <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Field
             name="mandateFirstName"
             label={FIELD_LABELS.mandateFirstName}
@@ -366,7 +366,7 @@ export function PracticeForm({
         <CardHeader>
           <CardTitle>Defunto</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
+        <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Field
             name="personFirstName"
             label={FIELD_LABELS.personFirstName}
@@ -528,7 +528,7 @@ export function PracticeForm({
             Facoltativo. Serve solo al documento 10.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
+        <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <FieldRoot>
             <FieldLabel htmlFor="personMaritalStatus">Stato civile</FieldLabel>
             {/* Radix forbids a SelectItem with an empty value, so "not stated"
@@ -646,7 +646,7 @@ export function PracticeForm({
         <CardHeader>
           <CardTitle>Decesso</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
+        <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Field
             name="personDeathDate"
             label={FIELD_LABELS.personDeathDate}
@@ -681,7 +681,7 @@ export function PracticeForm({
         <CardHeader>
           <CardTitle>Trasporto</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
+        <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Field
             name="transportDate"
             label={FIELD_LABELS.transportDate}
@@ -784,7 +784,7 @@ export function PracticeForm({
                   : "Il nome finisce nel documento 4"}
             </FieldDescription>
           </FieldRoot>
-          <FieldRoot className="sm:col-span-2">
+          <FieldRoot className="sm:col-span-2 lg:col-span-3">
             <FieldLabel>Necrofori</FieldLabel>
             {/* Checkboxes, not a Select: several are chosen at once. Radix's
                 Checkbox does not post anything, so each ticked one carries a
@@ -925,7 +925,7 @@ export function PracticeForm({
             Serve solo ai documenti 8 e 9. Lascia vuoto per una tumulazione.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
+        <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <ComuneField
             name="crematoryCity"
             label={FIELD_LABELS.crematoryCity}
