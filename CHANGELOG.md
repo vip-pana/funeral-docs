@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/vip-pana/funeral-docs/compare/v0.7.2...v0.8.0) (2026-09-28)
+
+
+### Funzionalità
+
+* compact the deceased record page ([#20](https://github.com/vip-pana/funeral-docs/issues/20)) ([e993ef4](https://github.com/vip-pana/funeral-docs/commit/e993ef483f32f87dcd4d567440c2135a44512823))
+
 ## [0.7.2](https://github.com/vip-pana/funeral-docs/compare/v0.7.1...v0.7.2) (2026-09-27)
 
 
