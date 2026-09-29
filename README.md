@@ -42,33 +42,35 @@ pnpm dev
 
 ## Comandi
 
-| Comando | Cosa fa |
-|---|---|
-| `pnpm dev` | server di sviluppo |
-| `pnpm build` | build di produzione |
+| Comando                       | Cosa fa                                                |
+| ----------------------------- | ------------------------------------------------------ |
+| `pnpm dev`                    | server di sviluppo                                     |
+| `pnpm build`                  | build di produzione                                    |
 | `pnpm auth:hash '<password>'` | genera l'hash per `AUTH_PASSWORD_HASH` (solo la prima) |
-| `pnpm db:generate` | crea una migrazione dallo schema |
-| `pnpm db:migrate` | applica le migrazioni |
-| `pnpm db:seed` | dati di esempio; `--reset` rifà le schede da zero |
-| `pnpm check:templates` | verifica che i `.docx` e `fields.ts` coincidano |
-| `pnpm test` | test unitari della logica pura |
-| `pnpm test:e2e` | suite end-to-end (serve un'istanza in ascolto) |
+| `pnpm db:generate`            | crea una migrazione dallo schema                       |
+| `pnpm db:migrate`             | applica le migrazioni                                  |
+| `pnpm db:seed`                | dati di esempio; `--reset` rifà le schede da zero      |
+| `pnpm check:templates`        | verifica che i `.docx` e `fields.ts` coincidano        |
+| `pnpm test`                   | test unitari della logica pura                         |
+| `pnpm test:e2e`               | suite end-to-end (serve un'istanza in ascolto)         |
+| `pnpm format`                 | formatta il codice con Prettier                        |
+| `pnpm format:check`           | verifica la formattazione, come fanno CI e pre-push    |
 
 ## Come è fatto
 
 Next.js 16 · React 19 · Tailwind 4 · shadcn/ui · SQLite con Drizzle ·
 docxtemplater.
 
-| Percorso | Contenuto |
-|---|---|
-| `templates/` | i sette `.docx`, con i placeholder `{campo}` |
-| `templates/FIELDS.md` | i 40 campi e le correzioni fatte ai modelli |
-| `src/lib/fields.ts` | definizione dei campi — unica fonte di verità |
-| `src/lib/docs/render.ts` | riempimento dei documenti |
-| `src/lib/comuni.ts` | 7.904 comuni ISTAT e 270 stati esteri per l'autocompletamento |
-| `scripts/normalize-templates.py` | normalizza i placeholder nei documenti 1-5 |
-| `scripts/placeholders-6-7.py` | trasforma in template gli allegati 2 e 3 |
-| `tests/` | suite end-to-end su browser |
+| Percorso                         | Contenuto                                                     |
+| -------------------------------- | ------------------------------------------------------------- |
+| `templates/`                     | i sette `.docx`, con i placeholder `{campo}`                  |
+| `templates/FIELDS.md`            | i 40 campi e le correzioni fatte ai modelli                   |
+| `src/lib/fields.ts`              | definizione dei campi — unica fonte di verità                 |
+| `src/lib/docs/render.ts`         | riempimento dei documenti                                     |
+| `src/lib/comuni.ts`              | 7.904 comuni ISTAT e 270 stati esteri per l'autocompletamento |
+| `scripts/normalize-templates.py` | normalizza i placeholder nei documenti 1-5                    |
+| `scripts/placeholders-6-7.py`    | trasforma in template gli allegati 2 e 3                      |
+| `tests/`                         | suite end-to-end su browser                                   |
 
 Dichiarante e impresa stanno nella scheda di un **cliente**: si registrano una
 volta in **Clienti** e per ogni defunto si sceglie per conto di chi vengono
