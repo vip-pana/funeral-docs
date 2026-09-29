@@ -1,0 +1,209 @@
+/**
+ * Pure helpers for the bearers' calendar. No database here: the grid is a
+ * client component and imports them.
+ *
+ * A month is carried as "yyyy-mm", the shape of the `?month=` parameter, and
+ * days as ISO dates, like every other date in the app.
+ */
+
+const MONTH = /^(\d{4})-(0[1-9]|1[0-2])$/;
+
+/** The current month in Rome: in UTC the 1st starts an hour or two late. */
+export function currentMonth(now = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Rome",
+    year: "numeric",
+    month: "2-digit",
+  }).format(now);
+}
+
+/** The `?month=` parameter, or the current month when absent or malformed. */
+export function parseMonth(value: string | undefined, now = new Date()): string {
+  return value && MONTH.test(value) ? value : currentMonth(now);
+}
+
+export function shiftMonth(month: string, delta: number): string {
+  const [year, m] = month.split("-").map(Number);
+  const d = new Date(Date.UTC(year, m - 1 + delta, 1));
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+const iso = (d: Date) => d.toISOString().slice(0, 10);
+
+/** Easter Sunday, by the anonymous Gregorian algorithm (Meeus). */
+export function easterSunday(year: number): Date {
+  const a = year % 19;
+  const b = Math.floor(year / 100);
+  const c = year % 100;
+  const d = Math.floor(b / 4);
+  const e = b % 4;
+  const f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4);
+  const k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const month = Math.floor((h + l - 7 * m + 114) / 31);
+  const day = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(Date.UTC(year, month - 1, day));
+}
+
+const NATIONAL = [
+  "01-01", "01-06", "04-25", "05-01", "06-02",
+  "08-15", "11-01", "12-08", "12-25", "12-26",
+];
+
+/**
+ * The public holidays of a year, as ISO dates: the national ones, Easter
+ * Monday, and the patron feast (the third Sunday of May and the Monday after).
+ * Sundays are not listed: `daysOfMonth` flags them on its own.
+ */
+export function holidays(year: number): Set<string> {
+  const out = new Set(NATIONAL.map((md) => `${year}-${md}`));
+
+  const easter = easterSunday(year);
+  out.add(iso(new Date(easter.getTime() + 86_400_000)));
+
+  // The first Sunday of May is between the 1st and the 7th; the third is two
+  // weeks later.
+  const may1 = new Date(Date.UTC(year, 4, 1)).getUTCDay();
+  const thirdSunday = 1 + ((7 - may1) % 7) + 14;
+  out.add(iso(new Date(Date.UTC(year, 4, thirdSunday))));
+  out.add(iso(new Date(Date.UTC(year, 4, thirdSunday + 1))));
+
+  return out;
+}
+
+export type CalendarDay = {
+  day: number;
+  date: string;
+  isSunday: boolean;
+  /** A Sunday or a public holiday: printed in red; services do not count. */
+  isHoliday: boolean;
+};
+
+export function daysOfMonth(month: string): CalendarDay[] {
+  const [year, m] = month.split("-").map(Number);
+  const count = new Date(Date.UTC(year, m, 0)).getUTCDate();
+  const feasts = holidays(year);
+  return Array.from({ length: count }, (_, i) => {
+    const day = i + 1;
+    const date = `${month}-${String(day).padStart(2, "0")}`;
+    const isSunday = new Date(Date.UTC(year, m - 1, day)).getUTCDay() === 0;
+    return { day, date, isSunday, isHoliday: isSunday || feasts.has(date) };
+  });
+}
+
+/** "Ottobre '26", as in the corner of the paper sheet. */
+export function monthLabel(month: string): string {
+  const [year, m] = month.split("-").map(Number);
+  const name = new Intl.DateTimeFormat("it-IT", {
+    month: "long",
+    timeZone: "UTC",
+  }).format(new Date(Date.UTC(year, m - 1, 1)));
+  return `${name[0].toUpperCase()}${name.slice(1)} '${String(year).slice(2)}`;
+}
+
+/** "1,58 PERILLO": the shoulder height in metres, then the name. */
+export function bearerLabel(bearer: {
+  name: string;
+  shoulderHeight: number | null;
+}): string {
+  const name = bearer.name.toUpperCase();
+  if (bearer.shoulderHeight == null) return name;
+  return `${(bearer.shoulderHeight / 100).toFixed(2).replace(".", ",")} ${name}`;
+}
+
+/** Tallest first, as on the sheet; those without a height go last. */
+export function byShoulderHeight<
+  T extends { name: string; shoulderHeight: number | null },
+>(a: T, b: T): number {
+  const ha = a.shoulderHeight ?? -1;
+  const hb = b.shoulderHeight ?? -1;
+  return hb - ha || a.name.localeCompare(b.name, "it");
+}
+
+/**
+ * What a cell records: a day of ferie with the hours of notice given, or a
+ * day worked with 1 to 3 services.
+ */
+export type DayMark =
+  | { code: "F"; notice: 48 | 24 }
+  | { code: "L"; services: 1 | 2 | 3 };
+
+/** Every choice the cell menu offers, in the order it shows them. */
+export const DAY_MARKS: DayMark[] = [
+  { code: "F", notice: 48 },
+  { code: "F", notice: 24 },
+  { code: "L", services: 1 },
+  { code: "L", services: 2 },
+  { code: "L", services: 3 },
+];
+
+/**
+ * What a day of ferie adds to the total: shorter notice and a red day each
+ * double it.
+ */
+export function holidayPoints(notice: 48 | 24, isHoliday: boolean): number {
+  return (notice === 24 ? 2 : 1) * (isHoliday ? 4 : 1);
+}
+
+/** The sign written in the cell, as on the paper sheet. */
+export function markSign(mark: DayMark, isHoliday: boolean): string {
+  if (mark.code === "F") return `F${holidayPoints(mark.notice, isHoliday)}`;
+  return ["\\", "X", "\\\\\\"][mark.services - 1];
+}
+
+export function markLabel(mark: DayMark): string {
+  if (mark.code === "F") return `Ferie, avviso ${mark.notice} ore`;
+  return mark.services === 1 ? "1 servizio" : `${mark.services} servizi`;
+}
+
+export function sameMark(a: DayMark | undefined, b: DayMark): boolean {
+  if (!a || a.code !== b.code) return false;
+  if (a.code === "F") return b.code === "F" && a.notice === b.notice;
+  return b.code === "L" && a.services === b.services;
+}
+
+/** A stored row as a mark, or undefined for a row this version cannot read. */
+export function toMark(row: {
+  code: string;
+  services: number | null;
+  noticeHours: number | null;
+}): DayMark | undefined {
+  if (row.code === "F") {
+    return { code: "F", notice: row.noticeHours === 24 ? 24 : 48 };
+  }
+  const services = row.services;
+  if (row.code === "L" && (services === 1 || services === 2 || services === 3)) {
+    return { code: "L", services };
+  }
+  return undefined;
+}
+
+/**
+ * The month's total: services done on working days (those on Sundays and
+ * holidays are recorded but do not count) plus the points of every day of
+ * ferie, red days included.
+ */
+export function serviceTotal(
+  marks: (DayMark | undefined)[],
+  days: CalendarDay[],
+): number {
+  return runningTotals(marks, days).at(-1) ?? 0;
+}
+
+/** The month's total so far, day by day: what the corner of each cell shows. */
+export function runningTotals(
+  marks: (DayMark | undefined)[],
+  days: CalendarDay[],
+): number[] {
+  let sum = 0;
+  return days.map((d, i) => {
+    const mark = marks[i];
+    if (mark?.code === "F") sum += holidayPoints(mark.notice, d.isHoliday);
+    else if (mark?.code === "L" && !d.isHoliday) sum += mark.services;
+    return sum;
+  });
+}

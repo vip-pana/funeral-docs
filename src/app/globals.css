@@ -131,3 +131,94 @@
     @apply font-sans;
   }
 }
+/*
+ * The bearers' calendar, coloured like the paper sheet it replaces. Plain
+ * classes rather than utilities: print has to force the light palette even
+ * when the app is in dark mode, and a variable swap does that in one place.
+ */
+:root {
+  --calendar-head: oklch(0.97 0.19 105);
+  --calendar-row-odd: oklch(0.93 0.025 255);
+  --calendar-row-even: oklch(0.96 0 0);
+  --calendar-line: oklch(0.7 0 0);
+  --calendar-ink: oklch(0.2 0 0);
+  --calendar-sunday: oklch(0.58 0.22 27);
+  --calendar-holiday: oklch(0.9 0.05 20);
+}
+
+.dark {
+  --calendar-head: oklch(0.55 0.12 100);
+  --calendar-row-odd: oklch(0.27 0.03 255);
+  --calendar-row-even: oklch(0.23 0 0);
+  --calendar-line: oklch(0.4 0 0);
+  --calendar-ink: oklch(0.95 0 0);
+  --calendar-sunday: oklch(0.72 0.19 27);
+  --calendar-holiday: oklch(0.33 0.06 20);
+}
+
+.calendar {
+  color: var(--calendar-ink);
+}
+.calendar th,
+.calendar td {
+  border: 1px solid var(--calendar-line);
+}
+.calendar-head {
+  background: var(--calendar-head);
+  color: oklch(0.2 0 0);
+}
+.calendar-head .calendar-sunday {
+  color: oklch(0.55 0.22 27);
+}
+.calendar-row-odd {
+  background: var(--calendar-row-odd);
+}
+.calendar-row-even {
+  background: var(--calendar-row-even);
+}
+/* Sundays and holidays: tinted red, since their services do not count. */
+.calendar .calendar-holiday {
+  background: var(--calendar-holiday);
+}
+
+@media print {
+  @page {
+    size: A3 landscape;
+    margin: 10mm;
+  }
+
+  .dark {
+    --calendar-head: oklch(0.97 0.19 105);
+    --calendar-row-odd: oklch(0.93 0.025 255);
+    --calendar-row-even: oklch(0.96 0 0);
+    --calendar-line: oklch(0.7 0 0);
+    --calendar-ink: oklch(0.2 0 0);
+    --calendar-holiday: oklch(0.9 0.05 20);
+    /* Paper is white: the dark theme's surfaces would print as black. */
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.145 0 0);
+    --border: oklch(0.922 0 0);
+  }
+
+  html,
+  body {
+    background: white !important;
+  }
+
+  /* Only the page content: no sidebar, no top bar. */
+  [data-slot="sidebar-gap"],
+  [data-slot="sidebar-container"],
+  [data-slot="sidebar-inset"] > header {
+    display: none !important;
+  }
+  [data-slot="sidebar-inset"] > main {
+    max-width: none;
+    padding: 0;
+  }
+
+  .calendar,
+  .calendar * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}

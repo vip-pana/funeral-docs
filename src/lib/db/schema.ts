@@ -1,5 +1,10 @@
 import { sql } from "drizzle-orm";
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+  integer,
+  sqliteTable,
+  text,
+  uniqueIndex,
+} from "drizzle-orm/sqlite-core";
 
 /**
  * Dates are stored as ISO text (yyyy-mm-dd) and times as hh:mm: SQLite has no
@@ -134,6 +139,40 @@ export const bearers = sqliteTable("bearers", {
     .notNull()
     .default(sql`(datetime('now'))`),
 });
+
+/**
+ * The bearers' calendar: one row per bearer per marked day, and no row for a
+ * day with nothing to record. `code` is "F" for a day of ferie, which carries
+ * how much notice was given (48 or 24 hours), or "L" for a worked day, which
+ * carries how many funeral services were done (1 to 3). A
+ * code rather than a boolean: the paper sheet it replaces has more kinds of
+ * day (R, M, E, I, V) that will be added later.
+ *
+ * The days go with the bearer: once they are off the list, their past
+ * holidays have no row to be shown on.
+ */
+export const bearerDays = sqliteTable(
+  "bearer_days",
+  {
+    id: uuid(),
+    bearerId: text("bearer_id")
+      .notNull()
+      .references(() => bearers.id, { onDelete: "cascade" }),
+    date: text("date").notNull(),
+    code: text("code").notNull().default("F"),
+    /** Only on a worked day ("L"): null for ferie. */
+    services: integer("services"),
+    /**
+     * Only on ferie ("F"): 48 or 24, the hours of notice. Null on the rows
+     * saved before it existed, which are read as 48.
+     */
+    noticeHours: integer("notice_hours"),
+    createdAt: text("created_at")
+      .notNull()
+      .default(sql`(datetime('now'))`),
+  },
+  (t) => [uniqueIndex("bearer_days_bearer_date").on(t.bearerId, t.date)],
+);
 
 export const practices = sqliteTable("practices", {
   id: uuid(),
@@ -315,5 +354,6 @@ export type Vehicle = typeof vehicles.$inferSelect;
 export type NewVehicle = typeof vehicles.$inferInsert;
 export type Bearer = typeof bearers.$inferSelect;
 export type NewBearer = typeof bearers.$inferInsert;
+export type BearerDay = typeof bearerDays.$inferSelect;
 export type Practice = typeof practices.$inferSelect;
 export type NewPractice = typeof practices.$inferInsert;

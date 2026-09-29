@@ -270,6 +270,58 @@ function seedList(
   return inserted;
 }
 
+/**
+ * A few holidays and worked days in the current month, so the calendar is not
+ * empty. Only on an empty table, like the lists above.
+ */
+function seedBearerDays(): number {
+  const { n } = db.prepare("SELECT COUNT(*) AS n FROM bearer_days").get() as {
+    n: number;
+  };
+  if (n) return n;
+
+  const month = new Date().toISOString().slice(0, 7);
+  const ids = (
+    db.prepare("SELECT id FROM bearers ORDER BY name").all() as { id: string }[]
+  ).map((r) => r.id);
+  const insert = db.prepare(
+    "INSERT INTO bearer_days (id, bearer_id, date, code, services, notice_hours) VALUES (@id, @bearerId, @date, @code, @services, @noticeHours)",
+  );
+  const day = (d: number) => `${month}-${String(d).padStart(2, "0")}`;
+
+  let count = 0;
+  ids.forEach((bearerId, i) => {
+    // Holidays for the first three, four days each, a week apart.
+    if (i < 3) {
+      for (let d = 3 + i * 7; d < 7 + i * 7; d++) {
+        insert.run({
+          id: crypto.randomUUID(),
+          bearerId,
+          date: day(d),
+          code: "F",
+          services: null,
+          // The last day of each stretch was asked for at a day's notice.
+          noticeHours: d === 6 + i * 7 ? 24 : 48,
+        });
+        count++;
+      }
+    }
+    // Everyone worked the 1st and the 2nd, with 1 to 3 services.
+    for (const d of [1, 2]) {
+      insert.run({
+        id: crypto.randomUUID(),
+        bearerId,
+        date: day(d),
+        code: "L",
+        services: ((i + d) % 3) + 1,
+        noticeHours: null,
+      });
+      count++;
+    }
+  });
+  return count;
+}
+
 function seedPractices() {
   const count = (
     db.prepare("SELECT COUNT(*) AS n FROM practices").get() as { n: number }
@@ -408,6 +460,7 @@ console.log(`Clienti: ${seedClients()}`);
 console.log(`Autofunebri: ${seedList("vehicles", VEHICLES).length}`);
 console.log(`Necrofori: ${seedList("bearers", BEARERS).length}`);
 console.log(`Defunti: ${seedPractices()}`);
+console.log(`Giorni di ferie: ${seedBearerDays()}`);
 
 db.close();
 console.log(`\nDati di esempio pronti in ${file}`);
