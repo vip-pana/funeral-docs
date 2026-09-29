@@ -10,7 +10,7 @@ try {
     console.log("  [pageerror]", e.message.slice(0, 160)),
   );
   let fail = 0;
-  const ck = (n, c, x = "") => {
+  const ck = (n: string, c: unknown, x: unknown = "") => {
     console.log(c ? "ok  " : "FAIL", n, x);
     if (!c) fail++;
   };

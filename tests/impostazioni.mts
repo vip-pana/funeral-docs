@@ -18,7 +18,7 @@ const ctx = await b.newContext();
 const p = await ctx.newPage();
 p.on("pageerror", (e) => console.log("  [pageerror]", e.message.slice(0, 150)));
 let fail = 0;
-const check = (n, c, x = "") => {
+const check = (n: string, c: unknown, x: unknown = "") => {
   console.log(c ? "ok  " : "FAIL", n, x);
   if (!c) fail++;
 };
@@ -32,7 +32,7 @@ const check = (n, c, x = "") => {
  * otherwise read the error left by the check before it. Sonner prepends, so the
  * newest toast is the first in the DOM, not the last.
  */
-async function submit(current, next, confirm = next) {
+async function submit(current: string, next: string, confirm = next) {
   const before = await p.locator("[data-sonner-toast]").count();
   await p.fill("#currentPassword", current);
   await p.fill("#newPassword", next);
@@ -64,7 +64,7 @@ try {
   check("  niente autofunebri", !(await p.$('button:has-text("Aggiungi")')));
 
   /** The error rendered under one field, which is where the message belongs. */
-  const errorOn = async (name) =>
+  const errorOn = async (name: string) =>
     (await p
       .locator(`#${name}-error`)
       .textContent()

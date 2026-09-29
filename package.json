@@ -16,7 +16,7 @@
     "auth:hash": "tsx scripts/hash-password.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "node tests/run.mjs",
+    "test:e2e": "tsx tests/run.mts",
     "prepare": "husky"
   },
   "dependencies": {
