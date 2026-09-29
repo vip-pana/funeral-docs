@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { type CSSProperties, useEffect, useRef, useState } from "react";
 
 import {
   Popover,
@@ -68,9 +68,13 @@ export function CalendarGrid({
   return (
     <div>
       <div ref={scroller} className="overflow-x-auto overscroll-x-contain print:overflow-visible">
-        <table className="calendar w-full min-w-[58rem] table-fixed text-xs print:min-w-0">
+        <table
+          className="calendar w-full min-w-[58rem] table-fixed text-xs print:min-w-0"
+          // Print stretches the rows to fill the sheet, so it needs the count.
+          style={{ "--calendar-rows": bearers.length } as CSSProperties}
+        >
           <colgroup>
-            <col className="w-36" />
+            <col className="w-36 print:w-48" />
             <col className="w-10" />
             {calendar.map((d) => (
               <col key={d.day} />
@@ -140,12 +144,12 @@ export function CalendarGrid({
                             <button
                               type="button"
                               aria-label={`${b.name}, ${day}: ${mark ? markLabel(mark, contract).toLowerCase() : "nulla segnato"}`}
-                              className="hover:bg-foreground/10 relative block h-7 w-full font-bold whitespace-nowrap print:h-6"
+                              className="hover:bg-foreground/10 calendar-cell relative block h-7 w-full font-bold whitespace-nowrap"
                             >
                               {mark ? markSign(mark, d.isHoliday, contract) : ""}
                               {/* The month's total so far, in the corner. */}
                               {showTotal && (
-                                <span className="absolute right-0.5 bottom-0 text-[8px] leading-none font-medium">
+                                <span className="calendar-corner absolute right-0.5 bottom-0 text-[8px] leading-none font-medium">
                                   {totals[j]}
                                 </span>
                               )}
@@ -172,7 +176,7 @@ export function CalendarGrid({
           </tbody>
         </table>
       </div>
-      <p className="mt-1 flex flex-wrap gap-x-8 gap-y-0.5 border-t pt-1 text-[10px] font-medium uppercase">
+      <p className="calendar-legend mt-1 flex flex-wrap gap-x-8 gap-y-0.5 border-t pt-1 text-[10px] font-medium uppercase">
         <span>Ferie avviso 48 ore = F1 (festivo F4)</span>
         <span>Ferie avviso 24 ore = F2 (festivo F8)</span>
         <span>Necrofori con contratto: ferie = F, senza punti</span>

@@ -229,6 +229,31 @@
     padding: 0;
   }
 
+  /* The sheet goes on a wall: bigger type, and the rows share out the A3
+     height (297mm less the margins, the legend and the gaps above), capped
+     so a short list does not get giant rows. */
+  .calendar {
+    font-size: 14px;
+    --calendar-row-height: min(
+      12mm,
+      calc((277mm - 25mm) / (var(--calendar-rows) + 1))
+    );
+  }
+  .calendar thead th,
+  .calendar .calendar-cell {
+    height: var(--calendar-row-height);
+  }
+  .calendar thead th,
+  .calendar tbody th {
+    padding-block: 0;
+  }
+  .calendar .calendar-corner {
+    font-size: 10px;
+  }
+  .calendar-legend {
+    font-size: 12px;
+  }
+
   .calendar,
   .calendar * {
     print-color-adjust: exact;
