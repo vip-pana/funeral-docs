@@ -159,9 +159,22 @@
 .calendar {
   color: var(--calendar-ink);
 }
+/* Separate borders, drawn once per cell: collapsed ones belong to the table,
+   and would scroll away from under the pinned name and total columns. */
+.calendar {
+  border-collapse: separate;
+  border-spacing: 0;
+}
 .calendar th,
 .calendar td {
-  border: 1px solid var(--calendar-line);
+  border-right: 1px solid var(--calendar-line);
+  border-bottom: 1px solid var(--calendar-line);
+}
+.calendar tr > :first-child {
+  border-left: 1px solid var(--calendar-line);
+}
+.calendar thead th {
+  border-top: 1px solid var(--calendar-line);
 }
 .calendar-head {
   background: var(--calendar-head);

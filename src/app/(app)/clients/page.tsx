@@ -1,3 +1,4 @@
+import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -37,32 +38,53 @@ export default async function ClientiPage() {
       </div>
 
       {clients.length > 0 ? (
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Ragione sociale</TableHead>
-                <TableHead>Dichiarante</TableHead>
-                <TableHead>Comune sede</TableHead>
-                <TableHead className="text-right">Azioni</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {clients.map((c) => (
-                <TableRow key={c.id}>
-                  <TableCell className="font-medium">{c.companyName}</TableCell>
-                  <TableCell>{personName(c)}</TableCell>
-                  <TableCell>{c.companyCity}</TableCell>
-                  <TableCell className="text-right">
-                    <Button asChild variant="ghost" size="sm">
-                      <Link href={`/clients/${c.id}`}>Apri</Link>
-                    </Button>
-                  </TableCell>
+        <>
+          {/* One card per client on phones, the whole of it a link. */}
+          <ul className="divide-y overflow-hidden rounded-xl border md:hidden">
+            {clients.map((c) => (
+              <li key={c.id}>
+                <Link
+                  href={`/clients/${c.id}`}
+                  className="hover:bg-accent active:bg-accent flex items-center gap-3 px-4 py-3"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium">{c.companyName}</p>
+                    <p className="text-muted-foreground truncate text-xs">
+                      {[personName(c), c.companyCity].filter(Boolean).join(" · ")}
+                    </p>
+                  </div>
+                  <ChevronRightIcon className="text-muted-foreground size-4 shrink-0" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <div className="hidden overflow-x-auto md:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Ragione sociale</TableHead>
+                  <TableHead>Dichiarante</TableHead>
+                  <TableHead>Comune sede</TableHead>
+                  <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+              <TableBody>
+                {clients.map((c) => (
+                  <TableRow key={c.id}>
+                    <TableCell className="font-medium">{c.companyName}</TableCell>
+                    <TableCell>{personName(c)}</TableCell>
+                    <TableCell>{c.companyCity}</TableCell>
+                    <TableCell className="text-right">
+                      <Button asChild variant="ghost" size="sm">
+                        <Link href={`/clients/${c.id}`}>Apri</Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </>
       ) : (
         <p className="text-muted-foreground text-sm">
           Aggiungi il primo cliente: senza, non si può registrare un defunto,

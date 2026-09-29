@@ -9,8 +9,11 @@ import {
   holidayPoints,
   markLabel,
   markSign,
+  monthSummary,
   monthLabel,
+  todayIso,
   toMark,
+  weekdayIndex,
   parseMonth,
   runningTotals,
   sameMark,
@@ -179,5 +182,32 @@ describe("calendar helpers", () => {
     expect(totals[6]).toBe(2); // 7th
     expect(totals[7]).toBe(2); // 8th, a holiday
     expect(totals[13]).toBe(4); // 14th
+  });
+
+  it("finds today in Rome and the weekday from Monday", () => {
+    // 23:30 UTC on the 30th is already the 1st in Rome.
+    expect(todayIso(new Date("2026-09-30T23:30:00Z"))).toBe("2026-10-01");
+    expect(weekdayIndex("2026-09-28")).toBe(0); // Monday
+    expect(weekdayIndex("2026-10-04")).toBe(6); // Sunday
+  });
+
+  it("takes the month's total apart", () => {
+    const days = daysOfMonth("2026-12");
+    const marks = days.map((d) =>
+      [7, 8].includes(d.day)
+        ? ({ code: "L", services: 2 } as const)
+        : d.day === 9
+          ? ({ code: "F", notice: 24 } as const)
+          : undefined,
+    );
+    expect(monthSummary(marks, days)).toEqual({
+      total: 4,
+      services: 2,
+      holidayServices: 2,
+      ferieDays: 1,
+      feriePoints: 2,
+    });
+    expect(monthSummary(marks, days, true).total).toBe(2);
+    expect(monthSummary(marks, days).total).toBe(serviceTotal(marks, days));
   });
 });

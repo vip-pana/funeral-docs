@@ -73,58 +73,101 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
 
       <CardContent className="space-y-6">
         {bearers.length > 0 ? (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Conducente</TableHead>
-                  <TableHead>Contratto</TableHead>
-                  <TableHead>Altezza spalla (cm)</TableHead>
-                  <TableHead className="text-right">Azioni</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {bearers.map((b) => (
-                  <TableRow key={b.id}>
-                    <TableCell className="font-medium">{b.name}</TableCell>
-                    <TableCell>
-                      {/* Saved on the spot rather than behind a submit: it is a
-                          single flag, and a form here would nest inside the one
-                          below. */}
+          <>
+            {/* On phones one card each: five columns do not fit, and the
+                buttons ended up off screen. The boxes are wrapped in their
+                labels, without the table's ids, which must stay unique. */}
+            <ul className="divide-y rounded-xl border md:hidden">
+              {bearers.map((b) => (
+                <li key={b.id} className="space-y-2 px-3 py-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="truncate font-medium">{b.name}</p>
+                    <div className="flex shrink-0 gap-1">
+                      <EditBearerDialog bearer={b} />
+                      <DeleteBearerButton bearerId={b.id} />
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+                    <label className="flex h-9 items-center gap-2">
                       <Checkbox
-                        id={`bearerIsDriver-${b.id}`}
-                        aria-label={`${b.name}: conducente`}
                         checked={b.isDriver}
                         onCheckedChange={(on) =>
                           setBearerDriver(b.id, on === true)
                         }
                       />
-                    </TableCell>
-                    <TableCell>
+                      Conducente
+                    </label>
+                    <label className="flex h-9 items-center gap-2">
                       <Checkbox
-                        id={`bearerHasContract-${b.id}`}
-                        aria-label={`${b.name}: contratto`}
                         checked={b.hasContract}
                         onCheckedChange={(on) =>
                           setBearerContract(b.id, on === true)
                         }
                       />
-                    </TableCell>
-                    <TableCell>
+                      Contratto
+                    </label>
+                    <label className="text-muted-foreground flex items-center gap-2">
+                      Altezza
                       <ShoulderHeightInput bearer={b} />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <EditBearerDialog bearer={b} />
-                        <DeleteBearerButton bearerId={b.id} />
-                      </div>
-                    </TableCell>
+                      cm
+                    </label>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div className="hidden overflow-x-auto md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>Conducente</TableHead>
+                    <TableHead>Contratto</TableHead>
+                    <TableHead>Altezza spalla (cm)</TableHead>
+                    <TableHead className="text-right">Azioni</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {bearers.map((b) => (
+                    <TableRow key={b.id}>
+                      <TableCell className="font-medium">{b.name}</TableCell>
+                      <TableCell>
+                        {/* Saved on the spot rather than behind a submit: it is a
+                            single flag, and a form here would nest inside the one
+                            below. */}
+                        <Checkbox
+                          id={`bearerIsDriver-${b.id}`}
+                          aria-label={`${b.name}: conducente`}
+                          checked={b.isDriver}
+                          onCheckedChange={(on) =>
+                            setBearerDriver(b.id, on === true)
+                          }
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Checkbox
+                          id={`bearerHasContract-${b.id}`}
+                          aria-label={`${b.name}: contratto`}
+                          checked={b.hasContract}
+                          onCheckedChange={(on) =>
+                            setBearerContract(b.id, on === true)
+                          }
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <ShoulderHeightInput bearer={b} />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
+                          <EditBearerDialog bearer={b} />
+                          <DeleteBearerButton bearerId={b.id} />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </>
         ) : (
           <p className="text-muted-foreground text-sm">
             Nessun necroforo configurato. Aggiungine uno qui sotto: potrai poi
@@ -159,20 +202,24 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
           />
           {/* Radix renders its own hidden input for `name`, which posts "on"
               when ticked and nothing at all when not. */}
-          <label className="mt-[calc(--spacing(6)+2px)] flex h-9 items-center gap-2 text-sm whitespace-nowrap">
-            <Checkbox id="bearerIsDriver" name="bearerIsDriver" />
-            Conducente
-          </label>
-          <label className="mt-[calc(--spacing(6)+2px)] flex h-9 items-center gap-2 text-sm whitespace-nowrap">
-            <Checkbox id="bearerHasContract" name="bearerHasContract" />
-            Contratto
-          </label>
+          {/* Side by side on a phone; from sm up the wrapper dissolves and each
+              box takes its own column. */}
+          <div className="flex gap-6 sm:contents">
+            <label className="flex h-9 items-center gap-2 text-sm whitespace-nowrap sm:mt-[calc(--spacing(6)+2px)]">
+              <Checkbox id="bearerIsDriver" name="bearerIsDriver" />
+              Conducente
+            </label>
+            <label className="flex h-9 items-center gap-2 text-sm whitespace-nowrap sm:mt-[calc(--spacing(6)+2px)]">
+              <Checkbox id="bearerHasContract" name="bearerHasContract" />
+              Contratto
+            </label>
+          </div>
           <Button
             type="submit"
             variant="outline"
             disabled={pending}
             // Drops down to the input's height, clearing the label above.
-            className="mt-[calc(--spacing(6)+2px)] shrink-0"
+            className="shrink-0 sm:mt-[calc(--spacing(6)+2px)]"
           >
             {pending ? "Aggiunta…" : "Aggiungi"}
           </Button>
