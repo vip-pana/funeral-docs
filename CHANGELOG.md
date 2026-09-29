@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.0](https://github.com/vip-pana/funeral-docs/compare/v0.7.2...v0.8.0) (2026-09-29)
+
+
+### Funzionalità
+
+* compact the deceased record page ([#20](https://github.com/vip-pana/funeral-docs/issues/20)) ([e993ef4](https://github.com/vip-pana/funeral-docs/commit/e993ef483f32f87dcd4d567440c2135a44512823))
+* record each bearer's shoulder height ([#22](https://github.com/vip-pana/funeral-docs/issues/22)) ([fc48a66](https://github.com/vip-pana/funeral-docs/commit/fc48a663e093b1e185d34fef84db0e7b7bcd66d6))
+
 ## [0.7.2](https://github.com/vip-pana/funeral-docs/compare/v0.7.1...v0.7.2) (2026-09-27)
 
 
