@@ -1,11 +1,8 @@
 import { defineConfig } from "@playwright/test";
 
-/**
- * The e2e suites being moved to Playwright Test, one at a time; the rest still
- * run through tests/run.mts. Both drive an instance already listening at
- * BASE_URL (see tests/README.md).
- */
-const session = "tests/e2e/.auth/session.json";
+import { SESSION } from "./tests/e2e/helpers";
+
+/** The e2e suites: see tests/README.md. */
 
 export default defineConfig({
   testDir: "tests/e2e",
@@ -15,9 +12,19 @@ export default defineConfig({
   reporter: process.env.CI
     ? [["github"], ["html", { open: "never" }]]
     : [["list"]],
+  // In CI Playwright starts the production build itself; locally the tests
+  // use the instance already running, as they always have. `next start` warns
+  // about the standalone output but serves the build all the same.
+  webServer: process.env.CI
+    ? {
+        command: "pnpm start",
+        url: `${process.env.BASE_URL ?? "http://localhost:3000"}/login`,
+        timeout: 60_000,
+      }
+    : undefined,
   use: {
     baseURL: process.env.BASE_URL ?? "http://localhost:3000",
-    // The Chrome already installed, as the old suites do: no browser download.
+    // The Chrome already installed: no browser download.
     channel: "chrome",
     trace: "retain-on-failure",
   },
@@ -27,7 +34,17 @@ export default defineConfig({
     {
       name: "chrome",
       dependencies: ["login"],
-      use: { storageState: session },
+      testIgnore: /impostazioni/,
+      use: { storageState: SESSION },
+    },
+    // Changes the password everyone else logs in with: after all of them, one
+    // test at a time — repeats included, which would otherwise race.
+    {
+      name: "password",
+      dependencies: ["chrome"],
+      testMatch: /impostazioni/,
+      workers: 1,
+      use: { storageState: SESSION },
     },
   ],
 });

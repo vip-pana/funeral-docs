@@ -76,31 +76,16 @@ jobs:
             echo "AUTH_PASSWORD_HASH=$(TEST_PASSWORD=$password node -e 'console.log(require("bcryptjs").hashSync(process.env.TEST_PASSWORD, 12))')"
           } >> "$GITHUB_ENV"
 
-      # The seed gives the suites a client to pick: without one, the new
+      # The seed gives the tests a client to pick: without one, the new
       # deceased form has nothing to fill in.
       - run: pnpm db:migrate
       - run: pnpm db:seed
 
       - run: pnpm build
 
-      # `next start` warns about the standalone output but serves the build
-      # all the same, without copying the static files over first.
-      - name: Start the app
-        run: |
-          pnpm start > "$RUNNER_TEMP/next.log" 2>&1 &
-          for i in $(seq 1 60); do
-            curl -sf -o /dev/null "$BASE_URL/login" && exit 0
-            sleep 1
-          done
-          cat "$RUNNER_TEMP/next.log"
-          exit 1
-
-      # The runner image ships Google Chrome, which the suites launch.
+      # Playwright starts the build (`webServer` in playwright.config.ts), and
+      # the runner image ships the Google Chrome the tests launch.
       - run: pnpm test:e2e
-
-      - name: Server log
-        if: failure()
-        run: cat "$RUNNER_TEMP/next.log"
 
       # Playwright's report, with a trace of every failed test: download it
       # and open it with `pnpm exec playwright show-report`.
