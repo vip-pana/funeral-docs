@@ -6,7 +6,7 @@ import { ageAt, documentFileName, formatDate, prepareValues } from "./render";
 
 /**
  * `renderDocument` is left out: it reads the .docx files from disk and is
- * already covered end-to-end by tests/pratiche.mts, which downloads the real
+ * already covered end-to-end by tests/e2e/pratiche.spec.ts, which downloads the real
  * documents and inspects their text.
  */
 

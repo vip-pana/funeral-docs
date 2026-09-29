@@ -16,7 +16,7 @@
     "auth:hash": "tsx scripts/hash-password.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "tsx tests/run.mts",
+    "test:e2e": "playwright test",
     "prepare": "husky"
   },
   "dependencies": {
@@ -46,6 +46,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "1.62.1",
     "@tailwindcss/postcss": "^4",
     "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^20",
@@ -57,7 +58,6 @@
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
     "jszip": "^3.10.1",
-    "playwright-core": "^1.62.1",
     "prettier": "^3.9.9",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4",
