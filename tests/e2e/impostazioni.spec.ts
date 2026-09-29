@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { expect, type Page, test } from "@playwright/test";
 
 import { PASSWORD } from "./helpers";
@@ -8,7 +10,8 @@ import { PASSWORD } from "./helpers";
  * the original back whatever happens.
  */
 
-const TEMP = "collaudo-temporanea-9182";
+// Made up on each run: a password written in the file reads as a leaked one.
+const TEMP = `temp-${randomUUID()}`;
 
 async function submit(
   page: Page,
