@@ -3,7 +3,12 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import PizZip from "pizzip";
 
-import { ALL_FIELDS, DOCUMENTS, type DocumentId, type TemplateField } from "@/lib/fields";
+import {
+  ALL_FIELDS,
+  DOCUMENTS,
+  type DocumentId,
+  type TemplateField,
+} from "@/lib/fields";
 
 /**
  * Templates use docxtemplater's `{field}` syntax (see templates/FIELDS.md).
@@ -18,7 +23,8 @@ import { ALL_FIELDS, DOCUMENTS, type DocumentId, type TemplateField } from "@/li
  * output through `outputFileTracingIncludes` in next.config.ts.
  */
 function templatePath(file: string): string {
-  const dir = process.env.TEMPLATES_DIR ?? path.join(process.cwd(), "templates");
+  const dir =
+    process.env.TEMPLATES_DIR ?? path.join(process.cwd(), "templates");
   return path.join(/* turbopackIgnore: true */ dir, file);
 }
 

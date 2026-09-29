@@ -20,7 +20,10 @@ import {
  * advance and `.returning({ id })` still works. It emits no DEFAULT clause in
  * the DDL, so raw SQL (the migration, scripts/seed.ts) has to supply its own.
  */
-const uuid = () => text("id").primaryKey().$defaultFn(() => crypto.randomUUID());
+const uuid = () =>
+  text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID());
 
 /**
  * The single shared password, as a bcrypt hash.
@@ -200,7 +203,9 @@ export const practices = sqliteTable("practices", {
   personLastName: text("person_last_name").notNull(),
   // Feeds the tax code computation, where women get +40 on the birth day.
   // Never appears in any document.
-  personSex: text("person_sex", { enum: ["M", "F"] }).notNull().default("M"),
+  personSex: text("person_sex", { enum: ["M", "F"] })
+    .notNull()
+    .default("M"),
   personTaxCode: text("person_tax_code").notNull(),
   personBirthDate: text("person_birth_date").notNull(),
   personBirthCity: text("person_birth_city").notNull(),

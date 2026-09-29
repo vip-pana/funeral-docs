@@ -18,8 +18,12 @@ const ROLE = "INCARICATO";
 
 const b = await chromium.launch({ channel: "chrome" });
 try {
-  const p = await (await b.newContext({ viewport: { width: 1280, height: 960 } })).newPage();
-  p.on("pageerror", (e) => console.log("  [pageerror]", e.message.slice(0, 160)));
+  const p = await (
+    await b.newContext({ viewport: { width: 1280, height: 960 } })
+  ).newPage();
+  p.on("pageerror", (e) =>
+    console.log("  [pageerror]", e.message.slice(0, 160)),
+  );
 
   let fail = 0;
   const check = (n, c, x = "") => {
@@ -31,8 +35,9 @@ try {
   await p.goto(`${B}/resources`);
   await p.waitForTimeout(700);
 
-  const card = p.locator('[data-slot=card]:has(#bearerName)');
-  const addBearer = () => card.getByRole("button", { name: "Aggiungi" }).click();
+  const card = p.locator("[data-slot=card]:has(#bearerName)");
+  const addBearer = () =>
+    card.getByRole("button", { name: "Aggiungi" }).click();
 
   check("1 card Necrofori presente", Boolean(await card.count()));
 
@@ -65,26 +70,41 @@ try {
   await p.waitForTimeout(250);
 
   await Promise.all([
-    p.waitForURL(/\/deceased\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/, { timeout: 20000 }),
+    p.waitForURL(
+      /\/deceased\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+      { timeout: 20000 },
+    ),
     p.click('button:has-text("Crea scheda")'),
   ]);
   const id = p.url().match(/\/deceased\/([0-9a-f-]{36})$/)[1];
 
   const docText = async (doc) => {
-    const res = await p.request.get(`${B}/api/deceased/${id}/generate?doc=${doc}`);
+    const res = await p.request.get(
+      `${B}/api/deceased/${id}/generate?doc=${doc}`,
+    );
     const zip = await JSZip.loadAsync(await res.body());
     const xml = await zip.file("word/document.xml").async("string");
-    return [...xml.matchAll(/<w:t(?: [^>]*)?>([\s\S]*?)<\/w:t>/g)].map((m) => m[1]).join("");
+    return [...xml.matchAll(/<w:t(?: [^>]*)?>([\s\S]*?)<\/w:t>/g)]
+      .map((m) => m[1])
+      .join("");
   };
 
   // --- both attachments come out filled in ---
   for (const doc of ["6", "7"]) {
     const txt = await docText(doc);
-    check(`4 documento ${doc} generato`, txt.includes("Rossi") && txt.includes("Mario"));
+    check(
+      `4 documento ${doc} generato`,
+      txt.includes("Rossi") && txt.includes("Mario"),
+    );
     // The raw placeholder surviving means a field is declared but never filled.
-    check(`  ${doc} nessun placeholder`, !txt.match(/\{[^}]*\}/), txt.match(/\{[^}]*\}/g)?.join(" ") ?? "");
+    check(
+      `  ${doc} nessun placeholder`,
+      !txt.match(/\{[^}]*\}/),
+      txt.match(/\{[^}]*\}/g)?.join(" ") ?? "",
+    );
     // Both forms are issued by San Severo: fixed text, not the client's city.
-    const heading = doc === "6" ? "COMUNE DI SAN SEVERO" : "CITTA DI SAN SEVERO";
+    const heading =
+      doc === "6" ? "COMUNE DI SAN SEVERO" : "CITTA DI SAN SEVERO";
     check(`  ${doc} intestazione fissa`, txt.includes(heading));
     check(`  ${doc} luogo della data fisso`, txt.includes("San Severo il "));
   }

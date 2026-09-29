@@ -14,7 +14,8 @@ import path from "node:path";
 
 import { ALL_FIELDS, DOCUMENTS } from "../src/lib/fields";
 
-const TEMPLATES_DIR = process.env.TEMPLATES_DIR ?? path.join(process.cwd(), "templates");
+const TEMPLATES_DIR =
+  process.env.TEMPLATES_DIR ?? path.join(process.cwd(), "templates");
 const PARTS = ["word/document.xml", "word/header1.xml", "word/footer1.xml"];
 
 function placeholdersOf(file: string): Set<string> {
@@ -43,7 +44,9 @@ function placeholdersOf(file: string): Set<string> {
     // was never normalised.
     const legacy = text.match(/\[[^\[\]]{1,60}\]/g);
     if (legacy) {
-      console.error(`  ${file} (${part}): sintassi vecchia rimasta ${legacy.join(", ")}`);
+      console.error(
+        `  ${file} (${part}): sintassi vecchia rimasta ${legacy.join(", ")}`,
+      );
       process.exitCode = 1;
     }
   }
@@ -59,7 +62,9 @@ for (const doc of DOCUMENTS) {
   const unknown = [...found].filter((f) => !known.has(f));
 
   if (unknown.length) {
-    console.error(`✗ ${doc.file}: placeholder non dichiarati in fields.ts → ${unknown.join(", ")}`);
+    console.error(
+      `✗ ${doc.file}: placeholder non dichiarati in fields.ts → ${unknown.join(", ")}`,
+    );
     failed = true;
   } else {
     console.log(`✓ ${doc.file}: ${found.size} campi`);
@@ -69,7 +74,9 @@ for (const doc of DOCUMENTS) {
 
 const unused = [...known].filter((f) => !used.has(f));
 if (unused.length) {
-  console.error(`✗ dichiarati in fields.ts ma assenti dai template → ${unused.join(", ")}`);
+  console.error(
+    `✗ dichiarati in fields.ts ma assenti dai template → ${unused.join(", ")}`,
+  );
   failed = true;
 }
 

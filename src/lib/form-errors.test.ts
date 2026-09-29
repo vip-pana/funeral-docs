@@ -7,7 +7,10 @@ describe("collectErrors", () => {
     expect(
       collectErrors([
         { path: ["personFirstName"], message: "Nome: campo obbligatorio" },
-        { path: ["destinationProvince"], message: "Sigla provincia: 2 lettere" },
+        {
+          path: ["destinationProvince"],
+          message: "Sigla provincia: 2 lettere",
+        },
       ]),
     ).toEqual({
       personFirstName: "Nome: campo obbligatorio",

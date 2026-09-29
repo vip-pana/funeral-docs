@@ -23,7 +23,12 @@ export function DeleteButton({ practiceId }: { practiceId: string }) {
 
   return (
     <form action={deletePractice.bind(null, practiceId)} className="flex gap-2">
-      <Button type="button" variant="ghost" size="sm" onClick={() => setConfirming(false)}>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        onClick={() => setConfirming(false)}
+      >
         Annulla
       </Button>
       <Button type="submit" variant="destructive" size="sm">

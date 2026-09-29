@@ -36,10 +36,10 @@ import { DeleteBearerButton } from "./delete-bearer-button";
 import { EditBearerDialog } from "./edit-bearer-dialog";
 
 export function BearersCard({ bearers }: { bearers: Bearer[] }) {
-  const [state, formAction, pending] = useActionState<BearerFormState, FormData>(
-    addBearer,
-    {},
-  );
+  const [state, formAction, pending] = useActionState<
+    BearerFormState,
+    FormData
+  >(addBearer, {});
   const { ref: formRef, reset } = useFormReset();
 
   useEffect(() => {
@@ -66,8 +66,8 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
           chi puo&apos; anche guidare l&apos;autofunebre: solo loro compaiono
           nella scelta del conducente, il cui nome finisce nel documento 4.
           Spunta Contratto per chi e&apos; assunto, a tempo determinato o
-          indeterminato, e non a chiamata: nel calendario le sue ferie non
-          danno punti.
+          indeterminato, e non a chiamata: nel calendario le sue ferie non danno
+          punti.
         </CardDescription>
       </CardHeader>
 
@@ -106,7 +106,7 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
                       />
                       Contratto
                     </label>
-                    <label className="text-muted-foreground flex items-center gap-2">
+                    <label className="flex items-center gap-2 text-muted-foreground">
                       Altezza
                       <ShoulderHeightInput bearer={b} />
                       cm
@@ -169,7 +169,7 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
             </div>
           </>
         ) : (
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             Nessun necroforo configurato. Aggiungine uno qui sotto: potrai poi
             sceglierli per ogni defunto.
           </p>

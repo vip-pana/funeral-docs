@@ -140,7 +140,9 @@ export function ComuneField({
             role="combobox"
             aria-expanded={open}
             aria-invalid={error ? true : undefined}
-            aria-describedby={[errorId, hintId].filter(Boolean).join(" ") || undefined}
+            aria-describedby={
+              [errorId, hintId].filter(Boolean).join(" ") || undefined
+            }
             className="w-full justify-between font-normal"
           >
             <span className={cn("truncate", !value && "text-muted-foreground")}>
@@ -194,7 +196,7 @@ export function ComuneField({
                     {/* The province for a municipality; for a state the word
                         itself, because "EE" means nothing to read even though it
                         is what the documents print. */}
-                    <span className="text-muted-foreground text-xs">
+                    <span className="text-xs text-muted-foreground">
                       {c.estero
                         ? c.storico
                           ? "Estero · cessato"

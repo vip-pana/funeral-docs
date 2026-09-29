@@ -108,9 +108,7 @@ export function GeneratePanel({ practiceId }: { practiceId: string }) {
 
       if (done) {
         toast.success(
-          done === 1
-            ? "Documento scaricato."
-            : `${done} documenti scaricati.`,
+          done === 1 ? "Documento scaricato." : `${done} documenti scaricati.`,
         );
       }
     } catch {
@@ -168,7 +166,7 @@ export function GeneratePanel({ practiceId }: { practiceId: string }) {
         </FieldRoot>
 
         <div className="flex items-center justify-between gap-4">
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             {chosen.length === 0
               ? "Nessun documento selezionato."
               : `${chosen.length} document${chosen.length === 1 ? "o" : "i"}.`}

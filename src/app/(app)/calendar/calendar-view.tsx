@@ -82,7 +82,9 @@ export function CalendarView({
 
   const [mode, setMode] = useState<CalendarMode | null>(initialMode);
   const [bearerId, setBearerId] = useState(
-    bearers.some((b) => b.id === initialBearer) ? initialBearer! : bearers[0].id,
+    bearers.some((b) => b.id === initialBearer)
+      ? initialBearer!
+      : bearers[0].id,
   );
   const [day, setDayNumber] = useState(
     initialDay && initialDay <= calendar.length ? initialDay : todayHere,
@@ -152,7 +154,7 @@ export function CalendarView({
           <div
             role="group"
             aria-label="Vista"
-            className="bg-muted inline-flex rounded-lg p-0.5"
+            className="inline-flex rounded-lg bg-muted p-0.5"
           >
             {MODES.map(({ mode: m, label, icon: Icon }) => (
               <button
@@ -164,7 +166,7 @@ export function CalendarView({
                   remember({ mode: m });
                 }}
                 className={cn(
-                  "text-muted-foreground inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 text-sm font-medium transition-colors",
+                  "inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 text-sm font-medium text-muted-foreground transition-colors",
                   mode === m && lit,
                   mode === null && autoLit[m],
                 )}
@@ -183,7 +185,11 @@ export function CalendarView({
           // Kept narrow on wide screens: a wall calendar does not need to be
           // a metre across.
           "mx-auto max-w-xl",
-          mode === "persona" ? "print:hidden" : mode === null ? "md:hidden print:hidden" : "hidden",
+          mode === "persona"
+            ? "print:hidden"
+            : mode === null
+              ? "md:hidden print:hidden"
+              : "hidden",
         )}
       >
         <PersonView
@@ -219,7 +225,11 @@ export function CalendarView({
 
       <div
         className={cn(
-          mode === "mese" ? "" : mode === null ? "hidden md:block print:block" : "hidden print:block",
+          mode === "mese"
+            ? ""
+            : mode === null
+              ? "hidden md:block print:block"
+              : "hidden print:block",
         )}
       >
         <CalendarGrid

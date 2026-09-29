@@ -39,7 +39,9 @@ export async function createSession(): Promise<string> {
     .sign(secret());
 }
 
-export async function isValidSession(token: string | undefined): Promise<boolean> {
+export async function isValidSession(
+  token: string | undefined,
+): Promise<boolean> {
   if (!token) return false;
   try {
     await jwtVerify(token, secret());

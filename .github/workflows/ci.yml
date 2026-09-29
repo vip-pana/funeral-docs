@@ -10,7 +10,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# The same three checks as the pre-push hook, which a --no-verify skips and a
+# The same checks as the pre-push hook, which a --no-verify skips and a
 # fresh clone does not have. The e2e suites stay out here too: they need an
 # instance already listening and a database to write to.
 jobs:
@@ -39,3 +39,5 @@ jobs:
       - run: pnpm tsc --noEmit
 
       - run: pnpm lint
+
+      - run: pnpm format:check

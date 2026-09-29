@@ -19,8 +19,12 @@ const NAME = "Mercedes Vito";
 
 const b = await chromium.launch({ channel: "chrome" });
 try {
-  const p = await (await b.newContext({ viewport: { width: 1280, height: 960 } })).newPage();
-  p.on("pageerror", (e) => console.log("  [pageerror]", e.message.slice(0, 160)));
+  const p = await (
+    await b.newContext({ viewport: { width: 1280, height: 960 } })
+  ).newPage();
+  p.on("pageerror", (e) =>
+    console.log("  [pageerror]", e.message.slice(0, 160)),
+  );
 
   let fail = 0;
   const check = (n, c, x = "") => {
@@ -33,14 +37,18 @@ try {
   // The Necrofori card has an identical "Aggiungi" button and its own table:
   // everything here is scoped to the hearse card, otherwise the selectors would
   // be ambiguous.
-  const card = p.locator('[data-slot=card]:has(#plate)');
-  const addVehicle = () => card.getByRole("button", { name: "Aggiungi" }).click();
+  const card = p.locator("[data-slot=card]:has(#plate)");
+  const addVehicle = () =>
+    card.getByRole("button", { name: "Aggiungi" }).click();
 
   await login(p, B);
   await p.goto(`${B}/resources`);
   await p.waitForTimeout(700);
 
-  check("1 card Autofunebri presente", (await plateText()).includes("Autofunebri"));
+  check(
+    "1 card Autofunebri presente",
+    (await plateText()).includes("Autofunebri"),
+  );
 
   // Remove hearses left by previous runs: the suite recreates one at the end,
   // and without this cleanup they would pile up.
@@ -55,7 +63,7 @@ try {
   // --- validation ---
   await addVehicle();
   await p.waitForFunction(
-    () => document.querySelectorAll('[role=alert]').length > 0,
+    () => document.querySelectorAll("[role=alert]").length > 0,
     null,
     { timeout: 12000 },
   );
@@ -66,8 +74,10 @@ try {
   await p.fill("#plate", PLATE.toLowerCase());
   await addVehicle();
   await p.waitForFunction(
-    () => [...document.querySelectorAll("[data-sonner-toast]")]
-      .some((t) => t.textContent?.includes("Autofunebre aggiunta")),
+    () =>
+      [...document.querySelectorAll("[data-sonner-toast]")].some((t) =>
+        t.textContent?.includes("Autofunebre aggiunta"),
+      ),
     null,
     { timeout: 12000 },
   );
@@ -81,25 +91,39 @@ try {
   await p.waitForTimeout(700);
   await p.click("#vehicleId");
   await p.waitForSelector("[role=option]", { timeout: 8000 });
-  const options = await p.$$eval("[role=option]", (els) => els.map((e) => e.textContent));
-  check("5 compare nel Select del defunto", options.some((o) => o?.includes(PLATE)),
-    JSON.stringify(options));
+  const options = await p.$$eval("[role=option]", (els) =>
+    els.map((e) => e.textContent),
+  );
+  check(
+    "5 compare nel Select del defunto",
+    options.some((o) => o?.includes(PLATE)),
+    JSON.stringify(options),
+  );
   await p.click(`[role=option]:has-text("${PLATE}")`);
   await p.waitForTimeout(300);
 
   // --- the plate reaches the document ---
   await fillPractice(p, SAMPLE);
   await Promise.all([
-    p.waitForURL(/\/deceased\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/, { timeout: 20000 }),
+    p.waitForURL(
+      /\/deceased\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+      { timeout: 20000 },
+    ),
     p.click('button:has-text("Crea scheda")'),
   ]);
-  const id = p.url().match(/\/deceased\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/)[1];
+  const id = p
+    .url()
+    .match(
+      /\/deceased\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/,
+    )[1];
 
   const docText = async () => {
     const res = await p.request.get(`${B}/api/deceased/${id}/generate?doc=2`);
     const zip = await JSZip.loadAsync(await res.body());
     const xml = await zip.file("word/document.xml").async("string");
-    return [...xml.matchAll(/<w:t(?: [^>]*)?>([\s\S]*?)<\/w:t>/g)].map((m) => m[1]).join("");
+    return [...xml.matchAll(/<w:t(?: [^>]*)?>([\s\S]*?)<\/w:t>/g)]
+      .map((m) => m[1])
+      .join("");
   };
 
   check("6 targa nel documento 2", (await docText()).includes(PLATE));
@@ -131,7 +155,7 @@ try {
   // The description of the hearse field alone: searching the whole page would
   // pick up the first one belonging to another field.
   const hint = await p
-    .locator('[data-slot=field]:has(#vehicleId) [data-slot=field-description]')
+    .locator("[data-slot=field]:has(#vehicleId) [data-slot=field-description]")
     .textContent();
   check(
     "9 avvisa che il mezzo non e' in elenco",

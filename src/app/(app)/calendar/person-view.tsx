@@ -54,14 +54,19 @@ export function PersonView({
 }) {
   const [openDay, setOpenDay] = useState<CalendarDay | null>(null);
 
-  const index = Math.max(0, bearers.findIndex((b) => b.id === bearerId));
+  const index = Math.max(
+    0,
+    bearers.findIndex((b) => b.id === bearerId),
+  );
   const bearer = bearers[index];
   const contract = bearer.hasContract;
   const rowMarks = calendar.map((d) => marks.get(key(bearer.id, d.date)));
   const totals = runningTotals(rowMarks, calendar, contract);
   const summary = monthSummary(rowMarks, calendar, contract);
   const step = (delta: number) =>
-    onBearerChange(bearers[(index + delta + bearers.length) % bearers.length].id);
+    onBearerChange(
+      bearers[(index + delta + bearers.length) % bearers.length].id,
+    );
 
   return (
     <div className="space-y-4">
@@ -77,7 +82,10 @@ export function PersonView({
           <ChevronLeftIcon />
         </Button>
         <Select value={bearer.id} onValueChange={onBearerChange}>
-          <SelectTrigger aria-label="Necroforo" className="h-9 flex-1 font-medium">
+          <SelectTrigger
+            aria-label="Necroforo"
+            className="h-9 flex-1 font-medium"
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -99,7 +107,7 @@ export function PersonView({
         </Button>
       </div>
 
-      <div className="bg-card rounded-xl border p-4">
+      <div className="rounded-xl border bg-card p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="truncate text-lg font-semibold">{bearer.name}</p>
@@ -116,10 +124,15 @@ export function PersonView({
             </div>
           </div>
           <div className="text-right">
-            <p className="text-3xl leading-none font-bold tabular-nums" data-testid="person-total">
+            <p
+              className="text-3xl leading-none font-bold tabular-nums"
+              data-testid="person-total"
+            >
               {summary.total}
             </p>
-            <p className="text-muted-foreground mt-1 text-xs">totale del mese</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              totale del mese
+            </p>
           </div>
         </div>
         <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
@@ -138,9 +151,12 @@ export function PersonView({
       </div>
 
       <div>
-        <div className="text-muted-foreground mb-1 grid grid-cols-7 text-center text-xs font-medium">
+        <div className="mb-1 grid grid-cols-7 text-center text-xs font-medium text-muted-foreground">
           {WEEKDAYS.map((w, i) => (
-            <span key={i} className={cn(i === 6 && "text-[var(--calendar-sunday)]")}>
+            <span
+              key={i}
+              className={cn(i === 6 && "text-[var(--calendar-sunday)]")}
+            >
               {w}
             </span>
           ))}
@@ -161,15 +177,19 @@ export function PersonView({
                 className={cn(
                   "relative flex aspect-square flex-col items-center justify-center rounded-lg border text-sm transition-colors active:scale-95",
                   "hover:border-foreground/30",
-                  d.isHoliday && "border-transparent bg-[var(--calendar-holiday)]",
+                  d.isHoliday &&
+                    "border-transparent bg-[var(--calendar-holiday)]",
                   markTone(mark),
-                  d.date === today && "ring-primary ring-2 ring-offset-1 ring-offset-background",
+                  d.date === today &&
+                    "ring-2 ring-primary ring-offset-1 ring-offset-background",
                 )}
               >
                 <span
                   className={cn(
                     "absolute top-1 left-1.5 text-[10px] leading-none font-medium",
-                    d.isHoliday ? "text-[var(--calendar-sunday)]" : "text-muted-foreground",
+                    d.isHoliday
+                      ? "text-[var(--calendar-sunday)]"
+                      : "text-muted-foreground",
                   )}
                 >
                   {d.day}
@@ -186,8 +206,9 @@ export function PersonView({
             );
           })}
         </div>
-        <p className="text-muted-foreground mt-3 text-xs">
-          Tocca un giorno per segnarlo. {contract
+        <p className="mt-3 text-xs text-muted-foreground">
+          Tocca un giorno per segnarlo.{" "}
+          {contract
             ? "Con il contratto le ferie non danno punti."
             : "Ferie: F1 con 48 ore di avviso, F2 con 24; nei festivi valgono il quadruplo."}{" "}
           Servizi: \ = 1, X = 2, \\\ = 3.
@@ -218,8 +239,8 @@ function Stat({
 }) {
   return (
     // Label first for the markup, number first on screen.
-    <div className="bg-muted/60 flex flex-col-reverse rounded-lg px-2 py-2">
-      <dt className="text-muted-foreground text-[11px] leading-tight">
+    <div className="flex flex-col-reverse rounded-lg bg-muted/60 px-2 py-2">
+      <dt className="text-[11px] leading-tight text-muted-foreground">
         {label}
         {hint && <span className="block opacity-80">{hint}</span>}
       </dt>

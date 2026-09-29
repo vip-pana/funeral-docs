@@ -1,6 +1,10 @@
 import { cookies } from "next/headers";
 
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 
 import { AppSidebar, SectionTitle } from "./app-sidebar";
 
@@ -18,7 +22,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
       <SidebarInset>
         {/* Pinned on phones, where pages are long and the menu is the only
             way elsewhere. */}
-        <header className="bg-background/90 supports-backdrop-filter:backdrop-blur sticky top-0 z-30 flex h-12 shrink-0 items-center gap-2 border-b px-2 sm:h-14 sm:px-4 md:static">
+        <header className="sticky top-0 z-30 flex h-12 shrink-0 items-center gap-2 border-b bg-background/90 px-2 supports-backdrop-filter:backdrop-blur sm:h-14 sm:px-4 md:static">
           <SidebarTrigger className="size-9" />
           <SectionTitle />
         </header>

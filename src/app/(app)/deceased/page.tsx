@@ -58,7 +58,7 @@ export default async function DefuntiPage({
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold">Defunti</h1>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             {/* Whole words, not stem + ending: concatenating a stem with a
                 suffix already produced a wrong plural once. */}
             {query
@@ -86,23 +86,23 @@ export default async function DefuntiPage({
               <li key={p.id}>
                 <Link
                   href={`/deceased/${p.id}`}
-                  className="hover:bg-accent active:bg-accent flex items-center gap-3 px-4 py-3"
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-accent active:bg-accent"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium">
                       {p.personLastName} {p.personFirstName}
                     </p>
-                    <p className="text-muted-foreground text-xs">
+                    <p className="text-xs text-muted-foreground">
                       Decesso {formatDate(p.personDeathDate)} · Trasporto{" "}
                       {formatDate(p.transportDate)}
                     </p>
                     {p.destinationCity && (
-                      <p className="text-muted-foreground truncate text-xs">
+                      <p className="truncate text-xs text-muted-foreground">
                         Destinazione {p.destinationCity}
                       </p>
                     )}
                   </div>
-                  <ChevronRightIcon className="text-muted-foreground size-4 shrink-0" />
+                  <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />
                 </Link>
               </li>
             ))}
@@ -142,7 +142,7 @@ export default async function DefuntiPage({
         </>
       ) : (
         query && (
-          <p className="text-muted-foreground py-8 text-center text-sm">
+          <p className="py-8 text-center text-sm text-muted-foreground">
             Nessun defunto corrisponde alla ricerca.
           </p>
         )

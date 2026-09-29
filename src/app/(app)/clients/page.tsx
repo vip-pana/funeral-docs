@@ -26,7 +26,7 @@ export default async function ClientiPage() {
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold">Clienti</h1>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             {clients.length === 0
               ? "Nessun cliente registrato."
               : `${clients.length} ${clients.length === 1 ? "cliente" : "clienti"}. Per ogni defunto scegli chi presenta la domanda.`}
@@ -45,15 +45,17 @@ export default async function ClientiPage() {
               <li key={c.id}>
                 <Link
                   href={`/clients/${c.id}`}
-                  className="hover:bg-accent active:bg-accent flex items-center gap-3 px-4 py-3"
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-accent active:bg-accent"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium">{c.companyName}</p>
-                    <p className="text-muted-foreground truncate text-xs">
-                      {[personName(c), c.companyCity].filter(Boolean).join(" · ")}
+                    <p className="truncate text-xs text-muted-foreground">
+                      {[personName(c), c.companyCity]
+                        .filter(Boolean)
+                        .join(" · ")}
                     </p>
                   </div>
-                  <ChevronRightIcon className="text-muted-foreground size-4 shrink-0" />
+                  <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />
                 </Link>
               </li>
             ))}
@@ -71,7 +73,9 @@ export default async function ClientiPage() {
               <TableBody>
                 {clients.map((c) => (
                   <TableRow key={c.id}>
-                    <TableCell className="font-medium">{c.companyName}</TableCell>
+                    <TableCell className="font-medium">
+                      {c.companyName}
+                    </TableCell>
                     <TableCell>{personName(c)}</TableCell>
                     <TableCell>{c.companyCity}</TableCell>
                     <TableCell className="text-right">
@@ -86,7 +90,7 @@ export default async function ClientiPage() {
           </div>
         </>
       ) : (
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Aggiungi il primo cliente: senza, non si può registrare un defunto,
           perché i documenti resterebbero senza dichiarante e senza impresa.
         </p>

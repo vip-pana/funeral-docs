@@ -14,11 +14,14 @@ const check = (n, c, x = "") => {
   if (!c) fail++;
 };
 
-const isDark = () => p.evaluate(() => document.documentElement.classList.contains("dark"));
+const isDark = () =>
+  p.evaluate(() => document.documentElement.classList.contains("dark"));
 // The palette is in oklch, so the browser reports the background as
 // `lab(L a b)` where L is a 0-100 lightness — not as `rgb()`.
 const bodyIsLight = async () => {
-  const c = await p.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  const c = await p.evaluate(
+    () => getComputedStyle(document.body).backgroundColor,
+  );
   const l = Number(c.match(/[\d.]+/)?.[0]);
   return [l > 50, c];
 };
@@ -28,41 +31,76 @@ await p.goto(`${B}/login`);
 check("1 classe dark sul root", await isDark());
 check(
   "  color-scheme dark",
-  (await p.evaluate(() => getComputedStyle(document.documentElement).colorScheme)) === "dark",
+  (await p.evaluate(
+    () => getComputedStyle(document.documentElement).colorScheme,
+  )) === "dark",
 );
 const [light, bg] = await bodyIsLight();
 check("  sfondo scuro senza scelta salvata", !light, bg);
 
 // --- show password ---
-check("2 password nascosta all'inizio", (await p.getAttribute("#password", "type")) === "password");
+check(
+  "2 password nascosta all'inizio",
+  (await p.getAttribute("#password", "type")) === "password",
+);
 await p.fill("#password", PW);
 await p.click('button[aria-label*="Mostra"]');
-check("  clic la rende visibile", (await p.getAttribute("#password", "type")) === "text");
-check("  aria-pressed aggiornato", (await p.getAttribute('button[aria-label*="Nascondi"]', "aria-pressed")) === "true");
+check(
+  "  clic la rende visibile",
+  (await p.getAttribute("#password", "type")) === "text",
+);
+check(
+  "  aria-pressed aggiornato",
+  (await p.getAttribute('button[aria-label*="Nascondi"]', "aria-pressed")) ===
+    "true",
+);
 await p.click('button[aria-label*="Nascondi"]');
-check("  secondo clic la rinasconde", (await p.getAttribute("#password", "type")) === "password");
+check(
+  "  secondo clic la rinasconde",
+  (await p.getAttribute("#password", "type")) === "password",
+);
 check("  il valore non si perde", (await p.inputValue("#password")) === PW);
 
 // --- sidebar ---
-await Promise.all([p.waitForURL(/deceased/, { timeout: 15000 }), p.click('button[type=submit]')]);
+await Promise.all([
+  p.waitForURL(/deceased/, { timeout: 15000 }),
+  p.click("button[type=submit]"),
+]);
 await p.waitForTimeout(500);
 
-check("3 sidebar presente", await p.isVisible('[data-slot="sidebar"], [data-sidebar="sidebar"]'));
+check(
+  "3 sidebar presente",
+  await p.isVisible('[data-slot="sidebar"], [data-sidebar="sidebar"]'),
+);
 check("  nessuna navbar orizzontale", !(await p.isVisible("header nav")));
 
-const activeHref = await p.getAttribute('[data-active="true"] a, a[data-active="true"]', "href").catch(() => null);
-check("4 voce attiva su Defunti", activeHref === "/deceased", String(activeHref));
+const activeHref = await p
+  .getAttribute('[data-active="true"] a, a[data-active="true"]', "href")
+  .catch(() => null);
+check(
+  "4 voce attiva su Defunti",
+  activeHref === "/deceased",
+  String(activeHref),
+);
 
 await p.goto(`${B}/resources`);
 await p.waitForTimeout(400);
-const active2 = await p.getAttribute('[data-active="true"] a, a[data-active="true"]', "href").catch(() => null);
+const active2 = await p
+  .getAttribute('[data-active="true"] a, a[data-active="true"]', "href")
+  .catch(() => null);
 check("  voce attiva su Risorse", active2 === "/resources", String(active2));
 
 // the subpage keeps the parent entry active
 await p.goto(`${B}/deceased/new`);
 await p.waitForTimeout(400);
-const active3 = await p.getAttribute('[data-active="true"] a, a[data-active="true"]', "href").catch(() => null);
-check("  sottopagina mantiene Defunti", active3 === "/deceased", String(active3));
+const active3 = await p
+  .getAttribute('[data-active="true"] a, a[data-active="true"]', "href")
+  .catch(() => null);
+check(
+  "  sottopagina mantiene Defunti",
+  active3 === "/deceased",
+  String(active3),
+);
 
 // --- theme switch in the sidebar ---
 await p.goto(`${B}/deceased`);
@@ -84,11 +122,21 @@ check("  secondo clic torna allo scuro", await isDark());
 // --- collapse persists ---
 await p.click('button[data-sidebar="trigger"]');
 await p.waitForTimeout(600);
-check("6 cookie salvato", (await ctx.cookies()).some((c) => c.name === "sidebar_state" && c.value === "false"));
+check(
+  "6 cookie salvato",
+  (await ctx.cookies()).some(
+    (c) => c.name === "sidebar_state" && c.value === "false",
+  ),
+);
 
 await p.reload();
 await p.waitForTimeout(600);
-const w = (await p.locator('[data-slot="sidebar-container"], [data-sidebar="sidebar"]').first().boundingBox())?.width;
+const w = (
+  await p
+    .locator('[data-slot="sidebar-container"], [data-sidebar="sidebar"]')
+    .first()
+    .boundingBox()
+)?.width;
 check("  resta compressa dopo il reload", w !== undefined && w < 100, `${w}px`);
 
 // --- logout from the sidebar ---

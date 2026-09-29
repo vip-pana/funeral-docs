@@ -27,10 +27,10 @@ import { addVehicle, type VehicleFormState } from "./vehicle-actions";
 import { DeleteVehicleButton } from "./delete-vehicle-button";
 
 export function VehiclesCard({ vehicles }: { vehicles: Vehicle[] }) {
-  const [state, formAction, pending] = useActionState<VehicleFormState, FormData>(
-    addVehicle,
-    {},
-  );
+  const [state, formAction, pending] = useActionState<
+    VehicleFormState,
+    FormData
+  >(addVehicle, {});
   const { ref: formRef, reset } = useFormReset();
 
   useEffect(() => {
@@ -82,7 +82,7 @@ export function VehiclesCard({ vehicles }: { vehicles: Vehicle[] }) {
             </Table>
           </div>
         ) : (
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             Nessuna autofunebre configurata. Aggiungine una qui sotto: potrai
             poi sceglierla per ogni defunto.
           </p>

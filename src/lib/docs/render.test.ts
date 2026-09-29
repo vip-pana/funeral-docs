@@ -184,6 +184,8 @@ describe("documentFileName", () => {
         { personLastName: "Rossi", personDeathDate: "2026-08-04" },
         "5",
       ),
-    ).toBe("ROSSI_2026-08-04_5_Riconoscimento-di-cadavere-e-suggellamento.docx");
+    ).toBe(
+      "ROSSI_2026-08-04_5_Riconoscimento-di-cadavere-e-suggellamento.docx",
+    );
   });
 });

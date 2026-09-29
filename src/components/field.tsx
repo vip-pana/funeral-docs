@@ -44,7 +44,9 @@ export function Field({
         name={name}
         className={inputClassName}
         aria-invalid={error ? true : undefined}
-        aria-describedby={[errorId, hintId].filter(Boolean).join(" ") || undefined}
+        aria-describedby={
+          [errorId, hintId].filter(Boolean).join(" ") || undefined
+        }
         {...props}
       />
       {hint && !error && (

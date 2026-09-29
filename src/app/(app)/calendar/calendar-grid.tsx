@@ -67,7 +67,10 @@ export function CalendarGrid({
 
   return (
     <div>
-      <div ref={scroller} className="overflow-x-auto overscroll-x-contain print:overflow-visible">
+      <div
+        ref={scroller}
+        className="overflow-x-auto overscroll-x-contain print:overflow-visible"
+      >
         <table
           className="calendar w-full min-w-[58rem] table-fixed text-xs print:min-w-0"
           // Print stretches the rows to fill the sheet, so it needs the count.
@@ -98,7 +101,8 @@ export function CalendarGrid({
                   className={cn(
                     "py-1.5 text-center font-semibold",
                     d.isHoliday && "calendar-sunday",
-                    d.date === today && "underline decoration-2 underline-offset-2 print:no-underline",
+                    d.date === today &&
+                      "underline decoration-2 underline-offset-2 print:no-underline",
                   )}
                 >
                   {d.day}
@@ -109,7 +113,9 @@ export function CalendarGrid({
           <tbody>
             {bearers.map((b, i) => {
               const contract = b.hasContract;
-              const rowMarks = calendar.map((d) => marks.get(key(b.id, d.date)));
+              const rowMarks = calendar.map((d) =>
+                marks.get(key(b.id, d.date)),
+              );
               const totals = runningTotals(rowMarks, calendar, contract);
               return (
                 <tr
@@ -144,9 +150,11 @@ export function CalendarGrid({
                             <button
                               type="button"
                               aria-label={`${b.name}, ${day}: ${mark ? markLabel(mark, contract).toLowerCase() : "nulla segnato"}`}
-                              className="hover:bg-foreground/10 calendar-cell relative block h-7 w-full font-bold whitespace-nowrap"
+                              className="calendar-cell relative block h-7 w-full font-bold whitespace-nowrap hover:bg-foreground/10"
                             >
-                              {mark ? markSign(mark, d.isHoliday, contract) : ""}
+                              {mark
+                                ? markSign(mark, d.isHoliday, contract)
+                                : ""}
                               {/* The month's total so far, in the corner. */}
                               {showTotal && (
                                 <span className="calendar-corner absolute right-0.5 bottom-0 text-[8px] leading-none font-medium">
@@ -155,8 +163,11 @@ export function CalendarGrid({
                               )}
                             </button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-52 gap-0 p-1" align="start">
-                            <p className="text-muted-foreground px-2 py-1 text-xs">
+                          <PopoverContent
+                            className="w-52 gap-0 p-1"
+                            align="start"
+                          >
+                            <p className="px-2 py-1 text-xs text-muted-foreground">
                               {b.name}, {day}
                             </p>
                             <MarkOptions

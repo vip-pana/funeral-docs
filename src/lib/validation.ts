@@ -319,7 +319,6 @@ export const practiceSchema = z.object({
   concessionType: optionalText,
   concessionNumber: optionalText,
   crematoryAra: optionalText,
-
 });
 
 export type ClientInput = z.infer<typeof clientSchema>;
@@ -331,8 +330,16 @@ export type PracticeInput = z.infer<typeof practiceSchema>;
 const MONTH_CODES = "ABCDEHLMPRST";
 /** In omocodia variants some digits are replaced by letters. */
 const OMOCODIA: Record<string, string> = {
-  L: "0", M: "1", N: "2", P: "3", Q: "4",
-  R: "5", S: "6", T: "7", U: "8", V: "9",
+  L: "0",
+  M: "1",
+  N: "2",
+  P: "3",
+  Q: "4",
+  R: "5",
+  S: "6",
+  T: "7",
+  U: "8",
+  V: "9",
 };
 
 const digits = (s: string) =>

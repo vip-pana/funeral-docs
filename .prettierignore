@@ -1,0 +1,7 @@
+# Written by tools, not by hand.
+pnpm-lock.yaml
+CHANGELOG.md
+.release-please-manifest.json
+drizzle/
+next-env.d.ts
+data/
