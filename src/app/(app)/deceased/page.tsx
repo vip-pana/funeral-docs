@@ -1,4 +1,5 @@
 import { desc, like, or } from "drizzle-orm";
+import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -77,38 +78,68 @@ export default async function DefuntiPage({
       </Suspense>
 
       {rows.length > 0 ? (
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {/* Not "Defunto": the page is already titled that, and the
-                    column holds the name. */}
-                <TableHead>Nominativo</TableHead>
-                <TableHead>Decesso</TableHead>
-                <TableHead>Trasporto</TableHead>
-                <TableHead>Destinazione</TableHead>
-                <TableHead className="text-right">Azioni</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rows.map((p) => (
-                <TableRow key={p.id}>
-                  <TableCell className="font-medium">
-                    {p.personLastName} {p.personFirstName}
-                  </TableCell>
-                  <TableCell>{formatDate(p.personDeathDate)}</TableCell>
-                  <TableCell>{formatDate(p.transportDate)}</TableCell>
-                  <TableCell>{p.destinationCity}</TableCell>
-                  <TableCell className="text-right">
-                    <Button asChild variant="ghost" size="sm">
-                      <Link href={`/deceased/${p.id}`}>Apri</Link>
-                    </Button>
-                  </TableCell>
+        <>
+          {/* Phones get one card per record, the whole of it a link: five
+              columns do not fit, and "Apri" would end up off screen. */}
+          <ul className="divide-y overflow-hidden rounded-xl border md:hidden">
+            {rows.map((p) => (
+              <li key={p.id}>
+                <Link
+                  href={`/deceased/${p.id}`}
+                  className="hover:bg-accent active:bg-accent flex items-center gap-3 px-4 py-3"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium">
+                      {p.personLastName} {p.personFirstName}
+                    </p>
+                    <p className="text-muted-foreground text-xs">
+                      Decesso {formatDate(p.personDeathDate)} · Trasporto{" "}
+                      {formatDate(p.transportDate)}
+                    </p>
+                    {p.destinationCity && (
+                      <p className="text-muted-foreground truncate text-xs">
+                        Destinazione {p.destinationCity}
+                      </p>
+                    )}
+                  </div>
+                  <ChevronRightIcon className="text-muted-foreground size-4 shrink-0" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <div className="hidden overflow-x-auto md:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  {/* Not "Defunto": the page is already titled that, and the
+                      column holds the name. */}
+                  <TableHead>Nominativo</TableHead>
+                  <TableHead>Decesso</TableHead>
+                  <TableHead>Trasporto</TableHead>
+                  <TableHead>Destinazione</TableHead>
+                  <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+              <TableBody>
+                {rows.map((p) => (
+                  <TableRow key={p.id}>
+                    <TableCell className="font-medium">
+                      {p.personLastName} {p.personFirstName}
+                    </TableCell>
+                    <TableCell>{formatDate(p.personDeathDate)}</TableCell>
+                    <TableCell>{formatDate(p.transportDate)}</TableCell>
+                    <TableCell>{p.destinationCity}</TableCell>
+                    <TableCell className="text-right">
+                      <Button asChild variant="ghost" size="sm">
+                        <Link href={`/deceased/${p.id}`}>Apri</Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </>
       ) : (
         query && (
           <p className="text-muted-foreground py-8 text-center text-sm">

@@ -113,7 +113,7 @@ export function VehiclesCard({ vehicles }: { vehicles: Vehicle[] }) {
             variant="outline"
             disabled={pending}
             // Drops down to the input's height, clearing the label above.
-            className="mt-[calc(--spacing(6)+2px)] shrink-0"
+            className="shrink-0 sm:mt-[calc(--spacing(6)+2px)]"
           >
             {pending ? "Aggiunta…" : "Aggiungi"}
           </Button>

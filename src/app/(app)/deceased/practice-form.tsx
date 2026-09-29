@@ -961,8 +961,10 @@ export function PracticeForm({
         </CardContent>
       </Card>
 
-      <div className="flex justify-end">
-        <Button type="submit" disabled={pending}>
+      {/* Pinned to the bottom on phones: the form is many screens long and
+          the button would otherwise be a long scroll away. */}
+      <div className="bg-background/95 supports-backdrop-filter:backdrop-blur sticky bottom-0 z-10 -mx-4 flex justify-end border-t px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
+        <Button type="submit" disabled={pending} className="h-10 w-full sm:h-8 sm:w-auto">
           {pending ? "Salvataggio…" : submitLabel}
         </Button>
       </div>

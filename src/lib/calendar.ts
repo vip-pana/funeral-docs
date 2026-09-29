@@ -248,3 +248,51 @@ export function runningTotals(
     return sum;
   });
 }
+
+/** Today in Rome, as an ISO date. */
+export function todayIso(now = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Rome" }).format(now);
+}
+
+/** 0 for Monday to 6 for Sunday: the Italian week starts on Monday. */
+export function weekdayIndex(date: string): number {
+  return (new Date(`${date}T00:00:00Z`).getUTCDay() + 6) % 7;
+}
+
+export type MonthSummary = {
+  /** The month's total, as in the Tot. column. */
+  total: number;
+  /** Services on working days: the ones that count. */
+  services: number;
+  /** Services on Sundays and holidays: recorded, not counted. */
+  holidayServices: number;
+  ferieDays: number;
+  feriePoints: number;
+};
+
+/** The month's total taken apart, for the view of a single bearer. */
+export function monthSummary(
+  marks: (DayMark | undefined)[],
+  days: CalendarDay[],
+  hasContract = false,
+): MonthSummary {
+  const out: MonthSummary = {
+    total: 0,
+    services: 0,
+    holidayServices: 0,
+    ferieDays: 0,
+    feriePoints: 0,
+  };
+  days.forEach((d, i) => {
+    const mark = marks[i];
+    if (mark?.code === "F") {
+      out.ferieDays++;
+      out.feriePoints += holidayPoints(mark.notice, d.isHoliday, hasContract);
+    } else if (mark?.code === "L") {
+      if (d.isHoliday) out.holidayServices += mark.services;
+      else out.services += mark.services;
+    }
+  });
+  out.total = out.services + out.feriePoints;
+  return out;
+}

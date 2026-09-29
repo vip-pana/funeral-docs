@@ -110,3 +110,19 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
+
+/**
+ * The section's name beside the menu button, on phones only: there the
+ * sidebar is closed and nothing else on the bar says where one is.
+ */
+export function SectionTitle() {
+  const pathname = usePathname();
+  const link = LINKS.find(
+    ({ href }) => pathname === href || pathname.startsWith(`${href}/`),
+  );
+  return (
+    <span className="truncate text-sm font-semibold md:hidden">
+      {link?.label ?? "Documenti funebri"}
+    </span>
+  );
+}
