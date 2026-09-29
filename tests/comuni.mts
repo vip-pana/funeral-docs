@@ -6,7 +6,7 @@ const b = await chromium.launch({ channel: "chrome" });
 const p = await (await b.newContext()).newPage();
 p.on("pageerror", (e) => console.log("  [pageerror]", e.message.slice(0, 160)));
 let fail = 0;
-const check = (n, c, x = "") => {
+const check = (n: string, c: unknown, x: unknown = "") => {
   console.log(c ? "ok  " : "FAIL", n, x);
   if (!c) fail++;
 };
@@ -23,7 +23,7 @@ let r = await p.request.get(`${B}/api/municipalities?q=fogg`);
 let j = await r.json();
 check(
   "1 ricerca comuni",
-  r.ok() && j.some((c) => c.nome === "Foggia"),
+  r.ok() && j.some((c: { nome: string }) => c.nome === "Foggia"),
   `${j.length} risultati`,
 );
 
@@ -50,7 +50,7 @@ check(
   r.ok() && j[0]?.nome === "Germania" && j[0]?.provincia === "EE",
   j
     .slice(0, 3)
-    .map((c) => c.nome)
+    .map((c: { nome: string }) => c.nome)
     .join(", "),
 );
 
@@ -80,7 +80,8 @@ await p.locator("#personLastName").focus();
 await p
   .waitForFunction(
     () =>
-      document.querySelector("input[name=personBirthCity]")?.value === "Foggia",
+      document.querySelector<HTMLInputElement>("input[name=personBirthCity]")
+        ?.value === "Foggia",
     null,
     { timeout: 8000 },
   )
@@ -123,8 +124,8 @@ await p.locator("#personLastName").focus();
 await p
   .waitForFunction(
     () =>
-      document.querySelector("input[name=personBirthCity]")?.value ===
-      "Germania",
+      document.querySelector<HTMLInputElement>("input[name=personBirthCity]")
+        ?.value === "Germania",
     null,
     { timeout: 8000 },
   )

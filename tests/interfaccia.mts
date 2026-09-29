@@ -9,7 +9,7 @@ const p = await ctx.newPage();
 p.on("pageerror", (e) => console.log("  [pageerror]", e.message.slice(0, 160)));
 
 let fail = 0;
-const check = (n, c, x = "") => {
+const check = (n: string, c: unknown, x: unknown = "") => {
   console.log(c ? "ok  " : "FAIL", n, x);
   if (!c) fail++;
 };

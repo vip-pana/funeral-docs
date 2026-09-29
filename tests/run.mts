@@ -8,34 +8,35 @@ import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const suites = [
-  "login.mjs",
-  "interfaccia.mjs",
-  "risorse.mjs",
+  "login.mts",
+  "interfaccia.mts",
+  "risorse.mts",
   // Before the suites that create a record: they need a client to pick.
-  "clienti.mjs",
-  "veicoli.mjs",
-  "conducenti.mjs",
-  "contratto.mjs",
-  "mobile.mjs",
-  "allegati.mjs",
-  "pratiche.mjs",
-  "comuni.mjs",
-  "codice-fiscale.mjs",
-  "api.mjs",
-  "elimina.mjs",
+  "clienti.mts",
+  "veicoli.mts",
+  "conducenti.mts",
+  "contratto.mts",
+  "mobile.mts",
+  "allegati.mts",
+  "pratiche.mts",
+  "comuni.mts",
+  "codice-fiscale.mts",
+  "api.mts",
+  "elimina.mts",
   // Last: it changes the shared password, which every other suite logs in
   // with. It puts the original back, but a crash midway would lock out
   // whatever ran after it.
-  "impostazioni.mjs",
+  "impostazioni.mts",
 ];
 const base = process.env.BASE_URL ?? "http://localhost:3000";
 
-const failed = [];
+const failed: string[] = [];
 
 for (const suite of suites) {
   console.log(`\n──────── ${suite} ────────`);
-  const code = await new Promise((resolve) => {
-    spawn(process.execPath, [join(here, suite)], {
+  // Through tsx, like this runner: the suites are TypeScript too.
+  const code = await new Promise<number | null>((resolve) => {
+    spawn(process.execPath, ["--import", "tsx", join(here, suite)], {
       stdio: "inherit",
       env: process.env,
     }).on("close", resolve);

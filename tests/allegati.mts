@@ -26,7 +26,7 @@ try {
   );
 
   let fail = 0;
-  const check = (n, c, x = "") => {
+  const check = (n: string, c: unknown, x: unknown = "") => {
     console.log(c ? "ok  " : "FAIL", n, x);
     if (!c) fail++;
   };
@@ -76,14 +76,14 @@ try {
     ),
     p.click('button:has-text("Crea scheda")'),
   ]);
-  const id = p.url().match(/\/deceased\/([0-9a-f-]{36})$/)[1];
+  const id = p.url().match(/\/deceased\/([0-9a-f-]{36})$/)![1];
 
-  const docText = async (doc) => {
+  const docText = async (doc: string) => {
     const res = await p.request.get(
       `${B}/api/deceased/${id}/generate?doc=${doc}`,
     );
     const zip = await JSZip.loadAsync(await res.body());
-    const xml = await zip.file("word/document.xml").async("string");
+    const xml = await zip.file("word/document.xml")!.async("string");
     return [...xml.matchAll(/<w:t(?: [^>]*)?>([\s\S]*?)<\/w:t>/g)]
       .map((m) => m[1])
       .join("");
@@ -137,7 +137,7 @@ try {
     p.click('button:has-text("Confermi")'),
   ]);
 
-  // Recreate the bearer: pratiche.mjs runs later and downloads every document.
+  // Recreate the bearer: pratiche.mts runs later and downloads every document.
   await p.goto(`${B}/resources`);
   await p.waitForTimeout(600);
   await p.fill("#bearerName", BEARER);

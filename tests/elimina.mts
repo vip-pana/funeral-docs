@@ -4,7 +4,7 @@ const B = process.env.BASE_URL ?? "http://localhost:3000";
 const b = await chromium.launch({ channel: "chrome" });
 const p = await (await b.newContext()).newPage();
 let fail = 0;
-const check = (n, c, x = "") => {
+const check = (n: string, c: unknown, x: unknown = "") => {
   console.log(c ? "ok  " : "FAIL", n, x);
   if (!c) fail++;
 };
@@ -48,7 +48,7 @@ const id = p
   .url()
   .match(
     /\/deceased\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/,
-  )[1];
+  )![1];
 
 // first click: asks for confirmation, does not delete
 await p.click('button:has-text("Elimina")');
@@ -70,7 +70,7 @@ await Promise.all([
 check("3 eliminata, torna a elenco", p.url().endsWith("/deceased"));
 check(
   "  sparita dall elenco",
-  !(await p.textContent("body")).includes("Elimina Prova"),
+  !((await p.textContent("body")) ?? "").includes("Elimina Prova"),
 );
 
 // the page no longer exists

@@ -7,7 +7,7 @@ const ctx = await b.newContext();
 const p = await ctx.newPage();
 p.on("pageerror", (e) => console.log("  [pageerror]", e.message.slice(0, 150)));
 let fail = 0;
-const check = (n, c, x = "") => {
+const check = (n: string, c: unknown, x: unknown = "") => {
   console.log(c ? "ok  " : "FAIL", n, x);
   if (!c) fail++;
 };
@@ -68,7 +68,10 @@ check(
 // The combobox writes into a hidden input, so the value is read from the DOM.
 check(
   "  comune persiste",
-  (await p.$eval("input[name=birthCity]", (el) => el.value)) === "San Severo",
+  (await p.$eval(
+    "input[name=birthCity]",
+    (el) => (el as HTMLInputElement).value,
+  )) === "San Severo",
 );
 
 // --- edit ---

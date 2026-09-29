@@ -14,7 +14,7 @@ import { fillPractice, login, pickSelect, SAMPLE } from "./helpers.mjs";
  * documents already issued. That is the reason the practice keeps a copy of the
  * name rather than just the reference.
  *
- * Runs before pratiche.mjs, which reuses the driver left here.
+ * Runs before pratiche.mts, which reuses the driver left here.
  */
 
 const B = process.env.BASE_URL ?? "http://localhost:3000";
@@ -30,7 +30,7 @@ try {
   );
 
   let fail = 0;
-  const check = (n, c, x = "") => {
+  const check = (n: string, c: unknown, x: unknown = "") => {
     console.log(c ? "ok  " : "FAIL", n, x);
     if (!c) fail++;
   };
@@ -129,13 +129,13 @@ try {
     .url()
     .match(
       /\/deceased\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/,
-    )[1];
+    )![1];
 
   // The driver only appears in document 4.
   const docText = async () => {
     const res = await p.request.get(`${B}/api/deceased/${id}/generate?doc=4`);
     const zip = await JSZip.loadAsync(await res.body());
-    const xml = await zip.file("word/document.xml").async("string");
+    const xml = await zip.file("word/document.xml")!.async("string");
     return [...xml.matchAll(/<w:t(?: [^>]*)?>([\s\S]*?)<\/w:t>/g)]
       .map((m) => m[1])
       .join("");
@@ -182,7 +182,7 @@ try {
     p.click('button:has-text("Confermi")'),
   ]);
 
-  // Recreate the driver for pratiche.mjs and allegati.mjs, which run later and
+  // Recreate the driver for pratiche.mts and allegati.mts, which run later and
   // pick it in the Select.
   await p.goto(`${B}/resources`);
   await p.waitForTimeout(600);

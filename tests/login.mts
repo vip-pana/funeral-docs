@@ -4,7 +4,7 @@ const b = await chromium.launch({ channel: "chrome" });
 const ctx = await b.newContext();
 const p = await ctx.newPage();
 let fail = 0;
-const check = (n, cond, extra = "") => {
+const check = (n: string, cond: unknown, extra: unknown = "") => {
   console.log(cond ? "ok  " : "FAIL", n, extra);
   if (!cond) fail++;
 };

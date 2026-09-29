@@ -6,7 +6,7 @@ import type { Client } from "./db/schema";
 
 /**
  * Only the pure functions are tested here: `listClients` and `getClient` read
- * the database and are covered end-to-end by tests/clienti.mjs.
+ * the database and are covered end-to-end by tests/clienti.mts.
  */
 
 const CLIENT: Client = {

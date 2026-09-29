@@ -10,7 +10,7 @@ import { fillPractice, login, SAMPLE } from "./helpers.mjs";
  * in documents already issued. That is the reason the practice keeps a copy of
  * the plate rather than just the reference.
  *
- * Runs before pratiche.mjs, which reuses the vehicle left here.
+ * Runs before pratiche.mts, which reuses the vehicle left here.
  */
 
 const B = process.env.BASE_URL ?? "http://localhost:3000";
@@ -27,7 +27,7 @@ try {
   );
 
   let fail = 0;
-  const check = (n, c, x = "") => {
+  const check = (n: string, c: unknown, x: unknown = "") => {
     console.log(c ? "ok  " : "FAIL", n, x);
     if (!c) fail++;
   };
@@ -115,12 +115,12 @@ try {
     .url()
     .match(
       /\/deceased\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/,
-    )[1];
+    )![1];
 
   const docText = async () => {
     const res = await p.request.get(`${B}/api/deceased/${id}/generate?doc=2`);
     const zip = await JSZip.loadAsync(await res.body());
-    const xml = await zip.file("word/document.xml").async("string");
+    const xml = await zip.file("word/document.xml")!.async("string");
     return [...xml.matchAll(/<w:t(?: [^>]*)?>([\s\S]*?)<\/w:t>/g)]
       .map((m) => m[1])
       .join("");
@@ -170,7 +170,7 @@ try {
     p.click('button:has-text("Confermi")'),
   ]);
 
-  // Recreate the hearse for pratiche.mjs, which runs later and uses it.
+  // Recreate the hearse for pratiche.mts, which runs later and uses it.
   await p.goto(`${B}/resources`);
   await p.waitForTimeout(600);
   await p.fill("#name", NAME);

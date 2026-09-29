@@ -12,7 +12,7 @@ const ctx = await b.newContext();
 const p = await ctx.newPage();
 p.on("pageerror", (e) => console.log("  [pageerror]", e.message.slice(0, 150)));
 let fail = 0;
-const check = (n, c, x = "") => {
+const check = (n: string, c: unknown, x: unknown = "") => {
   console.log(c ? "ok  " : "FAIL", n, x);
   if (!c) fail++;
 };
@@ -22,7 +22,7 @@ await login(p, B);
 await p.goto(`${B}/resources`);
 check("1 pagina aperta", (await p.textContent("h1"))?.includes("Risorse"));
 
-const body = await p.textContent("body");
+const body = (await p.textContent("body")) ?? "";
 check(
   "2 autofunebri e necrofori",
   body.includes("Autofunebri") && body.includes("Necrofori"),

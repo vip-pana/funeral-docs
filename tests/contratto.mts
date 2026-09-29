@@ -25,7 +25,7 @@ try {
   );
 
   let fail = 0;
-  const check = (n, c, x = "") => {
+  const check = (n: string, c: unknown, x: unknown = "") => {
     console.log(c ? "ok  " : "FAIL", n, x);
     if (!c) fail++;
   };

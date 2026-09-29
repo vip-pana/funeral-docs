@@ -1,8 +1,14 @@
+import type { Page } from "playwright-core";
+
 /**
  * Not an <input>: the trigger is a button that opens a popover with the
  * search, so `fill()` on the field fails.
  */
-export async function pickComune(page, fieldName, comune) {
+export async function pickComune(
+  page: Page,
+  fieldName: string,
+  comune: string,
+) {
   await page.click(`#${fieldName}`);
   await page.waitForSelector("[cmdk-input]", { timeout: 5000 });
   await page.fill("[cmdk-input]", comune);
@@ -25,7 +31,7 @@ export async function pickComune(page, fieldName, comune) {
  * `selectOption()` fails. If the entry is absent the menu closes without
  * picking anything — the caller decides whether that is a problem.
  */
-export async function pickSelect(page, fieldName, text) {
+export async function pickSelect(page: Page, fieldName: string, text: string) {
   await page.click(`#${fieldName}`);
   const found = await page
     .waitForSelector(`[role=option]:has-text("${text}")`, { timeout: 5000 })
@@ -46,7 +52,7 @@ export async function pickSelect(page, fieldName, text) {
 export const SEED_CLIENT = "OO.FF. Rossi Mario";
 
 /** Picks the seeded client on a practice form. */
-export async function pickClient(page, text = SEED_CLIENT) {
+export async function pickClient(page: Page, text = SEED_CLIENT) {
   return pickSelect(page, "clientId", text);
 }
 
@@ -59,9 +65,9 @@ export async function pickClient(page, text = SEED_CLIENT) {
  * the navigation that never happens.
  */
 export async function fillPractice(
-  page,
-  values,
-  { client = SEED_CLIENT } = {},
+  page: Page,
+  values: Record<string, string>,
+  { client = SEED_CLIENT }: { client?: string | false } = {},
 ) {
   const comuni = new Set([
     "personBirthCity",
@@ -106,7 +112,7 @@ export const SAMPLE = {
 };
 
 /** Logs in and lands on the practices page. */
-export async function login(page, base) {
+export async function login(page: Page, base: string) {
   await page.goto(`${base}/login`);
   await page.fill("#password", process.env.TEST_PASSWORD ?? "sviluppo123");
   await Promise.all([

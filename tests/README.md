@@ -25,19 +25,19 @@ Serve Google Chrome installato: i test usano `playwright-core` con
 
 | File                 | Verifica                                                                                  |
 | -------------------- | ----------------------------------------------------------------------------------------- |
-| `login.mjs`          | redirect, password errata, cookie, sessione, logout                                       |
-| `interfaccia.mjs`    | tema scuro, mostra password, sidebar                                                      |
-| `impostazioni.mjs`   | validazione, salvataggio, persistenza dei dati ditta                                      |
-| `veicoli.mjs`        | elenco autofunebri, targa copiata, documenti dopo l'eliminazione                          |
-| `conducenti.mjs`     | spunta Conducente sul necroforo, nome copiato, documenti dopo l'eliminazione              |
-| `contratto.mjs`      | spunta Contratto sul necroforo, una sola voce di ferie e nessun punto nel calendario      |
-| `mobile.mjs`         | schermo da telefono: nessuna pagina scorre di lato, calendario per necroforo e per giorno |
-| `allegati.mjs`       | necrofori, allegati 2 e 3, provincia di nascita ricavata                                  |
-| `pratiche.mjs`       | creazione, autocompilazione dal CF, download, contenuto dei documenti                     |
-| `comuni.mjs`         | ricerca comuni, codice catastale → comune, provincia automatica                           |
-| `codice-fiscale.mjs` | pulsante Calcola, sesso, nessun calcolo automatico                                        |
-| `api.mjs`            | casi limite della route di generazione                                                    |
-| `elimina.mjs`        | conferma in due passaggi                                                                  |
+| `login.mts`          | redirect, password errata, cookie, sessione, logout                                       |
+| `interfaccia.mts`    | tema scuro, mostra password, sidebar                                                      |
+| `impostazioni.mts`   | validazione, salvataggio, persistenza dei dati ditta                                      |
+| `veicoli.mts`        | elenco autofunebri, targa copiata, documenti dopo l'eliminazione                          |
+| `conducenti.mts`     | spunta Conducente sul necroforo, nome copiato, documenti dopo l'eliminazione              |
+| `contratto.mts`      | spunta Contratto sul necroforo, una sola voce di ferie e nessun punto nel calendario      |
+| `mobile.mts`         | schermo da telefono: nessuna pagina scorre di lato, calendario per necroforo e per giorno |
+| `allegati.mts`       | necrofori, allegati 2 e 3, provincia di nascita ricavata                                  |
+| `pratiche.mts`       | creazione, autocompilazione dal CF, download, contenuto dei documenti                     |
+| `comuni.mts`         | ricerca comuni, codice catastale → comune, provincia automatica                           |
+| `codice-fiscale.mts` | pulsante Calcola, sesso, nessun calcolo automatico                                        |
+| `api.mts`            | casi limite della route di generazione                                                    |
+| `elimina.mts`        | conferma in due passaggi                                                                  |
 
 ## In CI
 
@@ -49,4 +49,4 @@ bisogno di almeno un cliente da scegliere.
 
 I test scrivono sul database configurato in `.env`: eseguirli su
 `DATABASE_PATH` di produzione creerebbe schede finte fra quelle reali.
-`pratiche.mjs` e `impostazioni.mjs` lasciano dietro di sé i dati che creano.
+`pratiche.mts` e `impostazioni.mts` lasciano dietro di sé i dati che creano.

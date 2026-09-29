@@ -12,7 +12,7 @@ await Promise.all([
 ]);
 
 let fail = 0;
-const check = (n, c, x = "") => {
+const check = (n: string, c: unknown, x: unknown = "") => {
   console.log(c ? "ok  " : "FAIL", n, x);
   if (!c) fail++;
 };
@@ -50,8 +50,8 @@ const ID = p
   .url()
   .match(
     /\/deceased\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/,
-  )[1];
-const call = async (u) => {
+  )![1];
+const call = async (u: string) => {
   const r = await p.request.get(`${B}${u}`);
   return {
     status: r.status(),

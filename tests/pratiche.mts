@@ -1,4 +1,4 @@
-import { chromium } from "playwright-core";
+import { chromium, type Download } from "playwright-core";
 import fs from "node:fs";
 import JSZip from "jszip";
 import { fillPractice, pickSelect, SEED_CLIENT } from "./helpers.mjs";
@@ -9,7 +9,7 @@ const ctx = await b.newContext({ acceptDownloads: true });
 const p = await ctx.newPage();
 p.on("pageerror", (e) => console.log("  [pageerror]", e.message.slice(0, 150)));
 let fail = 0;
-const check = (n, c, x = "") => {
+const check = (n: string, c: unknown, x: unknown = "") => {
   console.log(c ? "ok  " : "FAIL", n, x);
   if (!c) fail++;
 };
@@ -107,7 +107,7 @@ await fillPractice(
   { concessionType: "perpetua", concessionNumber: "1234" },
   { client: false },
 );
-// Hearse and driver are left behind by veicoli.mjs and conducenti.mjs, which
+// Hearse and driver are left behind by veicoli.mts and conducenti.mts, which
 // run first: without them plate and name would not reach the document and the
 // checks below would be pointless.
 const hasVehicle = await pickSelect(p, "vehicleId", "FG123AB");
@@ -149,7 +149,7 @@ check(
 // --- single download ---
 const id = url.match(
   /\/deceased\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/,
-)[1];
+)![1];
 // Scoped to id^=doc-, not every checkbox on the page: the form has its own for
 // the bearers. Counted rather than hardcoded, so adding a template does not
 // break this test.
@@ -171,7 +171,7 @@ check(
 
 // content: is the real data in there?
 const z1 = await JSZip.loadAsync(fs.readFileSync(f1));
-const xml = await z1.file("word/document.xml").async("string");
+const xml = await z1.file("word/document.xml")!.async("string");
 const txt = [...xml.matchAll(/<w:t(?: [^>]*)?>([\s\S]*?)<\/w:t>/g)]
   .map((m) => m[1])
   .join("");
@@ -188,7 +188,7 @@ check(
 check("  nessun placeholder", !txt.match(/\{[^}]*\}/));
 
 // --- multiple download: N separate files, not one zip ---
-const got = [];
+const got: Download[] = [];
 p.on("download", (d) => got.push(d));
 for (let i = 0; i < nDocs; i++) await docBoxes.nth(i).check();
 await p.waitForTimeout(300);
@@ -212,12 +212,12 @@ check("  nessuno zip", !names.some((n) => n.endsWith(".zip")));
 check("  nomi distinti", new Set(names).size === names.length);
 
 // document 4 uses every company field
-const d4 = got.find((d) => d.suggestedFilename().includes("_4_"));
+const d4 = got.find((d) => d.suggestedFilename().includes("_4_"))!;
 const f4 = `/tmp/dl_${d4.suggestedFilename()}`;
 await d4.saveAs(f4);
 const z4 = await JSZip.loadAsync(fs.readFileSync(f4));
 const t4 = [
-  ...(await z4.file("word/document.xml").async("string")).matchAll(
+  ...(await z4.file("word/document.xml")!.async("string")).matchAll(
     /<w:t(?: [^>]*)?>([\s\S]*?)<\/w:t>/g,
   ),
 ]
@@ -235,12 +235,12 @@ check("  doc4 codice fiscale", t4.includes("RSSMRA40C12D643D"));
 check("  doc4 nessun placeholder", !t4.match(/\{[^}]*\}/));
 
 // document 10 is the mandate: the only one with tick boxes and a derived age
-const d10 = got.find((d) => d.suggestedFilename().includes("_10_"));
+const d10 = got.find((d) => d.suggestedFilename().includes("_10_"))!;
 const f10 = `/tmp/dl_${d10.suggestedFilename()}`;
 await d10.saveAs(f10);
 const z10 = await JSZip.loadAsync(fs.readFileSync(f10));
 const t10 = [
-  ...(await z10.file("word/document.xml").async("string")).matchAll(
+  ...(await z10.file("word/document.xml")!.async("string")).matchAll(
     /<w:t(?: [^>]*)?>([\s\S]*?)<\/w:t>/g,
   ),
 ]
@@ -294,12 +294,12 @@ check("  doc10 nessun placeholder", !t10.match(/\{[^}]*\}/));
 
 // document 11 is the only one that names the firm's seat and the hearse model,
 // and the only one holding an image — whose XML carries GUIDs in braces.
-const d11 = got.find((d) => d.suggestedFilename().includes("_11_"));
+const d11 = got.find((d) => d.suggestedFilename().includes("_11_"))!;
 const f11 = `/tmp/dl_${d11.suggestedFilename()}`;
 await d11.saveAs(f11);
 const z11 = await JSZip.loadAsync(fs.readFileSync(f11));
 const t11 = [
-  ...(await z11.file("word/document.xml").async("string")).matchAll(
+  ...(await z11.file("word/document.xml")!.async("string")).matchAll(
     /<w:t(?: [^>]*)?>([\s\S]*?)<\/w:t>/g,
   ),
 ]
@@ -347,7 +347,10 @@ check(
 
 // --- list ---
 await p.goto(`${B}/deceased`);
-check("9 compare in elenco", (await p.textContent("body")).includes("Rossi"));
+check(
+  "9 compare in elenco",
+  ((await p.textContent("body")) ?? "").includes("Rossi"),
+);
 
 // --- validation ---
 await p.goto(`${B}/deceased/new`);
@@ -365,12 +368,12 @@ check("10 validazione blocca vuoto", true);
 check("  resta su nuova", p.url().includes("/deceased/new"));
 check(
   "  cliente non svuotato",
-  (await p.textContent("#clientId")).includes(SEED_CLIENT),
+  ((await p.textContent("#clientId")) ?? "").includes(SEED_CLIENT),
   await p.textContent("#clientId"),
 );
 check(
   "  sesso non azzerato",
-  (await p.textContent("#personSex")).includes("Femminile"),
+  ((await p.textContent("#personSex")) ?? "").includes("Femminile"),
   await p.textContent("#personSex"),
 );
 
