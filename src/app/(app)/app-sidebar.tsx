@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  CalendarDaysIcon,
   FileTextIcon,
   LogOutIcon,
   MoonIcon,
@@ -33,6 +34,7 @@ const LINKS = [
   // Mezzi and personale: what the work is done with, not how the app is
   // configured — which is why they are no longer under Impostazioni.
   { href: "/resources", label: "Risorse", icon: TruckIcon },
+  { href: "/calendar", label: "Calendario", icon: CalendarDaysIcon },
   { href: "/settings", label: "Impostazioni", icon: SettingsIcon },
 ] as const;
 

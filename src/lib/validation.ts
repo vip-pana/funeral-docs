@@ -22,7 +22,7 @@ const optionalText = z
  * 2 March, so a non-existent day would reach the documents printed as
  * 31/02/2026. Comparing the parsed date back to its parts rejects it.
  */
-const isoDate = z
+export const isoDate = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, "Data non valida")
   .refine((v) => {

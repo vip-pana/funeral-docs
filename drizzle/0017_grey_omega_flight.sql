@@ -1,0 +1,1 @@
+ALTER TABLE `bearer_days` ADD `notice_hours` integer;
