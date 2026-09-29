@@ -33,6 +33,8 @@ la traccia salvata in `test-results/`.
 | ------------------------- | ----------------------------------------------------------------------------------------- |
 | `e2e/login.spec.ts`       | redirect, password errata, cookie, sessione, logout                                       |
 | `e2e/interfaccia.spec.ts` | tema scuro, mostra password, sidebar                                                      |
+| `e2e/risorse.spec.ts`     | autofunebri e necrofori, form che non si svuotano dopo un errore, navigazione             |
+| `e2e/clienti.spec.ts`     | validazione, creazione, modifica, scelta su un defunto, eliminazione                      |
 | `impostazioni.mts`        | validazione, salvataggio, persistenza dei dati ditta                                      |
 | `veicoli.mts`             | elenco autofunebri, targa copiata, documenti dopo l'eliminazione                          |
 | `conducenti.mts`          | spunta Conducente sul necroforo, nome copiato, documenti dopo l'eliminazione              |
@@ -40,7 +42,7 @@ la traccia salvata in `test-results/`.
 | `mobile.mts`              | schermo da telefono: nessuna pagina scorre di lato, calendario per necroforo e per giorno |
 | `allegati.mts`            | necrofori, allegati 2 e 3, provincia di nascita ricavata                                  |
 | `pratiche.mts`            | creazione, autocompilazione dal CF, download, contenuto dei documenti                     |
-| `comuni.mts`              | ricerca comuni, codice catastale → comune, provincia automatica                           |
+| `e2e/comuni.spec.ts`      | ricerca comuni, codice catastale → comune, provincia automatica                           |
 | `codice-fiscale.mts`      | pulsante Calcola, sesso, nessun calcolo automatico                                        |
 | `api.mts`                 | casi limite della route di generazione                                                    |
 | `elimina.mts`             | conferma in due passaggi                                                                  |
