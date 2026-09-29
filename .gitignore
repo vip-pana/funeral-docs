@@ -53,3 +53,8 @@ next-env.d.ts
 
 # Python bytecode dai normalizzatori dei template
 __pycache__/
+
+# playwright
+/test-results/
+/playwright-report/
+/tests/e2e/.auth/

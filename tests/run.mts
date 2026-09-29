@@ -8,8 +8,6 @@ import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const suites = [
-  "login.mts",
-  "interfaccia.mts",
   "risorse.mts",
   // Before the suites that create a record: they need a client to pick.
   "clienti.mts",
