@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.2](https://github.com/vip-pana/funeral-docs/compare/v0.10.1...v0.10.2) (2026-09-29)
+
+
+### CI
+
+* run the e2e suites on every PR ([#34](https://github.com/vip-pana/funeral-docs/issues/34)) ([1c12dc0](https://github.com/vip-pana/funeral-docs/commit/1c12dc0f67622ab7070095821267e06804625666))
+
 ## [0.10.1](https://github.com/vip-pana/funeral-docs/compare/v0.10.0...v0.10.1) (2026-09-29)
 
 
