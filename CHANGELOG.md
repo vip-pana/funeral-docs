@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.9.0](https://github.com/vip-pana/funeral-docs/compare/v0.8.0...v0.9.0) (2026-09-29)
+
+
+### Funzionalità
+
+* add the bearers' monthly calendar ([#25](https://github.com/vip-pana/funeral-docs/issues/25)) ([8c12c23](https://github.com/vip-pana/funeral-docs/commit/8c12c23357df194f46a6202f39804919289022d3))
+* mark bearers on a contract, whose ferie score no points ([#27](https://github.com/vip-pana/funeral-docs/issues/27)) ([7acd234](https://github.com/vip-pana/funeral-docs/commit/7acd2349bf1c91a58ea6cd6f14c247fd7e4f4372))
+
 ## [0.8.0](https://github.com/vip-pana/funeral-docs/compare/v0.7.2...v0.8.0) (2026-09-29)
 
 
