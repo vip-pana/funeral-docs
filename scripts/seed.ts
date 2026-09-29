@@ -74,12 +74,12 @@ const VEHICLES = [
 
 // One list: anyone can carry the coffin, and the flag says who also drives.
 const BEARERS = [
-  { name: "Giuseppe Bianchi", isDriver: true },
-  { name: "Antonio Russo", isDriver: true },
-  { name: "Michele Costa", isDriver: true },
-  { name: "Paolo Neri", isDriver: false },
-  { name: "Luca Galli", isDriver: false },
-  { name: "Carlo Ferrari", isDriver: false },
+  { name: "Giuseppe Bianchi", isDriver: true, shoulderHeight: 148 },
+  { name: "Antonio Russo", isDriver: true, shoulderHeight: 152 },
+  { name: "Michele Costa", isDriver: true, shoulderHeight: 145 },
+  { name: "Paolo Neri", isDriver: false, shoulderHeight: 150 },
+  { name: "Luca Galli", isDriver: false, shoulderHeight: 143 },
+  { name: "Carlo Ferrari", isDriver: false, shoulderHeight: 155 },
   { name: "Marco Conti", isDriver: false },
 ];
 
@@ -228,7 +228,12 @@ function seedClients(): number {
  */
 function seedList(
   table: "vehicles" | "bearers",
-  rows: { name: string; plate?: string; isDriver?: boolean }[],
+  rows: {
+    name: string;
+    plate?: string;
+    isDriver?: boolean;
+    shoulderHeight?: number;
+  }[],
 ): string[] {
   const ids = db
     .prepare(`SELECT id FROM ${table} ORDER BY name`)
@@ -241,7 +246,7 @@ function seedList(
           "INSERT INTO vehicles (id, name, plate) VALUES (@id, @name, @plate)",
         )
       : db.prepare(
-          "INSERT INTO bearers (id, name, is_driver) VALUES (@id, @name, @isDriver)",
+          "INSERT INTO bearers (id, name, is_driver, shoulder_height) VALUES (@id, @name, @isDriver, @shoulderHeight)",
         );
 
   const inserted: string[] = [];
@@ -253,7 +258,12 @@ function seedList(
     insert.run(
       table === "vehicles"
         ? { id, name: row.name, plate: row.plate }
-        : { id, name: row.name, isDriver: row.isDriver ? 1 : 0 },
+        : {
+            id,
+            name: row.name,
+            isDriver: row.isDriver ? 1 : 0,
+            shoulderHeight: row.shoulderHeight ?? null,
+          },
     );
     inserted.push(id);
   }

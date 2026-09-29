@@ -451,6 +451,24 @@ describe("vehicleSchema and bearerSchema", () => {
     expect(bearerSchema.safeParse({ name: "  " }).success).toBe(false);
   });
 
+  it("reads the shoulder height as whole centimetres", () => {
+    const result = bearerSchema.safeParse({ name: "Paolo", shoulderHeight: " 148 " });
+    expect(result.success && result.data.shoulderHeight).toBe(148);
+  });
+
+  it("leaves a blank shoulder height unrecorded", () => {
+    const result = bearerSchema.safeParse({ name: "Paolo", shoulderHeight: "" });
+    expect(result.success && result.data.shoulderHeight).toBeNull();
+  });
+
+  it("rejects a shoulder height out of range or not whole", () => {
+    for (const shoulderHeight of ["1.48", "14", "250", "abc"]) {
+      expect(
+        bearerSchema.safeParse({ name: "Paolo", shoulderHeight }).success,
+      ).toBe(false);
+    }
+  });
+
   /**
    * A checkbox posts "on" when ticked and nothing at all when not, so the
    * absent value has to come out false rather than fail as missing.
