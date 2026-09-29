@@ -11,8 +11,8 @@ concurrency:
   cancel-in-progress: true
 
 # The same checks as the pre-push hook, which a --no-verify skips and a
-# fresh clone does not have. The e2e suites stay out here too: they need an
-# instance already listening and a database to write to.
+# fresh clone does not have, plus the e2e suites: the hook leaves those out
+# because they write to the database, but here the database is a fresh one.
 jobs:
   verifica:
     runs-on: ubuntu-latest
@@ -41,3 +41,58 @@ jobs:
       - run: pnpm lint
 
       - run: pnpm format:check
+
+  e2e:
+    runs-on: ubuntu-latest
+    env:
+      # Job-level env has no `runner` context, so no RUNNER_TEMP here.
+      DATABASE_PATH: /tmp/funeral-e2e.db
+      SESSION_SECRET: e2e-only-session-secret-not-used-anywhere-else
+      COOKIE_SECURE: "false"
+      BASE_URL: http://localhost:3000
+      TEST_PASSWORD: sviluppo123
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+        env:
+          HUSKY: 0
+
+      # Next expands `$xxx` even in variables from the environment, so every
+      # `$` of the hash goes in escaped.
+      - name: Password hash
+        run: |
+          node -e 'console.log("AUTH_PASSWORD_HASH=" + require("bcryptjs").hashSync(process.env.TEST_PASSWORD, 12).replaceAll("$", "\\$"))' >> "$GITHUB_ENV"
+
+      # The seed gives the suites a client to pick: without one, the new
+      # deceased form has nothing to fill in.
+      - run: pnpm db:migrate
+      - run: pnpm db:seed
+
+      - run: pnpm build
+
+      # `next start` warns about the standalone output but serves the build
+      # all the same, without copying the static files over first.
+      - name: Start the app
+        run: |
+          pnpm start > "$RUNNER_TEMP/next.log" 2>&1 &
+          for i in $(seq 1 60); do
+            curl -sf -o /dev/null "$BASE_URL/login" && exit 0
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/next.log"
+          exit 1
+
+      # The runner image ships Google Chrome, which the suites launch.
+      - run: pnpm test:e2e
+
+      - name: Server log
+        if: failure()
+        run: cat "$RUNNER_TEMP/next.log"

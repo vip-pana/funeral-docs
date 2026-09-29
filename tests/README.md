@@ -39,6 +39,12 @@ Serve Google Chrome installato: i test usano `playwright-core` con
 | `api.mjs`            | casi limite della route di generazione                                                    |
 | `elimina.mjs`        | conferma in due passaggi                                                                  |
 
+## In CI
+
+Il job `e2e` di `.github/workflows/ci.yml` le lancia a ogni PR su un database
+nuovo, riempito con `pnpm db:seed`: le suite che creano un defunto hanno
+bisogno di almeno un cliente da scegliere.
+
 ## Nota
 
 I test scrivono sul database configurato in `.env`: eseguirli su
