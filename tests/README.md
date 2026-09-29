@@ -30,6 +30,7 @@ Serve Google Chrome installato: i test usano `playwright-core` con
 | `impostazioni.mjs` | validazione, salvataggio, persistenza dei dati ditta |
 | `veicoli.mjs` | elenco autofunebri, targa copiata, documenti dopo l'eliminazione |
 | `conducenti.mjs` | spunta Conducente sul necroforo, nome copiato, documenti dopo l'eliminazione |
+| `contratto.mjs` | spunta Contratto sul necroforo, una sola voce di ferie e nessun punto nel calendario |
 | `allegati.mjs` | necrofori, allegati 2 e 3, provincia di nascita ricavata |
 | `pratiche.mjs` | creazione, autocompilazione dal CF, download, contenuto dei documenti |
 | `comuni.mjs` | ricerca comuni, codice catastale → comune, provincia automatica |

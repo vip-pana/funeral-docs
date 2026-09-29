@@ -142,27 +142,64 @@ export const DAY_MARKS: DayMark[] = [
 ];
 
 /**
- * What a day of ferie adds to the total: shorter notice and a red day each
- * double it.
+ * The choices for one bearer. Those on a contract get a single entry for
+ * ferie: their ferie score nothing, so the notice would change nothing. It is
+ * saved as 48 hours, what an unmarked notice has always been read as.
  */
-export function holidayPoints(notice: 48 | 24, isHoliday: boolean): number {
+export function dayMarks(hasContract: boolean): DayMark[] {
+  if (!hasContract) return DAY_MARKS;
+  return DAY_MARKS.filter((m) => m.code !== "F" || m.notice === 48);
+}
+
+/**
+ * What a day of ferie adds to the total: shorter notice and a red day each
+ * double it. Nothing for a bearer on a contract.
+ */
+export function holidayPoints(
+  notice: 48 | 24,
+  isHoliday: boolean,
+  hasContract = false,
+): number {
+  if (hasContract) return 0;
   return (notice === 24 ? 2 : 1) * (isHoliday ? 4 : 1);
 }
 
-/** The sign written in the cell, as on the paper sheet. */
-export function markSign(mark: DayMark, isHoliday: boolean): string {
-  if (mark.code === "F") return `F${holidayPoints(mark.notice, isHoliday)}`;
+/**
+ * The sign written in the cell, as on the paper sheet. A bearer on a contract
+ * gets a bare "F": there are no points to write after it.
+ */
+export function markSign(
+  mark: DayMark,
+  isHoliday: boolean,
+  hasContract = false,
+): string {
+  if (mark.code === "F") {
+    return hasContract ? "F" : `F${holidayPoints(mark.notice, isHoliday)}`;
+  }
   return ["\\", "X", "\\\\\\"][mark.services - 1];
 }
 
-export function markLabel(mark: DayMark): string {
-  if (mark.code === "F") return `Ferie, avviso ${mark.notice} ore`;
+export function markLabel(mark: DayMark, hasContract = false): string {
+  if (mark.code === "F") {
+    return hasContract ? "Ferie" : `Ferie, avviso ${mark.notice} ore`;
+  }
   return mark.services === 1 ? "1 servizio" : `${mark.services} servizi`;
 }
 
-export function sameMark(a: DayMark | undefined, b: DayMark): boolean {
+/**
+ * Whether a cell holds a choice. For a bearer on a contract any day of ferie
+ * is their one ferie entry, including one saved with 24 hours' notice before
+ * they had the contract.
+ */
+export function sameMark(
+  a: DayMark | undefined,
+  b: DayMark,
+  hasContract = false,
+): boolean {
   if (!a || a.code !== b.code) return false;
-  if (a.code === "F") return b.code === "F" && a.notice === b.notice;
+  if (a.code === "F") {
+    return b.code === "F" && (hasContract || a.notice === b.notice);
+  }
   return b.code === "L" && a.services === b.services;
 }
 
@@ -185,24 +222,28 @@ export function toMark(row: {
 /**
  * The month's total: services done on working days (those on Sundays and
  * holidays are recorded but do not count) plus the points of every day of
- * ferie, red days included.
+ * ferie, red days included — none for a bearer on a contract.
  */
 export function serviceTotal(
   marks: (DayMark | undefined)[],
   days: CalendarDay[],
+  hasContract = false,
 ): number {
-  return runningTotals(marks, days).at(-1) ?? 0;
+  return runningTotals(marks, days, hasContract).at(-1) ?? 0;
 }
 
 /** The month's total so far, day by day: what the corner of each cell shows. */
 export function runningTotals(
   marks: (DayMark | undefined)[],
   days: CalendarDay[],
+  hasContract = false,
 ): number[] {
   let sum = 0;
   return days.map((d, i) => {
     const mark = marks[i];
-    if (mark?.code === "F") sum += holidayPoints(mark.notice, d.isHoliday);
+    if (mark?.code === "F") {
+      sum += holidayPoints(mark.notice, d.isHoliday, hasContract);
+    }
     else if (mark?.code === "L" && !d.isHoliday) sum += mark.services;
     return sum;
   });

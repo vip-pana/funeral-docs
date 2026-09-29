@@ -144,14 +144,17 @@ export const shoulderHeight = z
     return n;
   });
 
+// A checkbox posts "on" when ticked and nothing at all when not, so the absent
+// value has to mean false rather than fail as missing.
+const checkbox = z
+  .union([z.string(), z.null()])
+  .optional()
+  .transform((v) => v === "on" || v === "true");
+
 export const bearerSchema = z.object({
   name: requiredText("Nome"),
-  // A checkbox posts "on" when ticked and nothing at all when not, so the
-  // absent value has to mean false rather than fail as missing.
-  isDriver: z
-    .union([z.string(), z.null()])
-    .optional()
-    .transform((v) => v === "on" || v === "true"),
+  isDriver: checkbox,
+  hasContract: checkbox,
   shoulderHeight,
 });
 
