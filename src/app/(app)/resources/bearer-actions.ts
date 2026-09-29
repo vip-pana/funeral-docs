@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 
 import { db, schema } from "@/lib/db";
 import { collectErrors } from "@/lib/form-errors";
-import { bearerSchema } from "@/lib/validation";
+import { bearerSchema, shoulderHeight } from "@/lib/validation";
 
 /**
  * Kept separate from `actions.ts`: saving here is independent of saving the
@@ -36,13 +36,17 @@ export async function addBearer(
   const parsed = bearerSchema.safeParse({
     name: formData.get("bearerName"),
     isDriver: formData.get("bearerIsDriver"),
+    shoulderHeight: formData.get("bearerShoulderHeight"),
   });
 
   if (!parsed.success) {
     return {
       // Reported under the input's own name, which differs from the column so
       // it does not collide with the other cards' "name" fields.
-      errors: collectErrors(parsed.error.issues, { name: "bearerName" }),
+      errors: collectErrors(parsed.error.issues, {
+        name: "bearerName",
+        shoulderHeight: "bearerShoulderHeight",
+      }),
       message: "Controlla i campi segnalati.",
     };
   }
@@ -65,6 +69,25 @@ export async function setBearerDriver(id: string, isDriver: boolean) {
     .set({ isDriver })
     .where(eq(schema.bearers.id, id));
   revalidateBearerViews();
+}
+
+/**
+ * Edited straight from the table row, like the driver flag: the bearers
+ * entered before this field existed need a way to get one.
+ */
+export async function setBearerShoulderHeight(
+  id: string,
+  value: string,
+): Promise<{ error?: string }> {
+  const parsed = shoulderHeight.safeParse(value);
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+  await db
+    .update(schema.bearers)
+    .set({ shoulderHeight: parsed.data })
+    .where(eq(schema.bearers.id, id));
+  revalidateBearerViews();
+  return {};
 }
 
 export async function deleteBearer(id: string) {

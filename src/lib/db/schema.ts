@@ -125,6 +125,11 @@ export const bearers = sqliteTable("bearers", {
   name: text("name").notNull(),
   /** Whether they can drive the hearse, i.e. whether the practice can pick them. */
   isDriver: integer("is_driver", { mode: "boolean" }).notNull().default(false),
+  /**
+   * Height at the shoulder, in centimetres. Nullable: the bearers entered
+   * before it existed have none, and nothing requires it yet.
+   */
+  shoulderHeight: integer("shoulder_height"),
   createdAt: text("created_at")
     .notNull()
     .default(sql`(datetime('now'))`),

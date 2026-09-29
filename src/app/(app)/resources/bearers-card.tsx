@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Field } from "@/components/field";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -28,6 +29,7 @@ import {
   addBearer,
   type BearerFormState,
   setBearerDriver,
+  setBearerShoulderHeight,
 } from "./bearer-actions";
 import { DeleteBearerButton } from "./delete-bearer-button";
 
@@ -72,6 +74,7 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
                 <TableRow>
                   <TableHead>Nome</TableHead>
                   <TableHead>Conducente</TableHead>
+                  <TableHead>Altezza spalla (cm)</TableHead>
                   <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
               </TableHeader>
@@ -91,6 +94,9 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
                           setBearerDriver(b.id, on === true)
                         }
                       />
+                    </TableCell>
+                    <TableCell>
+                      <ShoulderHeightInput bearer={b} />
                     </TableCell>
                     <TableCell className="text-right">
                       <DeleteBearerButton bearerId={b.id} />
@@ -112,7 +118,7 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
         <form
           ref={formRef}
           action={formAction}
-          className="grid items-start gap-4 sm:grid-cols-[1fr_auto_auto]"
+          className="grid items-start gap-4 sm:grid-cols-[1fr_10rem_auto_auto]"
         >
           {/* Not just "name": the other cards' inputs already use it, and the
               e2e sweep over the settings inputs would match them all. */}
@@ -121,6 +127,16 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
             label="Nome"
             placeholder="Es. Paolo Neri"
             error={err("bearerName")}
+          />
+          <Field
+            name="bearerShoulderHeight"
+            label="Altezza spalla (cm)"
+            type="number"
+            inputMode="numeric"
+            min={100}
+            max={200}
+            placeholder="Es. 145"
+            error={err("bearerShoulderHeight")}
           />
           {/* Radix renders its own hidden input for `name`, which posts "on"
               when ticked and nothing at all when not. */}
@@ -140,5 +156,40 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
         </form>
       </CardContent>
     </Card>
+  );
+}
+
+/**
+ * Saved on blur, like the driver tick: one number per row, and a form here
+ * would nest inside the add form below. An invalid value is reported and put
+ * back to the saved one.
+ */
+function ShoulderHeightInput({ bearer }: { bearer: Bearer }) {
+  const saved = bearer.shoulderHeight?.toString() ?? "";
+
+  async function save(input: HTMLInputElement) {
+    if (input.value.trim() === saved) return;
+    const { error } = await setBearerShoulderHeight(bearer.id, input.value);
+    if (error) {
+      toast.error(error);
+      input.value = saved;
+    } else {
+      toast.success("Altezza salvata.");
+    }
+  }
+
+  return (
+    <Input
+      // Keyed on the saved value so a change from elsewhere resets the field.
+      key={saved}
+      type="number"
+      inputMode="numeric"
+      min={100}
+      max={200}
+      className="w-24"
+      aria-label={`${bearer.name}: altezza alla spalla in cm`}
+      defaultValue={saved}
+      onBlur={(e) => save(e.currentTarget)}
+    />
   );
 }

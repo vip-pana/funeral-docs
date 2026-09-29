@@ -1,0 +1,1 @@
+ALTER TABLE `bearers` ADD `shoulder_height` integer;

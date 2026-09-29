@@ -123,6 +123,27 @@ export const vehicleSchema = z.object({
   plate,
 });
 
+/**
+ * Centimetres, as typed in a number input. Blank means not recorded. The range
+ * only catches slips such as metres or a missing digit.
+ */
+export const shoulderHeight = z
+  .union([z.string(), z.null()])
+  .optional()
+  .transform((v, ctx) => {
+    const s = (v ?? "").trim();
+    if (!s) return null;
+    const n = Number(s);
+    if (!Number.isInteger(n) || n < 100 || n > 200) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Altezza alla spalla non valida: in cm, tra 100 e 200",
+      });
+      return z.NEVER;
+    }
+    return n;
+  });
+
 export const bearerSchema = z.object({
   name: requiredText("Nome"),
   // A checkbox posts "on" when ticked and nothing at all when not, so the
@@ -131,6 +152,7 @@ export const bearerSchema = z.object({
     .union([z.string(), z.null()])
     .optional()
     .transform((v) => v === "on" || v === "true"),
+  shoulderHeight,
 });
 
 /**
