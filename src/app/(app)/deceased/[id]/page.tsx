@@ -62,7 +62,7 @@ export default async function DefuntoPage({
   const action = updatePractice.bind(null, practice.id);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
           {/* No record number: the id is a UUID, unreadable and useless to

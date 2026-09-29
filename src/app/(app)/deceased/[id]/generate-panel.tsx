@@ -6,13 +6,20 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardAction,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Field as FieldRoot, FieldLabel } from "@/components/ui/field";
+import {
+  Field as FieldRoot,
+  FieldContent,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+  FieldTitle,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { DOCUMENTS, type DocumentId } from "@/lib/fields";
 
@@ -117,61 +124,51 @@ export function GeneratePanel({ practiceId }: { practiceId: string }) {
     <Card>
       <CardHeader>
         <CardTitle>Genera documenti</CardTitle>
-        <CardAction className="flex gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setSelected(new Set(DOCUMENTS.map((d) => d.id)))}
-          >
-            Tutti
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => setSelected(new Set())}>
-            Nessuno
-          </Button>
-        </CardAction>
+        <CardDescription>
+          Scegli quali stampare: ognuno viene scaricato come file .docx a
+          s&eacute; stante.
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid gap-x-6 gap-y-2 sm:grid-cols-2">
+        <FieldGroup className="gap-2">
           {DOCUMENTS.map((doc) => (
-            <label
-              key={doc.id}
-              htmlFor={`doc-${doc.id}`}
-              className="flex cursor-pointer items-start gap-2 text-sm"
-            >
-              <Checkbox
-                id={`doc-${doc.id}`}
-                className="mt-0.5"
-                checked={selected.has(doc.id)}
-                onCheckedChange={() => toggle(doc.id)}
-              />
-              <span className="leading-snug">
-                {doc.title}
-                <span className="text-muted-foreground block text-xs">
-                  {doc.description}
+            // A FieldLabel wrapping a Field: shadcn renders it as a selectable
+            // card, highlighted when the checkbox is ticked.
+            <FieldLabel key={doc.id} htmlFor={`doc-${doc.id}`}>
+              <FieldRoot orientation="horizontal">
+                <Checkbox
+                  id={`doc-${doc.id}`}
+                  checked={selected.has(doc.id)}
+                  onCheckedChange={() => toggle(doc.id)}
+                />
+                <FieldContent>
+                  <FieldTitle>{doc.title}</FieldTitle>
+                  <FieldDescription>{doc.description}</FieldDescription>
                   {"note" in doc && (
-                    <span className="text-foreground font-semibold">
-                      {" "}
-                      · {doc.note}
-                    </span>
+                    <p className="text-sm font-semibold">{doc.note}</p>
                   )}
-                </span>
-              </span>
-            </label>
+                </FieldContent>
+              </FieldRoot>
+            </FieldLabel>
           ))}
-        </div>
+        </FieldGroup>
 
-        <div className="flex flex-wrap items-end gap-4 border-t pt-4">
-          <FieldRoot className="w-auto">
-            <FieldLabel htmlFor="documentDate">Data sui documenti</FieldLabel>
-            <Input
-              id="documentDate"
-              type="date"
-              value={documentDate}
-              onChange={(e) => setDocumentDate(e.target.value)}
-              title="La data di compilazione stampata in fondo a ogni documento."
-            />
-          </FieldRoot>
-          <p className="text-muted-foreground ml-auto text-sm">
+        <FieldRoot className="max-w-60">
+          <FieldLabel htmlFor="documentDate">Data sui documenti</FieldLabel>
+          <Input
+            id="documentDate"
+            type="date"
+            value={documentDate}
+            onChange={(e) => setDocumentDate(e.target.value)}
+            aria-describedby="documentDate-hint"
+          />
+          <FieldDescription id="documentDate-hint">
+            La data di compilazione stampata in fondo a ogni documento.
+          </FieldDescription>
+        </FieldRoot>
+
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-muted-foreground text-sm">
             {chosen.length === 0
               ? "Nessun documento selezionato."
               : `${chosen.length} document${chosen.length === 1 ? "o" : "i"}.`}
