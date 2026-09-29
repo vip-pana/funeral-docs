@@ -32,6 +32,7 @@ import {
   setBearerShoulderHeight,
 } from "./bearer-actions";
 import { DeleteBearerButton } from "./delete-bearer-button";
+import { EditBearerDialog } from "./edit-bearer-dialog";
 
 export function BearersCard({ bearers }: { bearers: Bearer[] }) {
   const [state, formAction, pending] = useActionState<BearerFormState, FormData>(
@@ -99,7 +100,10 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
                       <ShoulderHeightInput bearer={b} />
                     </TableCell>
                     <TableCell className="text-right">
-                      <DeleteBearerButton bearerId={b.id} />
+                      <div className="flex justify-end gap-1">
+                        <EditBearerDialog bearer={b} />
+                        <DeleteBearerButton bearerId={b.id} />
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

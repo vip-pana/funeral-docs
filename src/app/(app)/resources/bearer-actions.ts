@@ -58,6 +58,44 @@ export async function addBearer(
 }
 
 /**
+ * Every field of an existing bearer at once, from the edit dialog. The id is
+ * bound on the server side of the call, like `deleteBearer`.
+ *
+ * Practices keep the names they copied when saved: renaming someone here
+ * changes the lists and the calendar, not the documents already issued.
+ */
+export async function updateBearer(
+  id: string,
+  _prev: BearerFormState,
+  formData: FormData,
+): Promise<BearerFormState> {
+  const parsed = bearerSchema.safeParse({
+    name: formData.get("editBearerName"),
+    isDriver: formData.get("editBearerIsDriver"),
+    shoulderHeight: formData.get("editBearerShoulderHeight"),
+  });
+
+  if (!parsed.success) {
+    return {
+      errors: collectErrors(parsed.error.issues, {
+        name: "editBearerName",
+        shoulderHeight: "editBearerShoulderHeight",
+      }),
+      message: "Controlla i campi segnalati.",
+    };
+  }
+
+  await db
+    .update(schema.bearers)
+    .set(parsed.data)
+    .where(eq(schema.bearers.id, id));
+
+  revalidateBearerViews();
+  revalidatePath("/calendar");
+  return { ok: true, message: "Necroforo aggiornato." };
+}
+
+/**
  * Whether they drive the hearse. Separate from `addBearer` because it is toggled
  * straight from the table row, with no form around it.
  */
