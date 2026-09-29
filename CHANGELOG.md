@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.0](https://github.com/vip-pana/funeral-docs/compare/v0.9.0...v0.10.0) (2026-09-29)
+
+
+### Funzionalità
+
+* make the app usable on a phone, with three calendar views ([#28](https://github.com/vip-pana/funeral-docs/issues/28)) ([cf50be2](https://github.com/vip-pana/funeral-docs/commit/cf50be265800a2ca3f15e9475e2a9f7bbae1988c))
+
 ## [0.9.0](https://github.com/vip-pana/funeral-docs/compare/v0.8.0...v0.9.0) (2026-09-29)
 
 
