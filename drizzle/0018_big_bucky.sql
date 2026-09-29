@@ -1,0 +1,1 @@
+ALTER TABLE `bearers` ADD `has_contract` integer DEFAULT false NOT NULL;

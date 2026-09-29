@@ -135,6 +135,13 @@ export const bearers = sqliteTable("bearers", {
    * before it existed have none, and nothing requires it yet.
    */
   shoulderHeight: integer("shoulder_height"),
+  /**
+   * Employed on a contract, fixed-term or permanent alike, rather than called
+   * in when needed: their ferie score no points on the calendar.
+   */
+  hasContract: integer("has_contract", { mode: "boolean" })
+    .notNull()
+    .default(false),
   createdAt: text("created_at")
     .notNull()
     .default(sql`(datetime('now'))`),

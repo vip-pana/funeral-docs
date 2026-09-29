@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   bearerLabel,
   byShoulderHeight,
+  dayMarks,
   daysOfMonth,
   easterSunday,
   holidayPoints,
@@ -12,6 +13,7 @@ import {
   toMark,
   parseMonth,
   runningTotals,
+  sameMark,
   serviceTotal,
   shiftMonth,
 } from "./calendar";
@@ -85,6 +87,23 @@ describe("calendar helpers", () => {
     expect(markLabel({ code: "L", services: 3 })).toBe("3 servizi");
   });
 
+  it("scores no ferie for a bearer on a contract", () => {
+    expect(holidayPoints(48, false, true)).toBe(0);
+    expect(holidayPoints(24, true, true)).toBe(0);
+    expect(markSign({ code: "F", notice: 24 }, true, true)).toBe("F");
+    expect(markSign({ code: "L", services: 2 }, false, true)).toBe("X");
+    expect(markLabel({ code: "F", notice: 48 }, true)).toBe("Ferie");
+  });
+
+  it("offers a contract a single ferie entry", () => {
+    expect(dayMarks(false)).toHaveLength(5);
+    const ferie = dayMarks(true).filter((m) => m.code === "F");
+    expect(ferie).toEqual([{ code: "F", notice: 48 }]);
+    // A day saved with 24 hours' notice still shows as that entry.
+    expect(sameMark({ code: "F", notice: 24 }, ferie[0], true)).toBe(true);
+    expect(sameMark({ code: "F", notice: 24 }, ferie[0])).toBe(false);
+  });
+
   it("reads a stored row back as a mark", () => {
     const row = { services: null, noticeHours: null };
     expect(toMark({ ...row, code: "F", noticeHours: 24 })).toEqual({
@@ -132,6 +151,21 @@ describe("calendar helpers", () => {
     // and 14th count (4). Ferie: the 9th, a Wednesday (1), and Sunday the
     // 20th with 24 hours' notice (8).
     expect(serviceTotal(marks, days)).toBe(13);
+  });
+
+  it("counts only the services of a bearer on a contract", () => {
+    const days = daysOfMonth("2026-12");
+    const marks = days.map((d) =>
+      d.day === 7
+        ? ({ code: "L", services: 2 } as const)
+        : d.day === 9
+          ? ({ code: "F", notice: 48 } as const)
+          : d.day === 20
+            ? ({ code: "F", notice: 24 } as const)
+            : undefined,
+    );
+    expect(serviceTotal(marks, days, true)).toBe(2);
+    expect(serviceTotal(marks, days)).toBe(11);
   });
 
   it("keeps a running total that holidays do not move", () => {

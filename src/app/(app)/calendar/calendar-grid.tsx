@@ -12,6 +12,7 @@ import {
   bearerLabel,
   DAY_MARKS,
   type DayMark,
+  dayMarks,
   daysOfMonth,
   markLabel,
   markSign,
@@ -109,7 +110,8 @@ export function CalendarGrid({
         <tbody>
           {bearers.map((b, i) => {
             const rowMarks = calendar.map((d) => marks.get(key(b.id, d.date)));
-            const totals = runningTotals(rowMarks, calendar);
+            const contract = b.hasContract;
+            const totals = runningTotals(rowMarks, calendar, contract);
             return (
               <tr
                 key={b.id}
@@ -127,6 +129,8 @@ export function CalendarGrid({
                 {calendar.map((d, j) => {
                   const k = key(b.id, d.date);
                   const mark = rowMarks[j];
+                  // No points to show in the corner of a contract's ferie.
+                  const showTotal = mark && !(contract && mark.code === "F");
                   const day = DAY_FORMAT.format(new Date(`${d.date}T00:00:00Z`));
                   return (
                     <td
@@ -140,12 +144,12 @@ export function CalendarGrid({
                         <PopoverTrigger asChild>
                           <button
                             type="button"
-                            aria-label={`${b.name}, ${day}: ${mark ? markLabel(mark).toLowerCase() : "nulla segnato"}`}
+                            aria-label={`${b.name}, ${day}: ${mark ? markLabel(mark, contract).toLowerCase() : "nulla segnato"}`}
                             className="hover:bg-foreground/10 relative block h-6 w-full font-bold whitespace-nowrap"
                           >
-                            {mark ? markSign(mark, d.isHoliday) : ""}
+                            {mark ? markSign(mark, d.isHoliday, contract) : ""}
                             {/* The month's total so far, in the corner. */}
-                            {mark && (
+                            {showTotal && (
                               <span className="absolute right-0.5 bottom-0 text-[8px] leading-none font-medium">
                                 {totals[j]}
                               </span>
@@ -156,17 +160,17 @@ export function CalendarGrid({
                           <p className="text-muted-foreground px-2 py-1 text-xs">
                             {b.name}, {day}
                           </p>
-                          {DAY_MARKS.map((m) => (
+                          {dayMarks(contract).map((m) => (
                             <button
                               key={markLabel(m)}
                               type="button"
-                              aria-pressed={sameMark(mark, m)}
+                              aria-pressed={sameMark(mark, m, contract)}
                               onClick={() => choose(b.id, d.date, m)}
                               className="hover:bg-accent aria-pressed:bg-accent flex w-full items-center justify-between rounded-sm px-2 py-1.5 text-sm"
                             >
-                              {markLabel(m)}
+                              {markLabel(m, contract)}
                               <span className="font-mono font-bold">
-                                {markSign(m, d.isHoliday)}
+                                {markSign(m, d.isHoliday, contract)}
                               </span>
                             </button>
                           ))}
@@ -192,6 +196,7 @@ export function CalendarGrid({
       <p className="mt-1 flex flex-wrap gap-x-8 border-t pt-1 text-[10px] font-medium uppercase">
         <span>Ferie avviso 48 ore = F1 (festivo F4)</span>
         <span>Ferie avviso 24 ore = F2 (festivo F8)</span>
+        <span>Necrofori con contratto: ferie = F, senza punti</span>
         {DAY_MARKS.filter((m) => m.code === "L").map((m) => (
           <span key={markLabel(m)}>
             {markLabel(m)} = {markSign(m, false)}

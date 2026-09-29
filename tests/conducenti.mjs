@@ -40,7 +40,7 @@ try {
   const card = p.locator('[data-slot=card]:has(#bearerName)');
   const addBearer = () => card.getByRole("button", { name: "Aggiungi" }).click();
   const driverBox = () =>
-    card.locator("tr", { hasText: DRIVER }).locator("[role=checkbox]");
+    card.locator("tr", { hasText: DRIVER }).locator("[id^=bearerIsDriver-]");
 
   check("1 card Necrofori presente", Boolean(await card.count()));
 

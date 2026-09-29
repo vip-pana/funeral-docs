@@ -15,6 +15,7 @@ const suites = [
   "clienti.mjs",
   "veicoli.mjs",
   "conducenti.mjs",
+  "contratto.mjs",
   "allegati.mjs",
   "pratiche.mjs",
   "comuni.mjs",

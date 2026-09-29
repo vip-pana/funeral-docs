@@ -36,6 +36,7 @@ export async function addBearer(
   const parsed = bearerSchema.safeParse({
     name: formData.get("bearerName"),
     isDriver: formData.get("bearerIsDriver"),
+    hasContract: formData.get("bearerHasContract"),
     shoulderHeight: formData.get("bearerShoulderHeight"),
   });
 
@@ -72,6 +73,7 @@ export async function updateBearer(
   const parsed = bearerSchema.safeParse({
     name: formData.get("editBearerName"),
     isDriver: formData.get("editBearerIsDriver"),
+    hasContract: formData.get("editBearerHasContract"),
     shoulderHeight: formData.get("editBearerShoulderHeight"),
   });
 
@@ -107,6 +109,20 @@ export async function setBearerDriver(id: string, isDriver: boolean) {
     .set({ isDriver })
     .where(eq(schema.bearers.id, id));
   revalidateBearerViews();
+}
+
+/**
+ * Whether they are on a contract rather than called in, toggled from the row
+ * like the driver flag. The calendar scores their ferie from it, past months
+ * included: the points are worked out when shown, never stored.
+ */
+export async function setBearerContract(id: string, hasContract: boolean) {
+  await db
+    .update(schema.bearers)
+    .set({ hasContract })
+    .where(eq(schema.bearers.id, id));
+  revalidateBearerViews();
+  revalidatePath("/calendar");
 }
 
 /**

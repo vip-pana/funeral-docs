@@ -28,6 +28,7 @@ import { useFormReset } from "@/lib/use-form-reset";
 import {
   addBearer,
   type BearerFormState,
+  setBearerContract,
   setBearerDriver,
   setBearerShoulderHeight,
 } from "./bearer-actions";
@@ -64,6 +65,9 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
           servizio, e i nomi finiscono nel documento 7. Spunta Conducente per
           chi puo&apos; anche guidare l&apos;autofunebre: solo loro compaiono
           nella scelta del conducente, il cui nome finisce nel documento 4.
+          Spunta Contratto per chi e&apos; assunto, a tempo determinato o
+          indeterminato, e non a chiamata: nel calendario le sue ferie non
+          danno punti.
         </CardDescription>
       </CardHeader>
 
@@ -75,6 +79,7 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
                 <TableRow>
                   <TableHead>Nome</TableHead>
                   <TableHead>Conducente</TableHead>
+                  <TableHead>Contratto</TableHead>
                   <TableHead>Altezza spalla (cm)</TableHead>
                   <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
@@ -93,6 +98,16 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
                         checked={b.isDriver}
                         onCheckedChange={(on) =>
                           setBearerDriver(b.id, on === true)
+                        }
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Checkbox
+                        id={`bearerHasContract-${b.id}`}
+                        aria-label={`${b.name}: contratto`}
+                        checked={b.hasContract}
+                        onCheckedChange={(on) =>
+                          setBearerContract(b.id, on === true)
                         }
                       />
                     </TableCell>
@@ -122,7 +137,7 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
         <form
           ref={formRef}
           action={formAction}
-          className="grid items-start gap-4 sm:grid-cols-[1fr_10rem_auto_auto]"
+          className="grid items-start gap-4 sm:grid-cols-[1fr_10rem_auto_auto_auto]"
         >
           {/* Not just "name": the other cards' inputs already use it, and the
               e2e sweep over the settings inputs would match them all. */}
@@ -147,6 +162,10 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
           <label className="mt-[calc(--spacing(6)+2px)] flex h-9 items-center gap-2 text-sm whitespace-nowrap">
             <Checkbox id="bearerIsDriver" name="bearerIsDriver" />
             Conducente
+          </label>
+          <label className="mt-[calc(--spacing(6)+2px)] flex h-9 items-center gap-2 text-sm whitespace-nowrap">
+            <Checkbox id="bearerHasContract" name="bearerHasContract" />
+            Contratto
           </label>
           <Button
             type="submit"

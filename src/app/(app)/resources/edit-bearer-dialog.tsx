@@ -100,6 +100,14 @@ function EditBearerForm({
         />
         Conducente
       </label>
+      <label className="flex items-center gap-2 text-sm">
+        <Checkbox
+          id="editBearerHasContract"
+          name="editBearerHasContract"
+          defaultChecked={bearer.hasContract}
+        />
+        Contratto
+      </label>
       <DialogFooter>
         <DialogClose asChild>
           <Button type="button" variant="outline">
