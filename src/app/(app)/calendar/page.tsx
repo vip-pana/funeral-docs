@@ -15,7 +15,12 @@ const MODES: CalendarMode[] = ["persona", "giorno", "mese"];
 export default async function CalendarioPage({
   searchParams,
 }: {
-  searchParams: Promise<{ month?: string; view?: string; who?: string; day?: string }>;
+  searchParams: Promise<{
+    month?: string;
+    view?: string;
+    who?: string;
+    day?: string;
+  }>;
 }) {
   const params = await searchParams;
   const month = parseMonth(params.month);
@@ -30,7 +35,7 @@ export default async function CalendarioPage({
     <div className="space-y-5">
       <div className="print:hidden">
         <h1 className="text-2xl font-semibold">Calendario necrofori</h1>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Tocca un giorno per segnare ferie o servizi svolti.
         </p>
       </div>
@@ -47,7 +52,7 @@ export default async function CalendarioPage({
           initialDay={Number.isInteger(day) && day > 0 ? day : undefined}
         />
       ) : (
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Nessun necroforo configurato. Aggiungili in{" "}
           <Link href="/resources" className="underline">
             Risorse

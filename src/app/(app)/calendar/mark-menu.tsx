@@ -72,7 +72,7 @@ export function MarkOptions({
               "flex w-full items-center justify-between rounded-sm px-2 py-1.5 text-sm",
               "hover:bg-accent aria-pressed:bg-accent",
               large &&
-                "aria-pressed:border-primary aria-pressed:ring-primary/30 h-14 gap-2 rounded-lg border px-3 text-left aria-pressed:ring-2",
+                "h-14 gap-2 rounded-lg border px-3 text-left aria-pressed:border-primary aria-pressed:ring-2 aria-pressed:ring-primary/30",
             )}
           >
             {markLabel(m, contract)}
@@ -82,13 +82,13 @@ export function MarkOptions({
           </button>
         ))}
       </div>
-      <div className={cn("bg-border my-1 h-px", large && "my-2")} />
+      <div className={cn("my-1 h-px bg-border", large && "my-2")} />
       <button
         type="button"
         disabled={!mark}
         onClick={() => onPick(null)}
         className={cn(
-          "hover:bg-accent w-full rounded-sm px-2 py-1.5 text-left text-sm disabled:opacity-50",
+          "w-full rounded-sm px-2 py-1.5 text-left text-sm hover:bg-accent disabled:opacity-50",
           large && "h-12 rounded-lg border text-center text-base",
         )}
       >
@@ -114,7 +114,7 @@ export function MarkSheet({
     <Sheet open={target !== null} onOpenChange={(open) => !open && onClose()}>
       <SheetContent
         side="bottom"
-        className="mx-auto max-w-lg gap-2 rounded-t-2xl pb-[max(1rem,env(safe-area-inset-bottom))] sm:rounded-2xl sm:bottom-4"
+        className="mx-auto max-w-lg gap-2 rounded-t-2xl pb-[max(1rem,env(safe-area-inset-bottom))] sm:bottom-4 sm:rounded-2xl"
       >
         {target && (
           <>

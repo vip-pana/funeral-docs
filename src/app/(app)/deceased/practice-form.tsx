@@ -61,10 +61,10 @@ export function PracticeForm({
   bearers: Bearer[];
   submitLabel: string;
 }) {
-  const [state, formAction, pending] = useActionState<PracticeFormState, FormData>(
-    action,
-    {},
-  );
+  const [state, formAction, pending] = useActionState<
+    PracticeFormState,
+    FormData
+  >(action, {});
   // This form is never emptied on purpose: after creating a record the page
   // navigates away, and an edit keeps showing what was saved.
   const { ref: formRef } = useFormReset();
@@ -108,13 +108,9 @@ export function PracticeForm({
     practice?.clientName && !clients.some((c) => c.id === clientId),
   );
 
-  const [vehicleId, setVehicleId] = useState(
-    practice?.vehicleId ?? "",
-  );
+  const [vehicleId, setVehicleId] = useState(practice?.vehicleId ?? "");
 
-  const [driverId, setDriverId] = useState(
-    practice?.driverId ?? "",
-  );
+  const [driverId, setDriverId] = useState(practice?.driverId ?? "");
 
   // The vehicle may have been deleted after saving: the practice keeps the
   // plate, but the list no longer has an entry to select.
@@ -137,7 +133,7 @@ export function PracticeForm({
   // boxes cannot show what was actually printed.
   const missingBearers = Boolean(
     practice?.bearerNames &&
-      bearerIds.some((id) => !bearers.some((b) => b.id === id)),
+    bearerIds.some((id) => !bearers.some((b) => b.id === id)),
   );
 
   useEffect(() => {
@@ -254,7 +250,11 @@ export function PracticeForm({
             {/* Same as the hearse below: no "none" entry, because Radix forbids
                 a SelectItem with an empty value — and here none is not a valid
                 choice anyway. */}
-            <Select name="clientId" value={clientId} onValueChange={setClientId}>
+            <Select
+              name="clientId"
+              value={clientId}
+              onValueChange={setClientId}
+            >
               <SelectTrigger
                 id="clientId"
                 className="w-full"
@@ -539,9 +539,7 @@ export function PracticeForm({
             <Select
               name="personMaritalStatus"
               value={maritalStatus}
-              onValueChange={(v) =>
-                setMaritalStatus(v as typeof maritalStatus)
-              }
+              onValueChange={(v) => setMaritalStatus(v as typeof maritalStatus)}
             >
               <SelectTrigger id="personMaritalStatus" className="w-full">
                 <SelectValue placeholder="Non indicato" />
@@ -764,7 +762,11 @@ export function PracticeForm({
             <FieldLabel htmlFor="driverId">Conducente</FieldLabel>
             {/* Same as the hearse above: no "none" entry, the placeholder
                 covers it. */}
-            <Select name="driverId" value={driverId} onValueChange={setDriverId}>
+            <Select
+              name="driverId"
+              value={driverId}
+              onValueChange={setDriverId}
+            >
               <SelectTrigger id="driverId" className="w-full">
                 <SelectValue placeholder="Nessuno" />
               </SelectTrigger>
@@ -878,9 +880,7 @@ export function PracticeForm({
                 <SelectItem value="tumulataNuova">
                   Tumulata in sepoltura da prenotare
                 </SelectItem>
-                <SelectItem value="cremata">
-                  Preventivamente cremata
-                </SelectItem>
+                <SelectItem value="cremata">Preventivamente cremata</SelectItem>
               </SelectContent>
             </Select>
             <FieldDescription>
@@ -963,8 +963,12 @@ export function PracticeForm({
 
       {/* Pinned to the bottom on phones: the form is many screens long and
           the button would otherwise be a long scroll away. */}
-      <div className="bg-background/95 supports-backdrop-filter:backdrop-blur sticky bottom-0 z-10 -mx-4 flex justify-end border-t px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
-        <Button type="submit" disabled={pending} className="h-10 w-full sm:h-8 sm:w-auto">
+      <div className="sticky bottom-0 z-10 -mx-4 flex justify-end border-t bg-background/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] supports-backdrop-filter:backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
+        <Button
+          type="submit"
+          disabled={pending}
+          className="h-10 w-full sm:h-8 sm:w-auto"
+        >
           {pending ? "Salvataggio…" : submitLabel}
         </Button>
       </div>

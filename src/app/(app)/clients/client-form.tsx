@@ -39,10 +39,10 @@ export function ClientForm({
   client?: Client;
   submitLabel: string;
 }) {
-  const [state, formAction, pending] = useActionState<ClientFormState, FormData>(
-    action,
-    {},
-  );
+  const [state, formAction, pending] = useActionState<
+    ClientFormState,
+    FormData
+  >(action, {});
 
   useEffect(() => {
     if (state.message) {
@@ -207,8 +207,8 @@ export function ClientForm({
         <CardHeader>
           <CardTitle>Dati fiscali e contatti</CardTitle>
           <CardDescription>
-            Servono per la fatturazione e per avere i recapiti a portata di mano:
-            non finiscono in nessun documento.
+            Servono per la fatturazione e per avere i recapiti a portata di
+            mano: non finiscono in nessun documento.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
@@ -271,8 +271,12 @@ export function ClientForm({
 
       {/* Pinned to the bottom on phones: the form is many screens long and
           the button would otherwise be a long scroll away. */}
-      <div className="bg-background/95 supports-backdrop-filter:backdrop-blur sticky bottom-0 z-10 -mx-4 flex justify-end border-t px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
-        <Button type="submit" disabled={pending} className="h-10 w-full sm:h-8 sm:w-auto">
+      <div className="sticky bottom-0 z-10 -mx-4 flex justify-end border-t bg-background/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] supports-backdrop-filter:backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
+        <Button
+          type="submit"
+          disabled={pending}
+          className="h-10 w-full sm:h-8 sm:w-auto"
+        >
           {pending ? "Salvataggio…" : submitLabel}
         </Button>
       </div>

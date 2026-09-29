@@ -204,8 +204,9 @@ describe("practiceSchema", () => {
   });
 
   it("rejects a non-existent burial permit date", () => {
-    expect(errorOn(parse({ burialPermitDate: "2026-02-31" }), "burialPermitDate"))
-      .toMatch(/inesistente/);
+    expect(
+      errorOn(parse({ burialPermitDate: "2026-02-31" }), "burialPermitDate"),
+    ).toMatch(/inesistente/);
   });
 
   it("uppercases the province", () => {
@@ -236,7 +237,10 @@ describe("practiceSchema", () => {
 
   it("rejects a marital status that is not one of the four boxes", () => {
     expect(
-      errorOn(parse({ personMaritalStatus: "divorziato" }), "personMaritalStatus"),
+      errorOn(
+        parse({ personMaritalStatus: "divorziato" }),
+        "personMaritalStatus",
+      ),
     ).toBeDefined();
   });
 
@@ -249,8 +253,9 @@ describe("practiceSchema", () => {
   /** Blank is fine, but a tax code that is typed in is checked. */
   it("checks the mandator's tax code only when there is one", () => {
     expect(parse({ mandateTaxCode: "" }).success).toBe(true);
-    expect(errorOn(parse({ mandateTaxCode: "XXX" }), "mandateTaxCode"))
-      .toBeDefined();
+    expect(
+      errorOn(parse({ mandateTaxCode: "XXX" }), "mandateTaxCode"),
+    ).toBeDefined();
     expect(parse({ mandateTaxCode: valid("RSSMRA80A01H501") }).success).toBe(
       true,
     );
@@ -259,49 +264,58 @@ describe("practiceSchema", () => {
   it("checks the stop time only when there is one", () => {
     expect(parse({ funeralStopTime: "" }).success).toBe(true);
     expect(parse({ funeralStopTime: "15:30" }).success).toBe(true);
-    expect(errorOn(parse({ funeralStopTime: "99:99" }), "funeralStopTime"))
-      .toBeDefined();
+    expect(
+      errorOn(parse({ funeralStopTime: "99:99" }), "funeralStopTime"),
+    ).toBeDefined();
   });
 
   it("rejects a province that is not two letters", () => {
-    expect(errorOn(parse({ destinationProvince: "Foggia" }), "destinationProvince"))
-      .toMatch(/2 lettere/);
+    expect(
+      errorOn(parse({ destinationProvince: "Foggia" }), "destinationProvince"),
+    ).toMatch(/2 lettere/);
   });
 
   it("rejects a tax code whose check character does not match", () => {
-    expect(errorOn(parse({ personTaxCode: "RSSMRA40C12D643A" }), "personTaxCode"))
-      .toMatch(/copiato bene/);
+    expect(
+      errorOn(parse({ personTaxCode: "RSSMRA40C12D643A" }), "personTaxCode"),
+    ).toMatch(/copiato bene/);
   });
 
   it("rejects a missing required field", () => {
-    expect(errorOn(parse({ personFirstName: "   " }), "personFirstName"))
-      .toMatch(/obbligatorio/);
+    expect(
+      errorOn(parse({ personFirstName: "   " }), "personFirstName"),
+    ).toMatch(/obbligatorio/);
   });
 
   describe("dates", () => {
     it("rejects a date that does not exist", () => {
-      expect(errorOn(parse({ personDeathDate: "2026-02-31" }), "personDeathDate"))
-        .toBe("Data inesistente");
+      expect(
+        errorOn(parse({ personDeathDate: "2026-02-31" }), "personDeathDate"),
+      ).toBe("Data inesistente");
     });
 
     it("accepts 29 February in a leap year and rejects it otherwise", () => {
       expect(parse({ personDeathDate: "2024-02-29" }).success).toBe(true);
-      expect(errorOn(parse({ personDeathDate: "2026-02-29" }), "personDeathDate"))
-        .toBe("Data inesistente");
+      expect(
+        errorOn(parse({ personDeathDate: "2026-02-29" }), "personDeathDate"),
+      ).toBe("Data inesistente");
     });
 
     it("rejects a date in Italian format", () => {
-      expect(errorOn(parse({ personBirthDate: "12/03/1940" }), "personBirthDate"))
-        .toBe("Data non valida");
+      expect(
+        errorOn(parse({ personBirthDate: "12/03/1940" }), "personBirthDate"),
+      ).toBe("Data non valida");
     });
   });
 
   describe("times", () => {
     it("rejects an hour or minute out of range", () => {
-      expect(errorOn(parse({ transportTime: "99:99" }), "transportTime"))
-        .toBe("Ora inesistente");
-      expect(errorOn(parse({ transportTime: "24:00" }), "transportTime"))
-        .toBe("Ora inesistente");
+      expect(errorOn(parse({ transportTime: "99:99" }), "transportTime")).toBe(
+        "Ora inesistente",
+      );
+      expect(errorOn(parse({ transportTime: "24:00" }), "transportTime")).toBe(
+        "Ora inesistente",
+      );
     });
 
     it("accepts midnight and the last minute of the day", () => {
@@ -310,8 +324,9 @@ describe("practiceSchema", () => {
     });
 
     it("requires two digits for the hour", () => {
-      expect(errorOn(parse({ transportTime: "9:00" }), "transportTime"))
-        .toMatch(/hh:mm/);
+      expect(
+        errorOn(parse({ transportTime: "9:00" }), "transportTime"),
+      ).toMatch(/hh:mm/);
     });
   });
 
@@ -437,9 +452,9 @@ describe("vehicleSchema and bearerSchema", () => {
   });
 
   it("rejects a blank plate", () => {
-    expect(vehicleSchema.safeParse({ name: "Vito", plate: "   " }).success).toBe(
-      false,
-    );
+    expect(
+      vehicleSchema.safeParse({ name: "Vito", plate: "   " }).success,
+    ).toBe(false);
   });
 
   it("accepts a bearer and trims the name", () => {
@@ -452,12 +467,18 @@ describe("vehicleSchema and bearerSchema", () => {
   });
 
   it("reads the shoulder height as whole centimetres", () => {
-    const result = bearerSchema.safeParse({ name: "Paolo", shoulderHeight: " 148 " });
+    const result = bearerSchema.safeParse({
+      name: "Paolo",
+      shoulderHeight: " 148 ",
+    });
     expect(result.success && result.data.shoulderHeight).toBe(148);
   });
 
   it("leaves a blank shoulder height unrecorded", () => {
-    const result = bearerSchema.safeParse({ name: "Paolo", shoulderHeight: "" });
+    const result = bearerSchema.safeParse({
+      name: "Paolo",
+      shoulderHeight: "",
+    });
     expect(result.success && result.data.shoulderHeight).toBeNull();
   });
 

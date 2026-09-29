@@ -22,8 +22,12 @@ const DRIVER = "Giuseppe Bianchi";
 
 const b = await chromium.launch({ channel: "chrome" });
 try {
-  const p = await (await b.newContext({ viewport: { width: 1280, height: 960 } })).newPage();
-  p.on("pageerror", (e) => console.log("  [pageerror]", e.message.slice(0, 160)));
+  const p = await (
+    await b.newContext({ viewport: { width: 1280, height: 960 } })
+  ).newPage();
+  p.on("pageerror", (e) =>
+    console.log("  [pageerror]", e.message.slice(0, 160)),
+  );
 
   let fail = 0;
   const check = (n, c, x = "") => {
@@ -37,8 +41,9 @@ try {
 
   // The Autofunebri card has an identical "Aggiungi" button and its own table:
   // everything here is scoped to the bearer card.
-  const card = p.locator('[data-slot=card]:has(#bearerName)');
-  const addBearer = () => card.getByRole("button", { name: "Aggiungi" }).click();
+  const card = p.locator("[data-slot=card]:has(#bearerName)");
+  const addBearer = () =>
+    card.getByRole("button", { name: "Aggiungi" }).click();
   const driverBox = () =>
     card.locator("tr", { hasText: DRIVER }).locator("[id^=bearerIsDriver-]");
 
@@ -68,8 +73,10 @@ try {
   await p.click("#bearerIsDriver");
   await addBearer();
   await p.waitForFunction(
-    () => [...document.querySelectorAll("[data-sonner-toast]")]
-      .some((t) => t.textContent?.includes("Necroforo aggiunto")),
+    () =>
+      [...document.querySelectorAll("[data-sonner-toast]")].some((t) =>
+        t.textContent?.includes("Necroforo aggiunto"),
+      ),
     null,
     { timeout: 12000 },
   );
@@ -112,17 +119,26 @@ try {
   check("7 torna nel Select", await pickSelect(p, "driverId", DRIVER));
   await fillPractice(p, SAMPLE);
   await Promise.all([
-    p.waitForURL(/\/deceased\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/, { timeout: 20000 }),
+    p.waitForURL(
+      /\/deceased\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+      { timeout: 20000 },
+    ),
     p.click('button:has-text("Crea scheda")'),
   ]);
-  const id = p.url().match(/\/deceased\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/)[1];
+  const id = p
+    .url()
+    .match(
+      /\/deceased\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/,
+    )[1];
 
   // The driver only appears in document 4.
   const docText = async () => {
     const res = await p.request.get(`${B}/api/deceased/${id}/generate?doc=4`);
     const zip = await JSZip.loadAsync(await res.body());
     const xml = await zip.file("word/document.xml").async("string");
-    return [...xml.matchAll(/<w:t(?: [^>]*)?>([\s\S]*?)<\/w:t>/g)].map((m) => m[1]).join("");
+    return [...xml.matchAll(/<w:t(?: [^>]*)?>([\s\S]*?)<\/w:t>/g)]
+      .map((m) => m[1])
+      .join("");
   };
 
   check("8 conducente nel documento 4", (await docText()).includes(DRIVER));
@@ -151,7 +167,7 @@ try {
   // The description of the driver field alone: searching the whole page would
   // pick up the first one belonging to another field.
   const hint = await p
-    .locator('[data-slot=field]:has(#driverId) [data-slot=field-description]')
+    .locator("[data-slot=field]:has(#driverId) [data-slot=field-description]")
     .textContent();
   check(
     "11 avvisa che il conducente non e' in elenco",

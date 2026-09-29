@@ -56,10 +56,10 @@ function EditBearerForm({
   bearer: Bearer;
   onDone: () => void;
 }) {
-  const [state, formAction, pending] = useActionState<BearerFormState, FormData>(
-    updateBearer.bind(null, bearer.id),
-    {},
-  );
+  const [state, formAction, pending] = useActionState<
+    BearerFormState,
+    FormData
+  >(updateBearer.bind(null, bearer.id), {});
 
   useEffect(() => {
     if (state.ok) {

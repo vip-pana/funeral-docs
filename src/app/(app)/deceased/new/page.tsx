@@ -26,7 +26,7 @@ export default async function NuovoDefuntoPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Nuovo defunto</h1>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           I dati del dichiarante e dell&apos;impresa arrivano dal cliente scelto
           qui sotto.
         </p>

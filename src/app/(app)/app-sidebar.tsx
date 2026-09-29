@@ -60,7 +60,9 @@ export function AppSidebar() {
                     asChild
                     // Subpages count too: on /deceased/12 the "Defunti" entry
                     // must stay highlighted.
-                    isActive={pathname === href || pathname.startsWith(`${href}/`)}
+                    isActive={
+                      pathname === href || pathname.startsWith(`${href}/`)
+                    }
                     tooltip={label}
                   >
                     <Link href={href}>
@@ -83,7 +85,9 @@ export function AppSidebar() {
                 rendering from it would either mismatch the server markup or
                 make this entry pop in a frame late. */}
             <SidebarMenuButton
-              onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+              onClick={() =>
+                setTheme(resolvedTheme === "dark" ? "light" : "dark")
+              }
               tooltip="Cambia tema"
             >
               <SunIcon className="hidden dark:block" />

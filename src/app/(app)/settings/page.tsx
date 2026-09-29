@@ -7,7 +7,7 @@ export default function ImpostazioniPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Impostazioni</h1>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Accesso al gestionale. Mezzi e personale stanno in Risorse.
         </p>
       </div>

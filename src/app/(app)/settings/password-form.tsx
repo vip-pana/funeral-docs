@@ -48,11 +48,7 @@ export function PasswordForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form
-          ref={formRef}
-          action={formAction}
-          className="grid max-w-md gap-4"
-        >
+        <form ref={formRef} action={formAction} className="grid max-w-md gap-4">
           <Field
             name="currentPassword"
             label="Password attuale"

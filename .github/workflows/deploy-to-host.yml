@@ -13,19 +13,19 @@ on:
   workflow_call:
     inputs:
       app:
-        description: 'Application to deploy, as named in the host wrapper whitelist'
+        description: "Application to deploy, as named in the host wrapper whitelist"
         required: true
         type: string
       version:
-        description: 'Release version to deploy, without the leading v'
+        description: "Release version to deploy, without the leading v"
         required: true
         type: string
       host:
-        description: 'Tailnet hostname of the target machine'
+        description: "Tailnet hostname of the target machine"
         required: true
         type: string
       ssh_user:
-        description: 'Unix account to connect as (its login shell is the deploy wrapper)'
+        description: "Unix account to connect as (its login shell is the deploy wrapper)"
         required: false
         default: deploy
         type: string
@@ -57,7 +57,7 @@ jobs:
           tags: tag:ci
           # The node is created for this job and expires with it, so a run
           # never leaves a lingering device with tailnet access.
-          use-cache: 'false'
+          use-cache: "false"
 
       # The action above reports success even after several failed attempts to
       # come up, so a green step is not proof the node joined. Without this the

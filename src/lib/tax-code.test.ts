@@ -76,8 +76,12 @@ describe("computeTaxCode", () => {
   it("uses the month letter, not the number", () => {
     // March is the third code in ABCDEHLMPRST.
     expect(computeTaxCode(MARIO)?.[8]).toBe("C");
-    expect(computeTaxCode({ ...MARIO, birthDate: "1940-01-12" })?.[8]).toBe("A");
-    expect(computeTaxCode({ ...MARIO, birthDate: "1940-12-12" })?.[8]).toBe("T");
+    expect(computeTaxCode({ ...MARIO, birthDate: "1940-01-12" })?.[8]).toBe(
+      "A",
+    );
+    expect(computeTaxCode({ ...MARIO, birthDate: "1940-12-12" })?.[8]).toBe(
+      "T",
+    );
   });
 
   describe("returns null when the data is not enough", () => {

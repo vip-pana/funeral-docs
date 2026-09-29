@@ -18,7 +18,10 @@ export function currentMonth(now = new Date()): string {
 }
 
 /** The `?month=` parameter, or the current month when absent or malformed. */
-export function parseMonth(value: string | undefined, now = new Date()): string {
+export function parseMonth(
+  value: string | undefined,
+  now = new Date(),
+): string {
   return value && MONTH.test(value) ? value : currentMonth(now);
 }
 
@@ -50,8 +53,16 @@ export function easterSunday(year: number): Date {
 }
 
 const NATIONAL = [
-  "01-01", "01-06", "04-25", "05-01", "06-02",
-  "08-15", "11-01", "12-08", "12-25", "12-26",
+  "01-01",
+  "01-06",
+  "04-25",
+  "05-01",
+  "06-02",
+  "08-15",
+  "11-01",
+  "12-08",
+  "12-25",
+  "12-26",
 ];
 
 /**
@@ -129,8 +140,7 @@ export function byShoulderHeight<
  * day worked with 1 to 3 services.
  */
 export type DayMark =
-  | { code: "F"; notice: 48 | 24 }
-  | { code: "L"; services: 1 | 2 | 3 };
+  { code: "F"; notice: 48 | 24 } | { code: "L"; services: 1 | 2 | 3 };
 
 /** Every choice the cell menu offers, in the order it shows them. */
 export const DAY_MARKS: DayMark[] = [
@@ -213,7 +223,10 @@ export function toMark(row: {
     return { code: "F", notice: row.noticeHours === 24 ? 24 : 48 };
   }
   const services = row.services;
-  if (row.code === "L" && (services === 1 || services === 2 || services === 3)) {
+  if (
+    row.code === "L" &&
+    (services === 1 || services === 2 || services === 3)
+  ) {
     return { code: "L", services };
   }
   return undefined;
@@ -243,15 +256,16 @@ export function runningTotals(
     const mark = marks[i];
     if (mark?.code === "F") {
       sum += holidayPoints(mark.notice, d.isHoliday, hasContract);
-    }
-    else if (mark?.code === "L" && !d.isHoliday) sum += mark.services;
+    } else if (mark?.code === "L" && !d.isHoliday) sum += mark.services;
     return sum;
   });
 }
 
 /** Today in Rome, as an ISO date. */
 export function todayIso(now = new Date()): string {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Rome" }).format(now);
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Rome" }).format(
+    now,
+  );
 }
 
 /** 0 for Monday to 6 for Sunday: the Italian week starts on Monday. */

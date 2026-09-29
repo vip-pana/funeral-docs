@@ -24,7 +24,9 @@ try {
       hasTouch: true,
     })
   ).newPage();
-  p.on("pageerror", (e) => console.log("  [pageerror]", e.message.slice(0, 160)));
+  p.on("pageerror", (e) =>
+    console.log("  [pageerror]", e.message.slice(0, 160)),
+  );
 
   let fail = 0;
   const check = (n, c, x = "") => {
@@ -35,7 +37,15 @@ try {
   await login(p, B);
 
   // --- nothing wider than the screen ---
-  for (const path of ["/deceased", "/deceased/new", "/clients", "/clients/new", "/resources", "/calendar", "/settings"]) {
+  for (const path of [
+    "/deceased",
+    "/deceased/new",
+    "/clients",
+    "/clients/new",
+    "/resources",
+    "/calendar",
+    "/settings",
+  ]) {
     await p.goto(`${B}${path}`);
     await p.waitForTimeout(500);
     const width = await p.evaluate(() => document.documentElement.scrollWidth);
@@ -59,17 +69,36 @@ try {
   await sheet.getByRole("button", { name: /^1 servizio/ }).click();
   await sheet.waitFor({ state: "hidden", timeout: 5000 });
   await p.waitForTimeout(800);
-  check("4 servizio segnato", (await cell.textContent())?.includes("\\"), await cell.textContent());
-  check("  totale aumentato", Number(await total.textContent()) === before + 1, await total.textContent());
+  check(
+    "4 servizio segnato",
+    (await cell.textContent())?.includes("\\"),
+    await cell.textContent(),
+  );
+  check(
+    "  totale aumentato",
+    Number(await total.textContent()) === before + 1,
+    await total.textContent(),
+  );
 
   await p.reload();
   await total.waitFor({ timeout: 8000 });
-  check("5 salvato", Number(await total.textContent()) === before + 1, await total.textContent());
+  check(
+    "5 salvato",
+    Number(await total.textContent()) === before + 1,
+    await total.textContent(),
+  );
 
   // --- the day view ---
   await p.getByRole("button", { name: "Giorno" }).click();
-  check("6 vista giorno nell'indirizzo", p.url().includes("view=giorno"), p.url());
-  await p.getByRole("button", { name: /3 gennaio/ }).first().click();
+  check(
+    "6 vista giorno nell'indirizzo",
+    p.url().includes("view=giorno"),
+    p.url(),
+  );
+  await p
+    .getByRole("button", { name: /3 gennaio/ })
+    .first()
+    .click();
   const marked = p.getByRole("button", { name: /: 1 servizio$/ });
   check("7 il servizio compare nel giorno", (await marked.count()) >= 1);
 
@@ -77,7 +106,10 @@ try {
   await marked.first().click();
   await p.getByRole("dialog").getByRole("button", { name: "Svuota" }).click();
   await p.waitForTimeout(800);
-  check("8 giorno svuotato", (await p.getByRole("button", { name: /: 1 servizio$/ }).count()) === 0);
+  check(
+    "8 giorno svuotato",
+    (await p.getByRole("button", { name: /: 1 servizio$/ }).count()) === 0,
+  );
 
   console.log(fail ? `\n=== ${fail} FALLITI ===` : "\n=== TUTTI OK ===");
   process.exitCode = fail ? 1 : 0;

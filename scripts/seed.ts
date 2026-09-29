@@ -124,71 +124,133 @@ type Person = {
 
 const PEOPLE: Person[] = [
   {
-    firstName: "Antonietta", lastName: "Russo", isFemale: true,
-    birthDate: "1934-11-02", birthCity: "San Severo", birthCode: "I158",
-    residenceCity: "San Severo", residenceAddress: "Via Fortore 44",
-    deathDate: "2026-07-28", deathTime: "05:20",
-    deathCity: "San Severo", deathPlace: "Abitazione",
-    transportDate: "2026-07-29", transportTime: "10:00", permitDate: "2026-07-28",
+    firstName: "Antonietta",
+    lastName: "Russo",
+    isFemale: true,
+    birthDate: "1934-11-02",
+    birthCity: "San Severo",
+    birthCode: "I158",
+    residenceCity: "San Severo",
+    residenceAddress: "Via Fortore 44",
+    deathDate: "2026-07-28",
+    deathTime: "05:20",
+    deathCity: "San Severo",
+    deathPlace: "Abitazione",
+    transportDate: "2026-07-29",
+    transportTime: "10:00",
+    permitDate: "2026-07-28",
     church: "Chiesa di San Severino Abate",
-    destinationCity: "San Severo", cemetery: "Cimitero Comunale",
+    destinationCity: "San Severo",
+    cemetery: "Cimitero Comunale",
   },
   {
-    firstName: "Vincenzo", lastName: "Di Maio", isFemale: false,
-    birthDate: "1941-06-17", birthCity: "Foggia", birthCode: "D643",
-    residenceCity: "Foggia", residenceAddress: "Corso Garibaldi 12",
-    deathDate: "2026-07-30", deathTime: "22:45",
-    deathCity: "Foggia", deathPlace: "Ospedali Riuniti",
-    transportDate: "2026-07-31", transportTime: "08:30", permitDate: "2026-07-30",
+    firstName: "Vincenzo",
+    lastName: "Di Maio",
+    isFemale: false,
+    birthDate: "1941-06-17",
+    birthCity: "Foggia",
+    birthCode: "D643",
+    residenceCity: "Foggia",
+    residenceAddress: "Corso Garibaldi 12",
+    deathDate: "2026-07-30",
+    deathTime: "22:45",
+    deathCity: "Foggia",
+    deathPlace: "Ospedali Riuniti",
+    transportDate: "2026-07-31",
+    transportTime: "08:30",
+    permitDate: "2026-07-30",
     church: "Cattedrale di Foggia",
-    destinationCity: "Lucera", cemetery: "Cimitero di Lucera",
+    destinationCity: "Lucera",
+    cemetery: "Cimitero di Lucera",
   },
   {
-    firstName: "Maria Grazia", lastName: "Fiore", isFemale: true,
-    birthDate: "1929-02-14", birthCity: "Lucera", birthCode: "E716",
-    residenceCity: "Lucera", residenceAddress: "Via Federico II 3",
-    deathDate: "2026-08-01", deathTime: "13:10",
-    deathCity: "Lucera", deathPlace: "Casa di riposo Villa Serena",
-    transportDate: "2026-08-02", transportTime: "16:00", permitDate: "2026-08-01",
+    firstName: "Maria Grazia",
+    lastName: "Fiore",
+    isFemale: true,
+    birthDate: "1929-02-14",
+    birthCity: "Lucera",
+    birthCode: "E716",
+    residenceCity: "Lucera",
+    residenceAddress: "Via Federico II 3",
+    deathDate: "2026-08-01",
+    deathTime: "13:10",
+    deathCity: "Lucera",
+    deathPlace: "Casa di riposo Villa Serena",
+    transportDate: "2026-08-02",
+    transportTime: "16:00",
+    permitDate: "2026-08-01",
     church: "Chiesa del Carmine",
-    destinationCity: "Lucera", cemetery: "Cimitero di Lucera",
+    destinationCity: "Lucera",
+    cemetery: "Cimitero di Lucera",
   },
   {
-    firstName: "Pasquale", lastName: "Marino", isFemale: false,
-    birthDate: "1948-09-30", birthCity: "Apricena", birthCode: "A339",
-    residenceCity: "Apricena", residenceAddress: "Via Sannicandro 87",
-    deathDate: "2026-08-03", deathTime: "07:05",
-    deathCity: "San Severo", deathPlace: "Ospedale Teresa Masselli Mascia",
-    transportDate: "2026-08-04", transportTime: "09:15", permitDate: "2026-08-03",
+    firstName: "Pasquale",
+    lastName: "Marino",
+    isFemale: false,
+    birthDate: "1948-09-30",
+    birthCity: "Apricena",
+    birthCode: "A339",
+    residenceCity: "Apricena",
+    residenceAddress: "Via Sannicandro 87",
+    deathDate: "2026-08-03",
+    deathTime: "07:05",
+    deathCity: "San Severo",
+    deathPlace: "Ospedale Teresa Masselli Mascia",
+    transportDate: "2026-08-04",
+    transportTime: "09:15",
+    permitDate: "2026-08-03",
     church: "Chiesa Madre di Apricena",
-    destinationCity: "Apricena", cemetery: "Cimitero di Apricena",
+    destinationCity: "Apricena",
+    cemetery: "Cimitero di Apricena",
   },
   {
-    firstName: "Rosa", lastName: "Colangelo", isFemale: true,
-    birthDate: "1937-04-08", birthCity: "San Severo", birthCode: "I158",
-    residenceCity: "San Severo", residenceAddress: "Viale Due Giugno 21",
-    deathDate: "2026-08-05", deathTime: "18:40",
-    deathCity: "San Severo", deathPlace: "Abitazione",
-    transportDate: "2026-08-06", transportTime: "11:30", permitDate: "2026-08-05",
+    firstName: "Rosa",
+    lastName: "Colangelo",
+    isFemale: true,
+    birthDate: "1937-04-08",
+    birthCity: "San Severo",
+    birthCode: "I158",
+    residenceCity: "San Severo",
+    residenceAddress: "Viale Due Giugno 21",
+    deathDate: "2026-08-05",
+    deathTime: "18:40",
+    deathCity: "San Severo",
+    deathPlace: "Abitazione",
+    transportDate: "2026-08-06",
+    transportTime: "11:30",
+    permitDate: "2026-08-05",
     church: "Chiesa di Santa Maria della Pietà",
-    destinationCity: "Torremaggiore", cemetery: "Cimitero di Torremaggiore",
+    destinationCity: "Torremaggiore",
+    cemetery: "Cimitero di Torremaggiore",
     cremation: {
-      crematoryCity: "Foggia", funeralStopCity: "Torremaggiore",
-      ashesCity: "Torremaggiore", consentRelative: "dalla figlia",
+      crematoryCity: "Foggia",
+      funeralStopCity: "Torremaggiore",
+      ashesCity: "Torremaggiore",
+      consentRelative: "dalla figlia",
       burialPermitDate: "2026-08-05",
     },
   },
   {
-    firstName: "Nicola", lastName: "Cassano", isFemale: false,
-    birthDate: "1952-12-21", birthCity: "Torremaggiore", birthCode: "L273",
-    residenceCity: "Torremaggiore", residenceAddress: "Via Marconi 9",
-    deathDate: "2026-08-06", deathTime: "02:15",
-    deathCity: "Foggia", deathPlace: "Ospedali Riuniti",
-    transportDate: "2026-08-07", transportTime: "07:45", permitDate: "2026-08-06",
+    firstName: "Nicola",
+    lastName: "Cassano",
+    isFemale: false,
+    birthDate: "1952-12-21",
+    birthCity: "Torremaggiore",
+    birthCode: "L273",
+    residenceCity: "Torremaggiore",
+    residenceAddress: "Via Marconi 9",
+    deathDate: "2026-08-06",
+    deathTime: "02:15",
+    deathCity: "Foggia",
+    deathPlace: "Ospedali Riuniti",
+    transportDate: "2026-08-07",
+    transportTime: "07:45",
+    permitDate: "2026-08-06",
     // Left empty on purpose: the church is optional, and a practice without one
     // has to look right too.
     church: "",
-    destinationCity: "Napoli", cemetery: "Cimitero di Poggioreale",
+    destinationCity: "Napoli",
+    cemetery: "Cimitero di Poggioreale",
   },
 ];
 
@@ -214,7 +276,8 @@ function seedClients(): number {
 
   // The id is generated here for the same reason as in `seedList` below: this
   // script talks to SQLite directly, so the schema's `$defaultFn` never runs.
-  for (const client of CLIENTS) insert.run({ id: crypto.randomUUID(), ...client });
+  for (const client of CLIENTS)
+    insert.run({ id: crypto.randomUUID(), ...client });
   return CLIENTS.length;
 }
 
@@ -235,9 +298,9 @@ function seedList(
     shoulderHeight?: number;
   }[],
 ): string[] {
-  const ids = db
-    .prepare(`SELECT id FROM ${table} ORDER BY name`)
-    .all() as { id: string }[];
+  const ids = db.prepare(`SELECT id FROM ${table} ORDER BY name`).all() as {
+    id: string;
+  }[];
   if (ids.length) return ids.map((r) => r.id);
 
   const insert =
@@ -376,7 +439,8 @@ function seedPractices() {
   let inserted = 0;
   PEOPLE.forEach((p, index) => {
     const comune = comuneByCode(p.birthCode);
-    if (!comune) throw new Error(`Codice catastale sconosciuto: ${p.birthCode}`);
+    if (!comune)
+      throw new Error(`Codice catastale sconosciuto: ${p.birthCode}`);
     // A wrong code resolves to some other municipality rather than failing, and
     // the practice would open with a birth city nobody typed.
     if (comune.nome !== p.birthCity) {
@@ -392,7 +456,8 @@ function seedPractices() {
       cadastralCode: p.birthCode,
       isFemale: p.isFemale,
     });
-    if (!taxCode) throw new Error(`Codice fiscale non calcolabile: ${p.lastName}`);
+    if (!taxCode)
+      throw new Error(`Codice fiscale non calcolabile: ${p.lastName}`);
 
     const province = provinciaOf(p.destinationCity);
     if (!province) {

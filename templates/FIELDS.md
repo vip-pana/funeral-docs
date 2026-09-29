@@ -33,62 +33,62 @@ coincidano nei due sensi.
 
 ## I documenti
 
-| Doc | Modulo |
-|---|---|
-| 1 | Comunicazione di autorizzazione al trasporto |
-| 2 | B4 Autorizzazione al trasporto in altro comune |
-| 3 | Domanda di autorizzazione al trasporto |
-| 4 | B5 Modulo di chiusura feretro |
-| 5 | Riconoscimento di cadavere e suggellamento |
-| 6 | Allegato 2 — Richiesta di autorizzazione al trasporto (L.R. 34/2008) |
-| 7 | Allegato 3 — Autorizzazione al trasporto (L.R. 34/2008) |
-| 8 | B7 Richiesta di trasporto e cremazione (L.R. 34/2008 art. 12-13) |
-| 9 | B6 Autorizzazione al trasporto e cremazione (L.R. 34/2008 art. 12-13) |
-| 10 | Conferimento mandato di servizio funebre |
-| 11 | Istanza e rilascio di autorizzazione al trasporto di cadavere (L.R. 34/2008 art. 10bis) |
+| Doc | Modulo                                                                                  |
+| --- | --------------------------------------------------------------------------------------- |
+| 1   | Comunicazione di autorizzazione al trasporto                                            |
+| 2   | B4 Autorizzazione al trasporto in altro comune                                          |
+| 3   | Domanda di autorizzazione al trasporto                                                  |
+| 4   | B5 Modulo di chiusura feretro                                                           |
+| 5   | Riconoscimento di cadavere e suggellamento                                              |
+| 6   | Allegato 2 — Richiesta di autorizzazione al trasporto (L.R. 34/2008)                    |
+| 7   | Allegato 3 — Autorizzazione al trasporto (L.R. 34/2008)                                 |
+| 8   | B7 Richiesta di trasporto e cremazione (L.R. 34/2008 art. 12-13)                        |
+| 9   | B6 Autorizzazione al trasporto e cremazione (L.R. 34/2008 art. 12-13)                   |
+| 10  | Conferimento mandato di servizio funebre                                                |
+| 11  | Istanza e rilascio di autorizzazione al trasporto di cadavere (L.R. 34/2008 art. 10bis) |
 
 ## Defunto — anagrafica
 
-| Campo | Descrizione | Doc |
-|---|---|---|
-| `personFirstName` | Nome | 1,2,3,4,5,6,7,8,9,10,11 |
-| `personLastName` | Cognome | 1,2,3,4,5,6,7,8,9,10,11 |
-| `personBirthDate` | Data di nascita (gg/mm/aaaa) | 1,2,3,4,6,7,8,9,10,11 |
-| `personBirthCity` | Comune di nascita | 1,4,6,7,8,9,10,11 |
-| `personTaxCode` | Codice fiscale | 4,6,7,8,9,11 |
-| `personResidenceCity` | Comune di residenza | 4,6,7,8,9,11 |
-| `personResidenceAddress` | Via e numero di residenza | 4,6,7,8,9,11 |
-| `personCitizenship` | Cittadinanza (default "italiana") | 9,10,11 |
+| Campo                    | Descrizione                       | Doc                     |
+| ------------------------ | --------------------------------- | ----------------------- |
+| `personFirstName`        | Nome                              | 1,2,3,4,5,6,7,8,9,10,11 |
+| `personLastName`         | Cognome                           | 1,2,3,4,5,6,7,8,9,10,11 |
+| `personBirthDate`        | Data di nascita (gg/mm/aaaa)      | 1,2,3,4,6,7,8,9,10,11   |
+| `personBirthCity`        | Comune di nascita                 | 1,4,6,7,8,9,10,11       |
+| `personTaxCode`          | Codice fiscale                    | 4,6,7,8,9,11            |
+| `personResidenceCity`    | Comune di residenza               | 4,6,7,8,9,11            |
+| `personResidenceAddress` | Via e numero di residenza         | 4,6,7,8,9,11            |
+| `personCitizenship`      | Cittadinanza (default "italiana") | 9,10,11                 |
 
 ## Defunto — decesso
 
-| Campo | Descrizione | Doc |
-|---|---|---|
-| `personDeathDate` | Data del decesso (gg/mm/aaaa) | 2,3,4,5,6,7,8,9,10,11 |
-| `personDeathTime` | Ora del decesso (hh:mm) | 3,4,5,6,7,8,9,10,11 |
-| `personDeathCity` | Comune del decesso | 4,5,6,7,8,9,11 |
-| `personDeathPlace` | Luogo del decesso (es. ospedale) | 4,6,10 |
+| Campo              | Descrizione                      | Doc                   |
+| ------------------ | -------------------------------- | --------------------- |
+| `personDeathDate`  | Data del decesso (gg/mm/aaaa)    | 2,3,4,5,6,7,8,9,10,11 |
+| `personDeathTime`  | Ora del decesso (hh:mm)          | 3,4,5,6,7,8,9,10,11   |
+| `personDeathCity`  | Comune del decesso               | 4,5,6,7,8,9,11        |
+| `personDeathPlace` | Luogo del decesso (es. ospedale) | 4,6,10                |
 
 ## Trasporto
 
-| Campo | Descrizione | Doc |
-|---|---|---|
-| `transportDate` | Data del trasporto | 3,4,10,11 |
-| `transportTime` | Ora di partenza (hh:mm) | 3,4,10 |
-| `transportPermitDate` | Data dell'autorizzazione al trasporto | 4 |
-| `ownerVehiclePlate` | Targa dell'autofunebre scelta per il defunto | 2,3,4,7,8,9,11 |
-| `ownerVehicleName` | Tipo di autofunebre (es. "Mercedes Vito") | 11 |
-| `ownerDriverName` | Nome del conducente scelto per il defunto | 4,7,8,9,11 |
-| `funeralChurch` | Chiesa per la sosta / esequie | 4,10,11 |
-| `bearerNames` | Necrofori scelti per il defunto, separati da virgola | 7,8,9 |
+| Campo                 | Descrizione                                          | Doc            |
+| --------------------- | ---------------------------------------------------- | -------------- |
+| `transportDate`       | Data del trasporto                                   | 3,4,10,11      |
+| `transportTime`       | Ora di partenza (hh:mm)                              | 3,4,10         |
+| `transportPermitDate` | Data dell'autorizzazione al trasporto                | 4              |
+| `ownerVehiclePlate`   | Targa dell'autofunebre scelta per il defunto         | 2,3,4,7,8,9,11 |
+| `ownerVehicleName`    | Tipo di autofunebre (es. "Mercedes Vito")            | 11             |
+| `ownerDriverName`     | Nome del conducente scelto per il defunto            | 4,7,8,9,11     |
+| `funeralChurch`       | Chiesa per la sosta / esequie                        | 4,10,11        |
+| `bearerNames`         | Necrofori scelti per il defunto, separati da virgola | 7,8,9          |
 
 ## Destinazione
 
-| Campo | Descrizione | Doc |
-|---|---|---|
-| `destinationCity` | Comune di destinazione | 1,2,3,11 |
-| `destinationProvince` | Provincia di destinazione (sigla) | 2 |
-| `destinationCemetery` | Cimitero / forno crematorio | 4,6,7,10 |
+| Campo                 | Descrizione                       | Doc      |
+| --------------------- | --------------------------------- | -------- |
+| `destinationCity`     | Comune di destinazione            | 1,2,3,11 |
+| `destinationProvince` | Provincia di destinazione (sigla) | 2        |
+| `destinationCemetery` | Cimitero / forno crematorio       | 4,6,7,10 |
 
 ## Cremazione — solo documenti 8 e 9
 
@@ -100,13 +100,13 @@ coincidano nei due sensi.
 > Affidamento personale e dispersione restano righe con `____` da barrare e
 > riempire a mano, come `Prot. n. ____`.
 
-| Campo | Descrizione | Doc |
-|---|---|---|
-| `crematoryCity` | Comune del forno crematorio | 8,9 |
-| `funeralStopCity` | Comune della sosta per le esequie | 8,9,11 |
-| `ashesCity` | Comune nel cui cimitero vengono tumulate le ceneri | 8,9 |
-| `cremationConsentRelative` | Chi ha reso la dichiarazione di volonta', preposizione inclusa (es. "dalla moglie") | 8 |
-| `burialPermitDate` | Data del permesso di seppellimento | 8 |
+| Campo                      | Descrizione                                                                         | Doc    |
+| -------------------------- | ----------------------------------------------------------------------------------- | ------ |
+| `crematoryCity`            | Comune del forno crematorio                                                         | 8,9    |
+| `funeralStopCity`          | Comune della sosta per le esequie                                                   | 8,9,11 |
+| `ashesCity`                | Comune nel cui cimitero vengono tumulate le ceneri                                  | 8,9    |
+| `cremationConsentRelative` | Chi ha reso la dichiarazione di volonta', preposizione inclusa (es. "dalla moglie") | 8      |
+| `burialPermitDate`         | Data del permesso di seppellimento                                                  | 8      |
 
 ## Mandante — solo documento 10
 
@@ -115,28 +115,28 @@ coincidano nei due sensi.
 > `practices` e non in `clients`. Tutto facoltativo: chi non stampa il
 > documento 10 non deve essere bloccato al salvataggio.
 
-| Campo | Descrizione | Doc |
-|---|---|---|
-| `mandateFirstName` | Nome | 10 |
-| `mandateLastName` | Cognome | 10 |
-| `mandateRelationship` | In qualita' di (es. "figlio", "coniuge") | 10 |
-| `mandateBirthDate` | Data di nascita | 10 |
-| `mandateBirthCity` | Comune di nascita | 10 |
-| `mandateResidenceCity` | Comune di residenza | 10 |
-| `mandatePhone` | Recapito telefonico | 10 |
-| `mandateTaxCode` | Codice fiscale | 10 |
-| `mandateIdType` | Tipo di documento | 10 |
-| `mandateIdNumber` | Numero del documento | 10 |
+| Campo                  | Descrizione                              | Doc |
+| ---------------------- | ---------------------------------------- | --- |
+| `mandateFirstName`     | Nome                                     | 10  |
+| `mandateLastName`      | Cognome                                  | 10  |
+| `mandateRelationship`  | In qualita' di (es. "figlio", "coniuge") | 10  |
+| `mandateBirthDate`     | Data di nascita                          | 10  |
+| `mandateBirthCity`     | Comune di nascita                        | 10  |
+| `mandateResidenceCity` | Comune di residenza                      | 10  |
+| `mandatePhone`         | Recapito telefonico                      | 10  |
+| `mandateTaxCode`       | Codice fiscale                           | 10  |
+| `mandateIdType`        | Tipo di documento                        | 10  |
+| `mandateIdNumber`      | Numero del documento                     | 10  |
 
 ## Defunto — solo documento 10
 
-| Campo | Descrizione | Doc |
-|---|---|---|
-| `personFatherName` | Paternita' (facoltativo) | 10 |
-| `personMotherName` | Maternita' (facoltativo) | 10 |
-| `personProfession` | Professione (facoltativo) | 10 |
-| `personIdType` | Tipo di documento, preimpostato a "Carta d'identita'" | 10 |
-| `personIdNumber` | Numero del documento | 10 |
+| Campo              | Descrizione                                           | Doc |
+| ------------------ | ----------------------------------------------------- | --- |
+| `personFatherName` | Paternita' (facoltativo)                              | 10  |
+| `personMotherName` | Maternita' (facoltativo)                              | 10  |
+| `personProfession` | Professione (facoltativo)                             | 10  |
+| `personIdType`     | Tipo di documento, preimpostato a "Carta d'identita'" | 10  |
+| `personIdNumber`   | Numero del documento                                  | 10  |
 
 ## Stato civile e destinazione della salma — solo documento 10
 
@@ -155,42 +155,42 @@ coincidano nei due sensi.
 > stamperebbe il nome del coniuge su tutte e tre le righe, sotto caselle non
 > spuntate.
 
-| Campo | Descrizione | Doc |
-|---|---|---|
-| `maritalSingleBox` | Casella celibe/nubile | 10 |
-| `maritalMarriedBox` | Casella coniugato/a | 10 |
-| `maritalSeparatedBox` | Casella separato/a | 10 |
-| `maritalWidowedBox` | Casella vedovo/a | 10 |
-| `marriedSpouseName` | Coniuge, ramo "coniugato/a" | 10 |
-| `marriedSpouseBirthDate` | Data di nascita del coniuge | 10 |
-| `marriedSpouseBirthCity` | Comune di nascita del coniuge | 10 |
-| `marriedSpouseResidenceCity` | Comune di residenza del coniuge | 10 |
-| `marriageDate` | Data del matrimonio | 10 |
-| `separatedSpouseName` | Coniuge, ramo "separato/a" | 10 |
-| `separatedSpouseBirthDate` | Data di nascita del coniuge separato | 10 |
-| `separatedSpouseBirthCity` | Comune di nascita del coniuge separato | 10 |
-| `separatedSpouseResidenceCity` | Comune di residenza del coniuge separato | 10 |
-| `separationDate` | Data della separazione | 10 |
-| `widowedSpouseName` | Coniuge, ramo "vedovo/a" | 10 |
-| `widowedSpouseDeathDate` | Data del decesso del coniuge | 10 |
-| `widowedSpouseDeathCity` | Comune del decesso del coniuge | 10 |
-| `destBuriedBox` | Casella inumata | 10 |
-| `destEntombedBox` | Casella tumulata in tomba esistente | 10 |
-| `destEntombedNewBox` | Casella tumulata in sepoltura da prenotare | 10 |
-| `destCrematedBox` | Casella cremata | 10 |
-| `concessionType` | Tipo di concessione (tomba esistente) | 10 |
-| `concessionNumber` | Numero della concessione | 10 |
-| `crematoryAra` | Ara crematoria (salma cremata) | 10 |
+| Campo                          | Descrizione                                | Doc |
+| ------------------------------ | ------------------------------------------ | --- |
+| `maritalSingleBox`             | Casella celibe/nubile                      | 10  |
+| `maritalMarriedBox`            | Casella coniugato/a                        | 10  |
+| `maritalSeparatedBox`          | Casella separato/a                         | 10  |
+| `maritalWidowedBox`            | Casella vedovo/a                           | 10  |
+| `marriedSpouseName`            | Coniuge, ramo "coniugato/a"                | 10  |
+| `marriedSpouseBirthDate`       | Data di nascita del coniuge                | 10  |
+| `marriedSpouseBirthCity`       | Comune di nascita del coniuge              | 10  |
+| `marriedSpouseResidenceCity`   | Comune di residenza del coniuge            | 10  |
+| `marriageDate`                 | Data del matrimonio                        | 10  |
+| `separatedSpouseName`          | Coniuge, ramo "separato/a"                 | 10  |
+| `separatedSpouseBirthDate`     | Data di nascita del coniuge separato       | 10  |
+| `separatedSpouseBirthCity`     | Comune di nascita del coniuge separato     | 10  |
+| `separatedSpouseResidenceCity` | Comune di residenza del coniuge separato   | 10  |
+| `separationDate`               | Data della separazione                     | 10  |
+| `widowedSpouseName`            | Coniuge, ramo "vedovo/a"                   | 10  |
+| `widowedSpouseDeathDate`       | Data del decesso del coniuge               | 10  |
+| `widowedSpouseDeathCity`       | Comune del decesso del coniuge             | 10  |
+| `destBuriedBox`                | Casella inumata                            | 10  |
+| `destEntombedBox`              | Casella tumulata in tomba esistente        | 10  |
+| `destEntombedNewBox`           | Casella tumulata in sepoltura da prenotare | 10  |
+| `destCrematedBox`              | Casella cremata                            | 10  |
+| `concessionType`               | Tipo di concessione (tomba esistente)      | 10  |
+| `concessionNumber`             | Numero della concessione                   | 10  |
+| `crematoryAra`                 | Ara crematoria (salma cremata)             | 10  |
 
 ## Trasporto — solo documento 10
 
 > Gli altri dati del percorso (data, ora di partenza, chiesa, cimitero) sono
 > quelli che usano gia' gli altri documenti.
 
-| Campo | Descrizione | Doc |
-|---|---|---|
-| `transportDeparturePlace` | Luogo di partenza del trasporto | 10 |
-| `funeralStopTime` | Ora della sosta per le esequie | 10 |
+| Campo                     | Descrizione                     | Doc |
+| ------------------------- | ------------------------------- | --- |
+| `transportDeparturePlace` | Luogo di partenza del trasporto | 10  |
+| `funeralStopTime`         | Ora della sosta per le esequie  | 10  |
 
 ## Dichiarante e impresa — dalla scheda del cliente
 
@@ -210,26 +210,26 @@ coincidano nei due sensi.
 > erano stati registrati perche' l'ufficio li avesse a portata di mano e non
 > raggiungevano nessun documento finche' non e' arrivato l'11.
 
-| Campo | Descrizione | Doc |
-|---|---|---|
-| `ownerFirstName` | Nome del dichiarante | 2,3,4,5,6,7,8,9,11 |
-| `ownerMiddleName` | Secondo nome / iniziale | 2,3,4,5,6,7,8,9 |
-| `ownerLastName` | Cognome del dichiarante | 2,3,4,5,6,7,8,9,11 |
-| `ownerCompanyName` | Ragione sociale | 4,7,8,9,10,11 |
-| `ownerCompanyCity` | Comune sede della ditta | 4,6,7,8,9,11 |
-| `ownerCity` | Comune che rilascia l'autorizzazione | 3,5,8,9 |
-| `ownerCityName` | Comune di partenza del trasporto | 2,8,9,10 |
-| `ownerRequestDate` | Data di presentazione della domanda | 2 |
-| `ownerBirthDate` | Data di nascita del dichiarante | 6,7,8,9,11 |
-| `ownerBirthCity` | Comune di nascita del dichiarante | 6,7,8,9,11 |
-| `ownerAddress` | Via e numero di residenza del dichiarante | 6,7,9,11 |
-| `ownerPostalCode` | CAP del dichiarante | 6,7,8 |
-| `ownerIdType` | Tipo di documento (es. CARTA D'IDENTITA) | 6,7,8,11 |
-| `ownerIdNumber` | Numero del documento | 6,7,8,11 |
-| `ownerIdIssuer` | Ente che ha rilasciato il documento | 6,7,8,11 |
-| `ownerIdDate` | Data di rilascio del documento | 6,7,8,11 |
-| `ownerCitizenship` | Cittadinanza del dichiarante (default "italiana") | 9 |
-| `ownerCompanyAddress` | Via e numero della sede della ditta | 11 |
+| Campo                 | Descrizione                                       | Doc                |
+| --------------------- | ------------------------------------------------- | ------------------ |
+| `ownerFirstName`      | Nome del dichiarante                              | 2,3,4,5,6,7,8,9,11 |
+| `ownerMiddleName`     | Secondo nome / iniziale                           | 2,3,4,5,6,7,8,9    |
+| `ownerLastName`       | Cognome del dichiarante                           | 2,3,4,5,6,7,8,9,11 |
+| `ownerCompanyName`    | Ragione sociale                                   | 4,7,8,9,10,11      |
+| `ownerCompanyCity`    | Comune sede della ditta                           | 4,6,7,8,9,11       |
+| `ownerCity`           | Comune che rilascia l'autorizzazione              | 3,5,8,9            |
+| `ownerCityName`       | Comune di partenza del trasporto                  | 2,8,9,10           |
+| `ownerRequestDate`    | Data di presentazione della domanda               | 2                  |
+| `ownerBirthDate`      | Data di nascita del dichiarante                   | 6,7,8,9,11         |
+| `ownerBirthCity`      | Comune di nascita del dichiarante                 | 6,7,8,9,11         |
+| `ownerAddress`        | Via e numero di residenza del dichiarante         | 6,7,9,11           |
+| `ownerPostalCode`     | CAP del dichiarante                               | 6,7,8              |
+| `ownerIdType`         | Tipo di documento (es. CARTA D'IDENTITA)          | 6,7,8,11           |
+| `ownerIdNumber`       | Numero del documento                              | 6,7,8,11           |
+| `ownerIdIssuer`       | Ente che ha rilasciato il documento               | 6,7,8,11           |
+| `ownerIdDate`         | Data di rilascio del documento                    | 6,7,8,11           |
+| `ownerCitizenship`    | Cittadinanza del dichiarante (default "italiana") | 9                  |
+| `ownerCompanyAddress` | Via e numero della sede della ditta               | 11                 |
 
 ## Sistema — ricavati, mai salvati
 
@@ -237,20 +237,20 @@ coincidano nei due sensi.
 > ISTAT (`provinciaOf`), cosi' le due non possono contraddirsi. Per un comune non
 > in elenco o condiviso da due province il documento stampa parentesi vuote.
 
-| Campo | Descrizione | Doc |
-|---|---|---|
-| `todayDate` | Data di compilazione | 1,2,3,4,5,6,7,8,9,10,11 |
-| `personBirthProvince` | Provincia di nascita del defunto | 6,7,8,9 |
-| `personResidenceProvince` | Provincia di residenza del defunto | 8,9 |
-| `personDeathProvince` | Provincia del decesso | 8,9 |
-| `crematoryProvince` | Provincia del forno crematorio | 9 |
-| `funeralStopProvince` | Provincia della sosta per le esequie | 8,9 |
-| `ashesProvince` | Provincia di destinazione delle ceneri | 8,9 |
-| `ownerBirthProvince` | Provincia di nascita del dichiarante | 8,9 |
-| `ownerCompanyProvince` | Provincia della sede della ditta | 8,9 |
-| `personAge` | Eta' del defunto, anni compiuti alla data del decesso | 10 |
-| `personDeathCityUpper` | Comune del decesso in maiuscolo, per l'intestazione | 11 |
-| `ownerCityUpper` | Comune che rilascia l'autorizzazione in maiuscolo, per l'intestazione | 8,9 |
+| Campo                     | Descrizione                                                           | Doc                     |
+| ------------------------- | --------------------------------------------------------------------- | ----------------------- |
+| `todayDate`               | Data di compilazione                                                  | 1,2,3,4,5,6,7,8,9,10,11 |
+| `personBirthProvince`     | Provincia di nascita del defunto                                      | 6,7,8,9                 |
+| `personResidenceProvince` | Provincia di residenza del defunto                                    | 8,9                     |
+| `personDeathProvince`     | Provincia del decesso                                                 | 8,9                     |
+| `crematoryProvince`       | Provincia del forno crematorio                                        | 9                       |
+| `funeralStopProvince`     | Provincia della sosta per le esequie                                  | 8,9                     |
+| `ashesProvince`           | Provincia di destinazione delle ceneri                                | 8,9                     |
+| `ownerBirthProvince`      | Provincia di nascita del dichiarante                                  | 8,9                     |
+| `ownerCompanyProvince`    | Provincia della sede della ditta                                      | 8,9                     |
+| `personAge`               | Eta' del defunto, anni compiuti alla data del decesso                 | 10                      |
+| `personDeathCityUpper`    | Comune del decesso in maiuscolo, per l'intestazione                   | 11                      |
+| `ownerCityUpper`          | Comune che rilascia l'autorizzazione in maiuscolo, per l'intestazione | 8,9                     |
 
 ---
 
@@ -258,15 +258,15 @@ coincidano nei due sensi.
 
 **Refusi nei nomi**
 
-| Prima | Dopo | Dove |
-|---|---|---|
-| `personBirthdate` | `personBirthDate` | 4 |
-| `personRecidencyCity` | `personResidenceCity` | 4 |
-| `personName` / `personSurname` | `personFirstName` / `personLastName` | 1 |
-| `OwnerBirthCity` | `ownerCity` | 3 |
-| `ownerCarTarga` | `ownerVehiclePlate` | 2,3,4 |
-| `personCimiteryDestination` | `destinationCemetery` | 4 |
-| `personBirthDate dd/mm/yyyy` | `personBirthDate` | 1 |
+| Prima                          | Dopo                                 | Dove  |
+| ------------------------------ | ------------------------------------ | ----- |
+| `personBirthdate`              | `personBirthDate`                    | 4     |
+| `personRecidencyCity`          | `personResidenceCity`                | 4     |
+| `personName` / `personSurname` | `personFirstName` / `personLastName` | 1     |
+| `OwnerBirthCity`               | `ownerCity`                          | 3     |
+| `ownerCarTarga`                | `ownerVehiclePlate`                  | 2,3,4 |
+| `personCimiteryDestination`    | `destinationCemetery`                | 4     |
+| `personBirthDate dd/mm/yyyy`   | `personBirthDate`                    | 1     |
 
 **Placeholder rotti nell'XML**
 
@@ -281,14 +281,14 @@ con la stessa formattazione prima di sostituire.
 
 **Campi semanticamente sbagliati**
 
-| Doc | Prima | Dopo | Perché |
-|---|---|---|---|
-| 5 | `deceduto ... il giorno [personBirthDate]` | `{personDeathDate}` | è la data del decesso |
-| 3 | `deceduto alle ore [personDeathDate]` | `{personDeathTime}` | è un'ora |
-| 4 | `[personTransportationDateTime]` | `{transportTime}` | è un'ora |
-| 2 | `[OwnerBirthDate]` (data domanda) | `{ownerRequestDate}` | non è una data di nascita |
-| 1,2,3 | destinazione = `[personBirthCity]` | `{destinationCity}` | la destinazione può differire dal comune di nascita |
-| 2 | data fissa `San Severo 03/07/2026` | `{todayDate}` | non era un placeholder: allineata agli altri 4 |
+| Doc   | Prima                                      | Dopo                 | Perché                                              |
+| ----- | ------------------------------------------ | -------------------- | --------------------------------------------------- |
+| 5     | `deceduto ... il giorno [personBirthDate]` | `{personDeathDate}`  | è la data del decesso                               |
+| 3     | `deceduto alle ore [personDeathDate]`      | `{personDeathTime}`  | è un'ora                                            |
+| 4     | `[personTransportationDateTime]`           | `{transportTime}`    | è un'ora                                            |
+| 2     | `[OwnerBirthDate]` (data domanda)          | `{ownerRequestDate}` | non è una data di nascita                           |
+| 1,2,3 | destinazione = `[personBirthCity]`         | `{destinationCity}`  | la destinazione può differire dal comune di nascita |
+| 2     | data fissa `San Severo 03/07/2026`         | `{todayDate}`        | non era un placeholder: allineata agli altri 4      |
 
 **Nomi tenuti separati per scelta**: `ownerCity`, `ownerCityName`, `ownerCompanyCity`
 si riferiscono tutti a San Severo nell'uso attuale, ma restano campi distinti.
