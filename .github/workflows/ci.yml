@@ -47,10 +47,8 @@ jobs:
     env:
       # Job-level env has no `runner` context, so no RUNNER_TEMP here.
       DATABASE_PATH: /tmp/funeral-e2e.db
-      SESSION_SECRET: e2e-only-session-secret-not-used-anywhere-else
       COOKIE_SECURE: "false"
       BASE_URL: http://localhost:3000
-      TEST_PASSWORD: sviluppo123
     steps:
       - uses: actions/checkout@v7
 
@@ -65,11 +63,18 @@ jobs:
         env:
           HUSKY: 0
 
-      # As is, `$` and all: Next only expands `$xxx` when it loads a .env file,
-      # and the runner has none.
-      - name: Password hash
+      # Made up on each run, so the workflow holds no credential at all. The
+      # hash goes in as is, `$` and all: Next only expands `$xxx` when it loads
+      # a .env file, and the runner has none.
+      - name: Test credentials
         run: |
-          node -e 'console.log("AUTH_PASSWORD_HASH=" + require("bcryptjs").hashSync(process.env.TEST_PASSWORD, 12))' >> "$GITHUB_ENV"
+          password=$(openssl rand -hex 16)
+          echo "::add-mask::$password"
+          {
+            echo "TEST_PASSWORD=$password"
+            echo "SESSION_SECRET=$(openssl rand -base64 32)"
+            echo "AUTH_PASSWORD_HASH=$(TEST_PASSWORD=$password node -e 'console.log(require("bcryptjs").hashSync(process.env.TEST_PASSWORD, 12))')"
+          } >> "$GITHUB_ENV"
 
       # The seed gives the suites a client to pick: without one, the new
       # deceased form has nothing to fill in.
