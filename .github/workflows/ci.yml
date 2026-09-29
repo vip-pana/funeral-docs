@@ -65,11 +65,11 @@ jobs:
         env:
           HUSKY: 0
 
-      # Next expands `$xxx` even in variables from the environment, so every
-      # `$` of the hash goes in escaped.
+      # As is, `$` and all: Next only expands `$xxx` when it loads a .env file,
+      # and the runner has none.
       - name: Password hash
         run: |
-          node -e 'console.log("AUTH_PASSWORD_HASH=" + require("bcryptjs").hashSync(process.env.TEST_PASSWORD, 12).replaceAll("$", "\\$"))' >> "$GITHUB_ENV"
+          node -e 'console.log("AUTH_PASSWORD_HASH=" + require("bcryptjs").hashSync(process.env.TEST_PASSWORD, 12))' >> "$GITHUB_ENV"
 
       # The seed gives the suites a client to pick: without one, the new
       # deceased form has nothing to fill in.
