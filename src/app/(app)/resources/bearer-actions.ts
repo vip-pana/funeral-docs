@@ -1,6 +1,6 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { db, schema } from "@/lib/db";
@@ -52,7 +52,15 @@ export async function addBearer(
     };
   }
 
-  await db.insert(schema.bearers).values(parsed.data);
+  // Last on the calendar: the order there is set by hand.
+  const [{ last }] = await db
+    .select({
+      last: sql<number>`coalesce(max(${schema.bearers.position}), -1)`,
+    })
+    .from(schema.bearers);
+  await db
+    .insert(schema.bearers)
+    .values({ ...parsed.data, position: last + 1 });
 
   revalidateBearerViews();
   return { ok: true, message: "Necroforo aggiunto." };

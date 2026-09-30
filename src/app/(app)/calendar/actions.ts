@@ -1,10 +1,10 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import type { DayMark } from "@/lib/calendar";
+import { type DayMark, moveOnto } from "@/lib/calendar";
 import { db, schema } from "@/lib/db";
 import { isoDate } from "@/lib/validation";
 
@@ -56,6 +56,41 @@ export async function setDay(
   } catch {
     // A bearer deleted meanwhile fails the foreign key.
     return { error: "Impossibile salvare il giorno." };
+  }
+
+  revalidatePath("/calendar");
+  return {};
+}
+
+/**
+ * Moves a bearer to where `overId` is on the calendar, shifting the others.
+ *
+ * The move rather than the whole list: the order is re-read here, so a page
+ * opened before someone else moved a row, or added a bearer, does not
+ * overwrite what they did.
+ */
+export async function moveBearer(
+  id: string,
+  overId: string,
+): Promise<{ error?: string }> {
+  try {
+    // better-sqlite3 is synchronous, and so is its transaction callback.
+    db.transaction((tx) => {
+      const rows = tx
+        .select({ id: schema.bearers.id })
+        .from(schema.bearers)
+        .orderBy(asc(schema.bearers.position), asc(schema.bearers.name))
+        .all();
+      moveOnto(rows, id, overId).forEach((row, position) =>
+        tx
+          .update(schema.bearers)
+          .set({ position })
+          .where(eq(schema.bearers.id, row.id))
+          .run(),
+      );
+    });
+  } catch {
+    return { error: "Impossibile salvare l'ordine." };
   }
 
   revalidatePath("/calendar");

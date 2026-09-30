@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import {
   bearerLabel,
-  byShoulderHeight,
   dayMarks,
   daysOfMonth,
   easterSunday,
@@ -10,6 +9,7 @@ import {
   markLabel,
   markSign,
   monthSummary,
+  moveOnto,
   monthLabel,
   todayIso,
   toMark,
@@ -62,14 +62,22 @@ describe("calendar helpers", () => {
     expect(bearerLabel({ name: "Rossi", shoulderHeight: null })).toBe("ROSSI");
   });
 
-  it("sorts tallest first and those without a height last", () => {
-    const rows = [
-      { name: "B", shoulderHeight: null },
-      { name: "C", shoulderHeight: 150 },
-      { name: "A", shoulderHeight: 158 },
-      { name: "D", shoulderHeight: 150 },
-    ].sort(byShoulderHeight);
-    expect(rows.map((r) => r.name)).toEqual(["A", "C", "D", "B"]);
+  describe("moveOnto", () => {
+    const rows = ["a", "b", "c", "d"].map((id) => ({ id }));
+    const ids = (r: { id: string }[]) => r.map((x) => x.id).join("");
+
+    it("moves a row up, onto the one it is dropped on", () => {
+      expect(ids(moveOnto(rows, "d", "b"))).toBe("adbc");
+    });
+
+    it("moves a row down the same way", () => {
+      expect(ids(moveOnto(rows, "a", "c"))).toBe("bcad");
+    });
+
+    it("leaves the list alone for an unknown id", () => {
+      expect(moveOnto(rows, "z", "a")).toBe(rows);
+      expect(moveOnto(rows, "a", "z")).toBe(rows);
+    });
   });
 
   it("scores ferie by notice and kind of day", () => {

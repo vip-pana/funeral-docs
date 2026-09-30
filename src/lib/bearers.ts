@@ -7,6 +7,14 @@ export async function listBearers(): Promise<Bearer[]> {
   return db.select().from(schema.bearers).orderBy(asc(schema.bearers.name));
 }
 
+/** In the order the calendar shows them, set by dragging the rows. */
+export async function listBearersByPosition(): Promise<Bearer[]> {
+  return db
+    .select()
+    .from(schema.bearers)
+    .orderBy(asc(schema.bearers.position), asc(schema.bearers.name));
+}
+
 /**
  * The drivers are the bearers flagged as such: anyone on the staff can drive the
  * hearse, and the flag says who actually does.

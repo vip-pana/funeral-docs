@@ -145,6 +145,11 @@ export const bearers = sqliteTable("bearers", {
   hasContract: integer("has_contract", { mode: "boolean" })
     .notNull()
     .default(false),
+  /**
+   * Where the row sits on the calendar, dragged into place by hand. New
+   * bearers go last.
+   */
+  position: integer("position").notNull().default(0),
   createdAt: text("created_at")
     .notNull()
     .default(sql`(datetime('now'))`),

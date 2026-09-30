@@ -1,6 +1,33 @@
 "use client";
 
-import { type CSSProperties, useEffect, useRef, useState } from "react";
+import {
+  closestCenter,
+  DndContext,
+  type DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  restrictToParentElement,
+  restrictToVerticalAxis,
+} from "@dnd-kit/modifiers";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { GripVerticalIcon } from "lucide-react";
+import {
+  type CSSProperties,
+  type ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import {
   Popover,
@@ -31,6 +58,9 @@ export const key = (bearerId: string, date: string) => `${bearerId}|${date}`;
  *
  * Narrower than the month, the days scroll sideways under the name and the
  * total, which stay put.
+ *
+ * The rows are dragged into order by the grip beside the name, and only by
+ * that: the cells stay free to open their menu.
  */
 export function CalendarGrid({
   month,
@@ -39,6 +69,7 @@ export function CalendarGrid({
   marks,
   today,
   onChoose,
+  onReorder,
 }: {
   month: string;
   bearers: Bearer[];
@@ -46,6 +77,7 @@ export function CalendarGrid({
   marks: Map<string, DayMark>;
   today: string;
   onChoose: (bearerId: string, date: string, mark: DayMark | null) => void;
+  onReorder: (bearerId: string, overId: string) => void;
 }) {
   // One menu open at a time, so the grid tracks which cell has it.
   const [openCell, setOpenCell] = useState<string | null>(null);
@@ -60,144 +92,235 @@ export function CalendarGrid({
     box.scrollLeft = cell.offsetLeft - box.clientWidth / 2;
   }, []);
 
+  const sensors = useSensors(
+    // A few pixels before a drag starts, so a tap on the grip is not one.
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+  const ids = bearers.map((b) => b.id);
+
+  function drop({ active, over }: DragEndEvent) {
+    if (!over || active.id === over.id) return;
+    onReorder(String(active.id), String(over.id));
+  }
+
   function choose(bearerId: string, date: string, mark: DayMark | null) {
     setOpenCell(null);
     onChoose(bearerId, date, mark);
   }
 
   return (
-    <div>
-      <div
-        ref={scroller}
-        className="overflow-x-auto overscroll-x-contain print:overflow-visible"
-      >
-        <table
-          className="calendar w-full min-w-[58rem] table-fixed text-xs print:min-w-0"
-          // Print stretches the rows to fill the sheet, so it needs the count.
-          style={{ "--calendar-rows": bearers.length } as CSSProperties}
+    // Outside the table: it renders a hidden <div> for screen readers, which a
+    // <table> cannot hold. A fixed id, because the generated one differs
+    // between server and client and breaks hydration.
+    <DndContext
+      id="calendar-order"
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+      onDragEnd={drop}
+    >
+      <div>
+        <div
+          ref={scroller}
+          className="overflow-x-auto overscroll-x-contain print:overflow-visible"
         >
-          <colgroup>
-            <col className="w-36 print:w-48" />
-            <col className="w-10" />
-            {calendar.map((d) => (
-              <col key={d.day} />
-            ))}
-          </colgroup>
-          <thead>
-            <tr className="calendar-head">
-              <th className="calendar-sunday sticky left-0 z-10 bg-inherit px-1.5 py-1.5 text-left font-semibold print:static">
-                {monthLabel(month)}
-              </th>
-              <th
-                className="sticky left-36 z-10 bg-inherit py-1.5 text-center font-semibold print:static"
-                title="Servizi del mese"
-              >
-                Tot.
-              </th>
+          <table
+            className="calendar w-full min-w-[58rem] table-fixed text-xs print:min-w-0"
+            // Print stretches the rows to fill the sheet, so it needs the count.
+            style={{ "--calendar-rows": bearers.length } as CSSProperties}
+          >
+            <colgroup>
+              <col className="w-36 print:w-48" />
+              <col className="w-10" />
               {calendar.map((d) => (
-                <th
-                  key={d.day}
-                  data-today={d.date === today || undefined}
-                  className={cn(
-                    "py-1.5 text-center font-semibold",
-                    d.isHoliday && "calendar-sunday",
-                    d.date === today &&
-                      "underline decoration-2 underline-offset-2 print:no-underline",
-                  )}
-                >
-                  {d.day}
-                </th>
+                <col key={d.day} />
               ))}
-            </tr>
-          </thead>
-          <tbody>
-            {bearers.map((b, i) => {
-              const contract = b.hasContract;
-              const rowMarks = calendar.map((d) =>
-                marks.get(key(b.id, d.date)),
-              );
-              const totals = runningTotals(rowMarks, calendar, contract);
-              return (
-                <tr
-                  key={b.id}
-                  className={i % 2 ? "calendar-row-even" : "calendar-row-odd"}
+            </colgroup>
+            <thead>
+              <tr className="calendar-head">
+                <th className="calendar-sunday sticky left-0 z-10 bg-inherit px-1.5 py-1.5 text-left font-semibold print:static">
+                  {monthLabel(month)}
+                </th>
+                <th
+                  className="sticky left-36 z-10 bg-inherit py-1.5 text-center font-semibold print:static"
+                  title="Servizi del mese"
                 >
+                  Tot.
+                </th>
+                {calendar.map((d) => (
                   <th
-                    scope="row"
-                    className="sticky left-0 z-10 truncate bg-inherit px-1.5 py-1 text-left font-semibold print:static"
+                    key={d.day}
+                    data-today={d.date === today || undefined}
+                    className={cn(
+                      "py-1.5 text-center font-semibold",
+                      d.isHoliday && "calendar-sunday",
+                      d.date === today &&
+                        "underline decoration-2 underline-offset-2 print:no-underline",
+                    )}
                   >
-                    {bearerLabel(b)}
+                    {d.day}
                   </th>
-                  <td className="sticky left-36 z-10 bg-inherit text-center font-bold print:static">
-                    {totals.at(-1) || ""}
-                  </td>
-                  {calendar.map((d, j) => {
-                    const k = key(b.id, d.date);
-                    const mark = rowMarks[j];
-                    // No points to show in the corner of a contract's ferie.
-                    const showTotal = mark && !(contract && mark.code === "F");
-                    const day = DAY_FORMAT.format(utc(d.date));
-                    return (
-                      <td
-                        key={d.day}
-                        className={cn("p-0", d.isHoliday && "calendar-holiday")}
-                      >
-                        <Popover
-                          open={openCell === k}
-                          onOpenChange={(open) => setOpenCell(open ? k : null)}
-                        >
-                          <PopoverTrigger asChild>
-                            <button
-                              type="button"
-                              aria-label={`${b.name}, ${day}: ${mark ? markLabel(mark, contract).toLowerCase() : "nulla segnato"}`}
-                              className="calendar-cell relative block h-7 w-full font-bold whitespace-nowrap hover:bg-foreground/10"
-                            >
-                              {mark
-                                ? markSign(mark, d.isHoliday, contract)
-                                : ""}
-                              {/* The month's total so far, in the corner. */}
-                              {showTotal && (
-                                <span className="calendar-corner absolute right-0.5 bottom-0 text-[8px] leading-none font-medium">
-                                  {totals[j]}
-                                </span>
-                              )}
-                            </button>
-                          </PopoverTrigger>
-                          <PopoverContent
-                            className="w-52 gap-0 p-1"
-                            align="start"
+                ))}
+              </tr>
+            </thead>
+            <SortableContext items={ids} strategy={verticalListSortingStrategy}>
+              <tbody>
+                {bearers.map((b, i) => {
+                  const contract = b.hasContract;
+                  const rowMarks = calendar.map((d) =>
+                    marks.get(key(b.id, d.date)),
+                  );
+                  const totals = runningTotals(rowMarks, calendar, contract);
+                  return (
+                    <SortableRow
+                      key={b.id}
+                      id={b.id}
+                      className={
+                        i % 2 ? "calendar-row-even" : "calendar-row-odd"
+                      }
+                    >
+                      {(grip) => (
+                        <>
+                          <th
+                            scope="row"
+                            className="sticky left-0 z-10 bg-inherit py-1 pr-1.5 pl-0.5 text-left font-semibold print:static print:px-1.5"
                           >
-                            <p className="px-2 py-1 text-xs text-muted-foreground">
-                              {b.name}, {day}
-                            </p>
-                            <MarkOptions
-                              bearer={b}
-                              day={d}
-                              mark={mark}
-                              onPick={(m) => choose(b.id, d.date, m)}
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      </td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                            <div className="flex items-center gap-0.5">
+                              {grip(`Sposta ${b.name}`)}
+                              <span className="min-w-0 truncate">
+                                {bearerLabel(b)}
+                              </span>
+                            </div>
+                          </th>
+                          <td className="sticky left-36 z-10 bg-inherit text-center font-bold print:static">
+                            {totals.at(-1) || ""}
+                          </td>
+                          {calendar.map((d, j) => {
+                            const k = key(b.id, d.date);
+                            const mark = rowMarks[j];
+                            // No points to show in the corner of a contract's ferie.
+                            const showTotal =
+                              mark && !(contract && mark.code === "F");
+                            const day = DAY_FORMAT.format(utc(d.date));
+                            return (
+                              <td
+                                key={d.day}
+                                className={cn(
+                                  "p-0",
+                                  d.isHoliday && "calendar-holiday",
+                                )}
+                              >
+                                <Popover
+                                  open={openCell === k}
+                                  onOpenChange={(open) =>
+                                    setOpenCell(open ? k : null)
+                                  }
+                                >
+                                  <PopoverTrigger asChild>
+                                    <button
+                                      type="button"
+                                      aria-label={`${b.name}, ${day}: ${mark ? markLabel(mark, contract).toLowerCase() : "nulla segnato"}`}
+                                      className="calendar-cell relative block h-7 w-full font-bold whitespace-nowrap hover:bg-foreground/10"
+                                    >
+                                      {mark
+                                        ? markSign(mark, d.isHoliday, contract)
+                                        : ""}
+                                      {/* The month's total so far, in the corner. */}
+                                      {showTotal && (
+                                        <span className="calendar-corner absolute right-0.5 bottom-0 text-[8px] leading-none font-medium">
+                                          {totals[j]}
+                                        </span>
+                                      )}
+                                    </button>
+                                  </PopoverTrigger>
+                                  <PopoverContent
+                                    className="w-52 gap-0 p-1"
+                                    align="start"
+                                  >
+                                    <p className="px-2 py-1 text-xs text-muted-foreground">
+                                      {b.name}, {day}
+                                    </p>
+                                    <MarkOptions
+                                      bearer={b}
+                                      day={d}
+                                      mark={mark}
+                                      onPick={(m) => choose(b.id, d.date, m)}
+                                    />
+                                  </PopoverContent>
+                                </Popover>
+                              </td>
+                            );
+                          })}
+                        </>
+                      )}
+                    </SortableRow>
+                  );
+                })}
+              </tbody>
+            </SortableContext>
+          </table>
+        </div>
+        <p className="calendar-legend mt-1 flex flex-wrap gap-x-8 gap-y-0.5 border-t pt-1 text-[10px] font-medium uppercase">
+          <span>Ferie avviso 48 ore = F1 (festivo F4)</span>
+          <span>Ferie avviso 24 ore = F2 (festivo F8)</span>
+          <span>Necrofori con contratto: ferie = F, senza punti</span>
+          {DAY_MARKS.filter((m) => m.code === "L").map((m) => (
+            <span key={markLabel(m)}>
+              {markLabel(m)} = {markSign(m, false)}
+            </span>
+          ))}
+          <span>Servizi di domeniche e festivi non contano nel totale</span>
+        </p>
       </div>
-      <p className="calendar-legend mt-1 flex flex-wrap gap-x-8 gap-y-0.5 border-t pt-1 text-[10px] font-medium uppercase">
-        <span>Ferie avviso 48 ore = F1 (festivo F4)</span>
-        <span>Ferie avviso 24 ore = F2 (festivo F8)</span>
-        <span>Necrofori con contratto: ferie = F, senza punti</span>
-        {DAY_MARKS.filter((m) => m.code === "L").map((m) => (
-          <span key={markLabel(m)}>
-            {markLabel(m)} = {markSign(m, false)}
-          </span>
-        ))}
-        <span>Servizi di domeniche e festivi non contano nel totale</span>
-      </p>
-    </div>
+    </DndContext>
+  );
+}
+
+/**
+ * A calendar row that can be dragged. The grip is handed to the cells rather
+ * than put in the row itself, so the name cell decides where it goes.
+ */
+function SortableRow({
+  id,
+  className,
+  children,
+}: {
+  id: string;
+  className: string;
+  children: (grip: (label: string) => ReactNode) => ReactNode;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  return (
+    <tr
+      ref={setNodeRef}
+      data-bearer-row={id}
+      className={cn(className, isDragging && "relative z-20 opacity-80")}
+      style={{ transform: CSS.Translate.toString(transform), transition }}
+    >
+      {children((label) => (
+        <button
+          ref={setActivatorNodeRef}
+          type="button"
+          aria-label={label}
+          className="shrink-0 cursor-grab touch-none rounded text-muted-foreground hover:text-foreground active:cursor-grabbing print:hidden"
+          {...attributes}
+          {...listeners}
+        >
+          <GripVerticalIcon className="size-3.5" />
+        </button>
+      ))}
+    </tr>
   );
 }
