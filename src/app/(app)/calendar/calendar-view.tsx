@@ -6,6 +6,7 @@ import {
   ChevronRightIcon,
   Grid3x3Icon,
   UserIcon,
+  UsersRoundIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { startTransition, useOptimistic, useState } from "react";
@@ -192,6 +193,19 @@ export function CalendarView({
               </button>
             ))}
           </div>
+          <Button variant="outline" asChild>
+            {/* The day picked in the Giorno view, or today in this month.
+                The calendar as it is now goes along, for the way back. */}
+            <Link
+              href={`/calendar/estrazione?${new URLSearchParams({
+                date: `${month}-${String(day).padStart(2, "0")}`,
+                back: query({}),
+              })}`}
+            >
+              <UsersRoundIcon />
+              <span className="max-sm:sr-only">Estrai necrofori</span>
+            </Link>
+          </Button>
           <PrintButton />
         </div>
       </div>
