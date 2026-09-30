@@ -3,6 +3,10 @@ import { describe, expect, it } from "vitest";
 import {
   bearerLabel,
   dayMarks,
+  hidesTotal,
+  isTrial,
+  type DayMark,
+  halfDayPoints,
   daysOfMonth,
   easterSunday,
   holidayPoints,
@@ -13,6 +17,8 @@ import {
   monthLabel,
   todayIso,
   toMark,
+  withHalfDay,
+  withServices,
   weekdayIndex,
   parseMonth,
   runningTotals,
@@ -107,7 +113,8 @@ describe("calendar helpers", () => {
   });
 
   it("offers a contract a single ferie entry", () => {
-    expect(dayMarks(false)).toHaveLength(5);
+    // Two ferie, sick leave and three counts of services.
+    expect(dayMarks(false)).toHaveLength(6);
     const ferie = dayMarks(true).filter((m) => m.code === "F");
     expect(ferie).toEqual([{ code: "F", notice: 48 }]);
     // A day saved with 24 hours' notice still shows as that entry.
@@ -214,8 +221,322 @@ describe("calendar helpers", () => {
       holidayServices: 2,
       ferieDays: 1,
       feriePoints: 2,
+      restDays: 0,
+      sickDays: 0,
     });
     expect(monthSummary(marks, days, true).total).toBe(2);
     expect(monthSummary(marks, days).total).toBe(serviceTotal(marks, days));
+  });
+
+  describe("half a day of ferie", () => {
+    const days = daysOfMonth("2026-12");
+    // Wednesday the 9th is a working day, Tuesday the 8th a holiday.
+    const only = (day: number, mark: DayMark) =>
+      days.map((d) => (d.day === day ? mark : undefined));
+
+    it("is worth 1, 4 on a red day, nothing on a contract", () => {
+      expect(halfDayPoints(false)).toBe(1);
+      expect(halfDayPoints(true)).toBe(4);
+      expect(halfDayPoints(false, true)).toBe(0);
+      expect(halfDayPoints(true, true)).toBe(0);
+    });
+
+    it("adds up with the services of the other half", () => {
+      const h3 = only(9, { code: "H", kind: "F", half: "M", services: 3 });
+      const h1 = only(9, { code: "H", kind: "F", half: "P", services: 1 });
+      expect(serviceTotal(h3, days)).toBe(4);
+      expect(serviceTotal(h1, days)).toBe(2);
+      // On a contract only the services count.
+      expect(serviceTotal(h3, days, true)).toBe(3);
+    });
+
+    it("keeps its 4 on a red day, where the services do not count", () => {
+      const marks = only(8, { code: "H", kind: "F", half: "M", services: 2 });
+      expect(serviceTotal(marks, days)).toBe(4);
+      expect(monthSummary(marks, days)).toEqual({
+        total: 4,
+        services: 0,
+        holidayServices: 2,
+        ferieDays: 0.5,
+        feriePoints: 4,
+        restDays: 0,
+        sickDays: 0,
+      });
+    });
+
+    it("toggles the half, keeping the services", () => {
+      expect(withHalfDay(undefined, "F", "M")).toEqual({
+        code: "H",
+        kind: "F",
+        half: "M",
+        services: 0,
+      });
+      expect(withHalfDay({ code: "L", services: 2 }, "F", "P")).toEqual({
+        code: "H",
+        kind: "F",
+        half: "P",
+        services: 2,
+      });
+      // Tapped again: the half goes, the services stay.
+      expect(
+        withHalfDay({ code: "H", kind: "F", half: "P", services: 2 }, "F", "P"),
+      ).toEqual({
+        code: "L",
+        services: 2,
+      });
+      expect(
+        withHalfDay({ code: "H", kind: "F", half: "M", services: 0 }, "F", "M"),
+      ).toBe(null);
+      // The other half moves it.
+      expect(
+        withHalfDay({ code: "H", kind: "F", half: "M", services: 1 }, "F", "P"),
+      ).toEqual({
+        code: "H",
+        kind: "F",
+        half: "P",
+        services: 1,
+      });
+      // A whole day of ferie gives way.
+      expect(withHalfDay({ code: "F", notice: 48 }, "F", "M")).toEqual({
+        code: "H",
+        kind: "F",
+        half: "M",
+        services: 0,
+      });
+    });
+
+    it("keeps the half when the services change", () => {
+      expect(
+        withServices({ code: "H", kind: "F", half: "M", services: 0 }, 3),
+      ).toEqual({
+        code: "H",
+        kind: "F",
+        half: "M",
+        services: 3,
+      });
+      expect(withServices({ code: "F", notice: 24 }, 2)).toEqual({
+        code: "L",
+        services: 2,
+      });
+      expect(withServices(undefined, 1)).toEqual({ code: "L", services: 1 });
+    });
+
+    it("reads the stored rows", () => {
+      const row = { services: null, noticeHours: null };
+      expect(toMark({ ...row, code: "H", halfDay: "P" })).toEqual({
+        code: "H",
+        kind: "F",
+        half: "P",
+        services: 0,
+      });
+      expect(toMark({ ...row, code: "H", halfDay: "M", services: 3 })).toEqual({
+        code: "H",
+        kind: "F",
+        half: "M",
+        services: 3,
+      });
+      expect(toMark({ ...row, code: "H", halfDay: null })).toBeUndefined();
+    });
+
+    it("is labelled with its half and services", () => {
+      expect(markLabel({ code: "H", kind: "F", half: "M", services: 0 })).toBe(
+        "Ferie mattina",
+      );
+      expect(markLabel({ code: "H", kind: "F", half: "P", services: 2 })).toBe(
+        "Ferie pomeriggio + 2 servizi",
+      );
+      expect(
+        markSign({ code: "H", kind: "F", half: "P", services: 3 }, false),
+      ).toBe("\\\\\\");
+    });
+  });
+
+  describe("rest", () => {
+    const days = daysOfMonth("2026-12");
+    const only = (day: number, mark: DayMark) =>
+      days.map((d) => (d.day === day ? mark : undefined));
+
+    it("is offered only to a bearer on a contract", () => {
+      expect(dayMarks(false).some((m) => m.code === "R")).toBe(false);
+      expect(dayMarks(true).some((m) => m.code === "R")).toBe(true);
+    });
+
+    it("is worth nothing, whole or half, red days included", () => {
+      expect(serviceTotal(only(9, { code: "R" }), days, true)).toBe(0);
+      expect(serviceTotal(only(8, { code: "R" }), days, true)).toBe(0);
+      const half = { code: "H", kind: "R", half: "P", services: 0 } as const;
+      expect(serviceTotal(only(8, half), days, true)).toBe(0);
+    });
+
+    it("leaves the services of the other half to count", () => {
+      const marks = only(9, { code: "H", kind: "R", half: "M", services: 2 });
+      expect(serviceTotal(marks, days, true)).toBe(2);
+      expect(monthSummary(marks, days, true)).toEqual({
+        total: 2,
+        services: 2,
+        holidayServices: 0,
+        ferieDays: 0,
+        feriePoints: 0,
+        restDays: 0.5,
+        sickDays: 0,
+      });
+      expect(monthSummary(only(9, { code: "R" }), days, true).restDays).toBe(1);
+    });
+
+    it("swaps with ferie on the same half, keeping the services", () => {
+      const ferie = { code: "H", kind: "F", half: "M", services: 1 } as const;
+      expect(withHalfDay(ferie, "R", "M")).toEqual({
+        code: "H",
+        kind: "R",
+        half: "M",
+        services: 1,
+      });
+      expect(withHalfDay({ code: "R" }, "R", "P")).toEqual({
+        code: "H",
+        kind: "R",
+        half: "P",
+        services: 0,
+      });
+      expect(
+        withHalfDay({ code: "H", kind: "R", half: "P", services: 3 }, "R", "P"),
+      ).toEqual({ code: "L", services: 3 });
+    });
+
+    it("reads the stored rows", () => {
+      const row = { services: null, noticeHours: null };
+      expect(toMark({ ...row, code: "R" })).toEqual({ code: "R" });
+      expect(toMark({ ...row, code: "R", halfDay: "M", services: 2 })).toEqual({
+        code: "H",
+        kind: "R",
+        half: "M",
+        services: 2,
+      });
+    });
+
+    it("is labelled and hides the running total", () => {
+      expect(markLabel({ code: "R" })).toBe("Riposo");
+      expect(markSign({ code: "R" }, false)).toBe("R");
+      expect(markLabel({ code: "H", kind: "R", half: "P", services: 1 })).toBe(
+        "Riposo pomeriggio + 1 servizio",
+      );
+      expect(hidesTotal({ code: "R" }, true)).toBe(true);
+      expect(
+        hidesTotal({ code: "H", kind: "R", half: "M", services: 0 }, true),
+      ).toBe(true);
+      expect(
+        hidesTotal({ code: "H", kind: "R", half: "M", services: 2 }, true),
+      ).toBe(false);
+      expect(hidesTotal({ code: "F", notice: 48 }, false)).toBe(false);
+    });
+  });
+
+  describe("sick leave", () => {
+    const days = daysOfMonth("2026-12");
+    const only = (day: number, mark: DayMark) =>
+      days.map((d) => (d.day === day ? mark : undefined));
+
+    it("is offered to everyone", () => {
+      expect(dayMarks(false).some((m) => m.code === "M")).toBe(true);
+      expect(dayMarks(true).some((m) => m.code === "M")).toBe(true);
+    });
+
+    it("is worth nothing and counts as a day off sick", () => {
+      const marks = only(9, { code: "M" });
+      expect(serviceTotal(marks, days)).toBe(0);
+      expect(serviceTotal(only(8, { code: "M" }), days)).toBe(0);
+      expect(monthSummary(marks, days).sickDays).toBe(1);
+      expect(hidesTotal({ code: "M" }, false)).toBe(true);
+    });
+
+    it("gives way to anything picked after it", () => {
+      expect(withServices({ code: "M" }, 2)).toEqual({
+        code: "L",
+        services: 2,
+      });
+      expect(withHalfDay({ code: "M" }, "F", "M")).toEqual({
+        code: "H",
+        kind: "F",
+        half: "M",
+        services: 0,
+      });
+    });
+
+    it("is read, labelled and signed", () => {
+      const row = { services: null, noticeHours: null };
+      expect(toMark({ ...row, code: "M" })).toEqual({ code: "M" });
+      expect(markLabel({ code: "M" })).toBe("Malattia");
+      expect(markSign({ code: "M" }, false)).toBe("M");
+    });
+  });
+
+  describe("services in the trial period", () => {
+    const days = daysOfMonth("2026-12");
+    const only = (day: number, mark: DayMark) =>
+      days.map((d) => (d.day === day ? mark : undefined));
+    const pp = { code: "L", services: 2, trial: true } as const;
+
+    it("is written P, PP, PPP and labelled", () => {
+      expect(markSign({ code: "L", services: 1, trial: true }, false)).toBe(
+        "P",
+      );
+      expect(markSign(pp, false)).toBe("PP");
+      expect(markSign({ code: "L", services: 3, trial: true }, true)).toBe(
+        "PPP",
+      );
+      expect(markLabel(pp)).toBe("2 servizi in prova");
+    });
+
+    it("counts like ordinary services, not on red days", () => {
+      expect(serviceTotal(only(9, pp), days)).toBe(2);
+      expect(serviceTotal(only(8, pp), days)).toBe(0);
+      const half = {
+        code: "H",
+        kind: "F",
+        half: "M",
+        services: 3,
+        trial: true,
+      } as const;
+      expect(serviceTotal(only(9, half), days)).toBe(4);
+      expect(markLabel(half)).toBe("Ferie mattina + 3 servizi in prova");
+    });
+
+    it("switches between ordinary and trial services", () => {
+      expect(withServices({ code: "L", services: 2 }, 2, true)).toEqual(pp);
+      expect(withServices(pp, 2)).toEqual({ code: "L", services: 2 });
+      expect(
+        withServices({ code: "H", kind: "F", half: "P", services: 0 }, 1, true),
+      ).toEqual({ code: "H", kind: "F", half: "P", services: 1, trial: true });
+    });
+
+    it("keeps the trial with the services when a half comes or goes", () => {
+      expect(withHalfDay(pp, "F", "M")).toEqual({
+        code: "H",
+        kind: "F",
+        half: "M",
+        services: 2,
+        trial: true,
+      });
+      expect(
+        withHalfDay(
+          { code: "H", kind: "F", half: "M", services: 2, trial: true },
+          "F",
+          "M",
+        ),
+      ).toEqual(pp);
+    });
+
+    it("is read from the row and told apart from ordinary services", () => {
+      const row = { noticeHours: null };
+      expect(toMark({ ...row, code: "L", services: 2, trial: true })).toEqual(
+        pp,
+      );
+      expect(toMark({ ...row, code: "L", services: 2, trial: false })).toEqual({
+        code: "L",
+        services: 2,
+      });
+      expect(sameMark(pp, { code: "L", services: 2 })).toBe(false);
+      expect(sameMark(pp, pp)).toBe(true);
+      expect(isTrial(pp)).toBe(true);
+    });
   });
 });

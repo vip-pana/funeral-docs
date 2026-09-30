@@ -148,6 +148,20 @@
       "when": 1790768694594,
       "tag": "0020_short_power_man",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "6",
+      "when": 1790784042498,
+      "tag": "0021_real_colleen_wing",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "6",
+      "when": 1790787800861,
+      "tag": "0022_sparkling_lightspeed",
+      "breakpoints": true
     }
   ]
 }

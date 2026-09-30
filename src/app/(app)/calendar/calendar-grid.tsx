@@ -38,6 +38,7 @@ import {
   bearerLabel,
   type CalendarDay,
   DAY_MARKS,
+  hidesTotal,
   type DayMark,
   markLabel,
   markSign,
@@ -47,7 +48,7 @@ import {
 import type { Bearer } from "@/lib/db/schema";
 import { cn } from "@/lib/utils";
 
-import { DAY_FORMAT, MarkOptions, utc } from "./mark-menu";
+import { DAY_FORMAT, MarkGlyph, MarkOptions, utc } from "./mark-menu";
 
 export const key = (bearerId: string, date: string) => `${bearerId}|${date}`;
 
@@ -106,8 +107,13 @@ export function CalendarGrid({
     onReorder(String(active.id), String(over.id));
   }
 
-  function choose(bearerId: string, date: string, mark: DayMark | null) {
-    setOpenCell(null);
+  function choose(
+    bearerId: string,
+    date: string,
+    mark: DayMark | null,
+    keepOpen = false,
+  ) {
+    if (!keepOpen) setOpenCell(null);
     onChoose(bearerId, date, mark);
   }
 
@@ -133,7 +139,7 @@ export function CalendarGrid({
             style={{ "--calendar-rows": bearers.length } as CSSProperties}
           >
             <colgroup>
-              <col className="w-56 print:w-48" />
+              <col className="w-56" />
               <col className="w-10" />
               {calendar.map((d) => (
                 <col key={d.day} />
@@ -204,9 +210,10 @@ export function CalendarGrid({
                           {calendar.map((d, j) => {
                             const k = key(b.id, d.date);
                             const mark = rowMarks[j];
-                            // No points to show in the corner of a contract's ferie.
+                            // No points to show in the corner of a contract's
+                            // ferie or of a rest.
                             const showTotal =
-                              mark && !(contract && mark.code === "F");
+                              mark && !hidesTotal(mark, contract);
                             const day = DAY_FORMAT.format(utc(d.date));
                             return (
                               <td
@@ -228,9 +235,13 @@ export function CalendarGrid({
                                       aria-label={`${b.name}, ${day}: ${mark ? markLabel(mark, contract).toLowerCase() : "nulla segnato"}`}
                                       className="calendar-cell relative block h-7 w-full font-bold whitespace-nowrap hover:bg-foreground/10"
                                     >
-                                      {mark
-                                        ? markSign(mark, d.isHoliday, contract)
-                                        : ""}
+                                      {mark && (
+                                        <MarkGlyph
+                                          mark={mark}
+                                          isHoliday={d.isHoliday}
+                                          hasContract={contract}
+                                        />
+                                      )}
                                       {/* The month's total so far, in the corner. */}
                                       {showTotal && (
                                         <span className="calendar-corner absolute right-0.5 bottom-0 text-[8px] leading-none font-medium">
@@ -250,7 +261,9 @@ export function CalendarGrid({
                                       bearer={b}
                                       day={d}
                                       mark={mark}
-                                      onPick={(m) => choose(b.id, d.date, m)}
+                                      onPick={(m, keepOpen) =>
+                                        choose(b.id, d.date, m, keepOpen)
+                                      }
                                     />
                                   </PopoverContent>
                                 </Popover>
@@ -269,7 +282,19 @@ export function CalendarGrid({
         <p className="calendar-legend mt-1 flex flex-wrap gap-x-8 gap-y-0.5 border-t pt-1 text-[10px] font-medium uppercase">
           <span>Ferie avviso 48 ore = F1 (festivo F4)</span>
           <span>Ferie avviso 24 ore = F2 (festivo F8)</span>
+          <span>
+            Ferie mezza giornata = F piccola in alto (mattina) o in basso
+            (pomeriggio): 1 punto (festivo 4)
+          </span>
           <span>Necrofori con contratto: ferie = F, senza punti</span>
+          <span>Malattia = M, tutta la giornata, senza punti</span>
+          <span>
+            Servizi in prova = P, PP, PPP (non per chi ha il contratto)
+          </span>
+          <span>
+            Riposo (solo contratto) = R, mezza giornata R piccola in alto o in
+            basso: senza punti
+          </span>
           {DAY_MARKS.filter((m) => m.code === "L").map((m) => (
             <span key={markLabel(m)}>
               {markLabel(m)} = {markSign(m, false)}

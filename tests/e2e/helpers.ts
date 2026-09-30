@@ -203,7 +203,35 @@ export async function deleteResource(
 ) {
   await page.goto("/resources");
   const row = card(page).locator("tr", { hasText: text });
-  await row.getByRole("button", { name: "Elimina" }).click();
-  await row.getByRole("button", { name: "Confermi?" }).click();
+  // A click that lands before the page has hydrated does nothing, and the
+  // confirmation never shows: retried until it does.
+  const confirm = row.getByRole("button", { name: "Confermi?" });
+  await expect(async () => {
+    if (!(await confirm.isVisible())) {
+      await row
+        .getByRole("button", { name: "Elimina" })
+        .click({ timeout: 2000 });
+    }
+    await expect(confirm).toBeVisible({ timeout: 1000 });
+  }).toPass({ timeout: 15_000 });
+  await confirm.click();
   await expect(row).toHaveCount(0);
+}
+
+/**
+ * Checks what the database holds from a second tab, retrying until it shows.
+ * The calendar saves in the background, one change at a time: reloading the
+ * page that made them would cut the queue short and lose the last ones.
+ */
+export async function expectSaved(
+  page: Page,
+  url: string,
+  check: (other: Page) => Promise<void>,
+) {
+  const other = await page.context().newPage();
+  await expect(async () => {
+    await other.goto(url);
+    await check(other);
+  }).toPass({ timeout: 15_000 });
+  await other.close();
 }
