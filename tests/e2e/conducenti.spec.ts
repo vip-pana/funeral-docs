@@ -10,6 +10,7 @@ import {
   pickSelect,
   SAMPLE,
   savePractice,
+  SEED_CLIENT,
   selectOptions,
   unique,
 } from "./helpers";
@@ -82,6 +83,38 @@ test("il conducente arriva sulla scheda e resta dopo l'eliminazione", async ({
   );
   await expect(hint).toContainText("non piu'");
   await expect(hint).toContainText(driver);
+
+  await deletePractice(page, id);
+});
+
+/**
+ * The client's declarant drives too, without being on the staff: they are in
+ * the driver's Select but not among the bearers' checkboxes.
+ */
+test("il titolare del cliente si sceglie come conducente", async ({ page }) => {
+  const declarant = "Mario F. Rossi";
+
+  await page.goto("/deceased/new");
+  expect(await selectOptions(page, "driverId")).toContainEqual(
+    expect.stringContaining(declarant),
+  );
+  await expect(
+    page.locator("label", { hasText: declarant }).locator("[role=checkbox]"),
+  ).toHaveCount(0);
+
+  await pickSelect(page, "driverId", SEED_CLIENT);
+  await fillPractice(page, SAMPLE);
+  const id = await savePractice(page);
+  expect(await documentText(page, id, "4")).toContain(declarant);
+
+  // Reopening the record shows them picked, not as a driver gone missing.
+  await page.goto(`/deceased/${id}`);
+  await expect(page.locator("#driverId")).toContainText(declarant);
+  await expect(
+    page.locator(
+      "[data-slot=field]:has(#driverId) [data-slot=field-description]",
+    ),
+  ).not.toContainText("non piu'");
 
   await deletePractice(page, id);
 });

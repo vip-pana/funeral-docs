@@ -16,7 +16,9 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -29,7 +31,7 @@ import {
 } from "@/components/ui/card";
 // From lib/client-name, not lib/clients: that one opens the database, and this
 // is a client component.
-import { clientLabel } from "@/lib/client-name";
+import { clientLabel, personName } from "@/lib/client-name";
 import type { Bearer, Client, Practice, Vehicle } from "@/lib/db/schema";
 import { FIELD_LABELS } from "@/lib/fields";
 import { computeTaxCode } from "@/lib/tax-code";
@@ -56,7 +58,10 @@ export function PracticeForm({
   practice?: Practice;
   clients: Client[];
   vehicles: Vehicle[];
-  /** Already filtered to the bearers flagged as drivers. */
+  /**
+   * Already filtered to the bearers flagged as drivers. The clients'
+   * declarants are offered as drivers too, from `clients`.
+   */
   drivers: Bearer[];
   bearers: Bearer[];
   submitLabel: string;
@@ -110,7 +115,10 @@ export function PracticeForm({
 
   const [vehicleId, setVehicleId] = useState(practice?.vehicleId ?? "");
 
-  const [driverId, setDriverId] = useState(practice?.driverId ?? "");
+  // A bearer or a client's declarant: whichever reference the record holds.
+  const [driverId, setDriverId] = useState(
+    practice?.driverId ?? practice?.driverClientId ?? "",
+  );
 
   // The vehicle may have been deleted after saving: the practice keeps the
   // plate, but the list no longer has an entry to select.
@@ -120,7 +128,9 @@ export function PracticeForm({
 
   // Same for the driver, which keeps the copied name.
   const missingDriver = Boolean(
-    practice?.driverName && !drivers.some((d) => d.id === driverId),
+    practice?.driverName &&
+    !drivers.some((d) => d.id === driverId) &&
+    !clients.some((c) => c.id === driverId),
   );
 
   // Stored as a comma-separated string of ids, so it survives a bearer being
@@ -771,17 +781,34 @@ export function PracticeForm({
                 <SelectValue placeholder="Nessuno" />
               </SelectTrigger>
               <SelectContent>
-                {drivers.map((d) => (
-                  <SelectItem key={d.id} value={d.id}>
-                    {d.name}
-                  </SelectItem>
-                ))}
+                {drivers.length > 0 && (
+                  <SelectGroup>
+                    <SelectLabel>Necrofori</SelectLabel>
+                    {drivers.map((d) => (
+                      <SelectItem key={d.id} value={d.id}>
+                        {d.name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                )}
+                {/* Every client's declarant can drive: they are not on the
+                    staff, so they have no Conducente box to tick. */}
+                {clients.length > 0 && (
+                  <SelectGroup>
+                    <SelectLabel>Titolari</SelectLabel>
+                    {clients.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {personName(c)} ({c.companyName})
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                )}
               </SelectContent>
             </Select>
             <FieldDescription>
               {missingDriver
                 ? `Conducente non piu' in elenco. Nome registrato: ${practice?.driverName}`
-                : drivers.length === 0
+                : drivers.length === 0 && clients.length === 0
                   ? "Nessun conducente: in Risorse spunta la casella Conducente su un necroforo."
                   : "Il nome finisce nel documento 4"}
             </FieldDescription>

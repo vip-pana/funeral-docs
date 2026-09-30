@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getBearers, getDriver } from "@/lib/bearers";
-import { clientNameOf } from "@/lib/client-name";
+import { clientNameOf, personName } from "@/lib/client-name";
 import { getClient } from "@/lib/clients";
 import { db, schema } from "@/lib/db";
 import { collectErrors } from "@/lib/form-errors";
@@ -16,6 +16,29 @@ export type PracticeFormState = {
   errors?: Record<string, string>;
   message?: string;
 };
+
+/**
+ * The driver is looked up among the bearers first, then among the clients,
+ * whose declarants drive without being on the staff. Both lists post a plain
+ * id to the same Select: they are UUIDs, so one never matches the other table.
+ */
+async function resolveDriver(id: string | undefined) {
+  if (!id) return { driverId: null, driverClientId: null, driverName: "" };
+  const bearer = await getDriver(id);
+  if (bearer) {
+    return {
+      driverId: bearer.id,
+      driverClientId: null,
+      driverName: bearer.name,
+    };
+  }
+  const client = await getClient(id);
+  return {
+    driverId: null,
+    driverClientId: client?.id ?? null,
+    driverName: client ? personName(client) : "",
+  };
+}
 
 /**
  * Copies the company name from the chosen client, the plate from the chosen
@@ -34,7 +57,7 @@ async function withSelections(data: PracticeInput) {
   const [client, vehicle, driver, bearers] = await Promise.all([
     getClient(data.clientId),
     data.vehicleId ? getVehicle(data.vehicleId) : null,
-    data.driverId ? getDriver(data.driverId) : null,
+    resolveDriver(data.driverId),
     getBearers(data.bearerIds),
   ]);
   return {
@@ -52,8 +75,7 @@ async function withSelections(data: PracticeInput) {
     // 11 prints the two side by side.
     vehiclePlate: vehicle?.plate ?? "",
     vehicleName: vehicle?.name ?? "",
-    driverId: driver?.id ?? null,
-    driverName: driver?.name ?? "",
+    ...driver,
     // Ids so reopening the record can tick the right boxes, names because those
     // are what document 7 prints. Unknown ids drop out: `getBearers` only
     // returns rows that exist.
