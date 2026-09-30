@@ -128,12 +128,12 @@ export function CalendarGrid({
           className="overflow-x-auto overscroll-x-contain print:overflow-visible"
         >
           <table
-            className="calendar w-full min-w-[58rem] table-fixed text-xs print:min-w-0"
+            className="calendar w-full min-w-[66rem] table-fixed text-xs print:min-w-0"
             // Print stretches the rows to fill the sheet, so it needs the count.
             style={{ "--calendar-rows": bearers.length } as CSSProperties}
           >
             <colgroup>
-              <col className="w-36 print:w-48" />
+              <col className="w-56 print:w-48" />
               <col className="w-10" />
               {calendar.map((d) => (
                 <col key={d.day} />
@@ -145,7 +145,7 @@ export function CalendarGrid({
                   {monthLabel(month)}
                 </th>
                 <th
-                  className="sticky left-36 z-10 bg-inherit py-1.5 text-center font-semibold print:static"
+                  className="sticky left-56 z-10 bg-inherit py-1.5 text-center font-semibold print:static"
                   title="Servizi del mese"
                 >
                   Tot.
@@ -190,12 +190,15 @@ export function CalendarGrid({
                           >
                             <div className="flex items-center gap-0.5">
                               {grip(`Sposta ${b.name}`)}
-                              <span className="min-w-0 truncate">
+                              <span
+                                className="min-w-0 truncate"
+                                title={bearerLabel(b)}
+                              >
                                 {bearerLabel(b)}
                               </span>
                             </div>
                           </th>
-                          <td className="sticky left-36 z-10 bg-inherit text-center font-bold print:static">
+                          <td className="sticky left-56 z-10 bg-inherit text-center font-bold print:static">
                             {totals.at(-1) || ""}
                           </td>
                           {calendar.map((d, j) => {

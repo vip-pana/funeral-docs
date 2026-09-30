@@ -240,6 +240,10 @@ export function CalendarView({
       )}
 
       <div
+        // The grid takes the whole width the layout can give it: the names
+        // are first and last together, and the month has 31 columns. Only
+        // while it is the view on screen, so the others stay centred.
+        data-wide={mode === "mese" || mode === null || undefined}
         className={cn(
           mode === "mese"
             ? ""
