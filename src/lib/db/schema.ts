@@ -238,8 +238,13 @@ export const practices = sqliteTable("practices", {
 
   // Same split as the vehicle above: the reference nulls itself out if the
   // driver is deleted, the name is copied so documents already issued keep it.
-  // It points at `bearers`, filtered to those flagged as drivers.
+  // The driver is either a bearer flagged as such or the declarant of a
+  // client, who drives without being on the staff: at most one of the two
+  // references is set.
   driverId: text("driver_id").references(() => bearers.id, {
+    onDelete: "set null",
+  }),
+  driverClientId: text("driver_client_id").references(() => clients.id, {
     onDelete: "set null",
   }),
   driverName: text("driver_name").notNull().default(""),
