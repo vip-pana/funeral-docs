@@ -1,12 +1,18 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { SearchIcon } from "lucide-react";
+import { useActionState, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Field } from "@/components/field";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import {
   Card,
   CardContent,
@@ -35,7 +41,21 @@ import {
 import { DeleteBearerButton } from "./delete-bearer-button";
 import { EditBearerDialog } from "./edit-bearer-dialog";
 
+/** Lowercase and without accents, so "nicolo" finds "Nicolò". */
+const fold = (text: string) =>
+  text
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
+
 export function BearersCard({ bearers }: { bearers: Bearer[] }) {
+  // Filtered here rather than through the URL like the records list: the
+  // bearers are a few dozen and already all on the page.
+  const [query, setQuery] = useState("");
+  const shown = bearers.filter((b) =>
+    fold(b.name).includes(fold(query.trim())),
+  );
+
   const [state, formAction, pending] = useActionState<
     BearerFormState,
     FormData
@@ -74,11 +94,35 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
       <CardContent className="space-y-6">
         {bearers.length > 0 ? (
           <>
+            <InputGroup className="max-w-md">
+              <InputGroupAddon>
+                <SearchIcon />
+              </InputGroupAddon>
+              <InputGroupInput
+                id="bearerSearch"
+                type="search"
+                aria-label="Cerca fra i necrofori"
+                placeholder="Cerca per nome…"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            </InputGroup>
+            {shown.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                Nessun necroforo trovato per «{query.trim()}».
+              </p>
+            )}
             {/* On phones one card each: five columns do not fit, and the
                 buttons ended up off screen. The boxes are wrapped in their
                 labels, without the table's ids, which must stay unique. */}
-            <ul className="divide-y rounded-xl border md:hidden">
-              {bearers.map((b) => (
+            {/* Both hidden while the search finds nothing: an empty bordered
+                box or a bare table header reads as a glitch. */}
+            <ul
+              className={
+                shown.length ? "divide-y rounded-xl border md:hidden" : "hidden"
+              }
+            >
+              {shown.map((b) => (
                 <li key={b.id} className="space-y-2 px-3 py-3">
                   <div className="flex items-center justify-between gap-2">
                     <p className="truncate font-medium">{b.name}</p>
@@ -115,7 +159,11 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
                 </li>
               ))}
             </ul>
-            <div className="hidden overflow-x-auto md:block">
+            <div
+              className={
+                shown.length ? "hidden overflow-x-auto md:block" : "hidden"
+              }
+            >
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -127,7 +175,7 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {bearers.map((b) => (
+                  {shown.map((b) => (
                     <TableRow key={b.id}>
                       <TableCell className="font-medium">{b.name}</TableCell>
                       <TableCell>

@@ -26,7 +26,9 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
           <SidebarTrigger className="size-9" />
           <SectionTitle />
         </header>
-        <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-5 sm:px-6 sm:py-8">
+        {/* A page can ask for the full width by marking an element
+            `data-wide`, as the calendar grid does. */}
+        <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-5 has-[[data-wide]]:max-w-none sm:px-6 sm:py-8">
           {children}
         </main>
       </SidebarInset>

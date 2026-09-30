@@ -13,7 +13,20 @@ const dayMark = z.discriminatedUnion("code", [
     code: z.literal("F"),
     notice: z.union([z.literal(48), z.literal(24)]),
   }),
-  z.object({ code: z.literal("L"), services: z.number().int().min(1).max(3) }),
+  z.object({ code: z.literal("R") }),
+  z.object({ code: z.literal("M") }),
+  z.object({
+    code: z.literal("L"),
+    services: z.number().int().min(1).max(3),
+    trial: z.literal(true).optional(),
+  }),
+  z.object({
+    code: z.literal("H"),
+    kind: z.enum(["F", "R"]),
+    half: z.enum(["M", "P"]),
+    services: z.number().int().min(0).max(3),
+    trial: z.literal(true).optional(),
+  }),
 ]);
 
 /**
@@ -29,8 +42,28 @@ export async function setDay(
   const parsed = mark === null ? null : dayMark.safeParse(mark);
   if (parsed && !parsed.success) return { error: "Scelta non valida." };
 
+  // Rest is for bearers on a contract, the trial period for everyone else:
+  // the menu offers each to them alone, and the server holds the line too.
+  const data = parsed?.data;
+  const rest =
+    data && (data.code === "R" || (data.code === "H" && data.kind === "R"));
+  const trial = data && (data.code === "L" || data.code === "H") && data.trial;
+  if (rest || trial) {
+    const [bearer] = await db
+      .select({ hasContract: schema.bearers.hasContract })
+      .from(schema.bearers)
+      .where(eq(schema.bearers.id, bearerId))
+      .limit(1);
+    if (rest && !bearer?.hasContract) {
+      return { error: "Il riposo è solo per chi ha il contratto." };
+    }
+    if (trial && bearer?.hasContract) {
+      return { error: "La prova non è per chi ha il contratto." };
+    }
+  }
+
   try {
-    if (!parsed) {
+    if (!data) {
       await db
         .delete(schema.bearerDays)
         .where(
@@ -40,10 +73,17 @@ export async function setDay(
           ),
         );
     } else {
+      // Half a day of rest is stored as "R" with its half, half a day of
+      // ferie as "H": a whole rest is "R" with no half.
       const values = {
-        code: parsed.data.code,
-        services: parsed.data.code === "L" ? parsed.data.services : null,
-        noticeHours: parsed.data.code === "F" ? parsed.data.notice : null,
+        code: data.code === "H" && data.kind === "R" ? "R" : data.code,
+        services: data.code === "L" || data.code === "H" ? data.services : null,
+        noticeHours: data.code === "F" ? data.notice : null,
+        halfDay: data.code === "H" ? data.half : null,
+        trial:
+          Boolean(trial) &&
+          (data.code === "L" || data.code === "H") &&
+          data.services > 0,
       };
       await db
         .insert(schema.bearerDays)

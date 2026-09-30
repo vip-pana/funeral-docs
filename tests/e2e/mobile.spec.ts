@@ -67,7 +67,7 @@ test("il calendario si segna dal telefono", async ({ page, browser }, info) => {
   const cell = page.getByRole("button", { name: /, 3 gennaio:/ });
   await cell.click();
   const sheet = page.getByRole("dialog");
-  await sheet.getByRole("button", { name: /^1 servizio/ }).click();
+  await sheet.getByRole("button", { name: /^1 servizio(?! in prova)/ }).click();
   await expect(sheet).toBeHidden();
   await expect(cell).toContainText("\\");
   await expect(total).toHaveText("1");

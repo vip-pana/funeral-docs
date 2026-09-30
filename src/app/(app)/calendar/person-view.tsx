@@ -16,8 +16,8 @@ import {
   bearerLabel,
   type CalendarDay,
   type DayMark,
+  hidesTotal,
   markLabel,
-  markSign,
   monthSummary,
   runningTotals,
   weekdayIndex,
@@ -26,7 +26,7 @@ import type { Bearer } from "@/lib/db/schema";
 import { cn } from "@/lib/utils";
 
 import { key } from "./calendar-grid";
-import { DAY_FORMAT, MarkSheet, markTone, utc } from "./mark-menu";
+import { DAY_FORMAT, MarkGlyph, MarkSheet, markTone, utc } from "./mark-menu";
 
 const WEEKDAYS = ["L", "M", "M", "G", "V", "S", "D"];
 
@@ -136,11 +136,24 @@ export function PersonView({
           </div>
         </div>
         <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
-          <Stat label="Servizi" value={summary.services} />
+          <Stat
+            label="Servizi"
+            value={summary.services}
+            hint={
+              summary.sickDays
+                ? `malattia ${summary.sickDays.toLocaleString("it-IT")} gg`
+                : undefined
+            }
+          />
           <Stat
             label={contract ? "Giorni di ferie" : "Punti ferie"}
             value={contract ? summary.ferieDays : summary.feriePoints}
-            hint={contract ? "senza punti" : `${summary.ferieDays} gg`}
+            // Half days make it 1,5: written the Italian way.
+            hint={
+              contract
+                ? `riposo ${summary.restDays.toLocaleString("it-IT")} gg`
+                : `${summary.ferieDays.toLocaleString("it-IT")} gg`
+            }
           />
           <Stat
             label="In festivi"
@@ -167,7 +180,7 @@ export function PersonView({
           ))}
           {calendar.map((d, j) => {
             const mark = rowMarks[j];
-            const counts = mark && !(contract && mark.code === "F");
+            const counts = mark && !hidesTotal(mark, contract);
             return (
               <button
                 key={d.day}
@@ -195,7 +208,15 @@ export function PersonView({
                   {d.day}
                 </span>
                 <span className="font-mono text-base font-bold">
-                  {mark ? markSign(mark, d.isHoliday, contract) : ""}
+                  {mark ? (
+                    <MarkGlyph
+                      mark={mark}
+                      isHoliday={d.isHoliday}
+                      hasContract={contract}
+                    />
+                  ) : (
+                    ""
+                  )}
                 </span>
                 {counts && (
                   <span className="absolute right-1 bottom-0.5 text-[9px] leading-none opacity-70">
@@ -209,18 +230,19 @@ export function PersonView({
         <p className="mt-3 text-xs text-muted-foreground">
           Tocca un giorno per segnarlo.{" "}
           {contract
-            ? "Con il contratto le ferie non danno punti."
-            : "Ferie: F1 con 48 ore di avviso, F2 con 24; nei festivi valgono il quadruplo."}{" "}
-          Servizi: \ = 1, X = 2, \\\ = 3.
+            ? "Con il contratto le ferie non danno punti, e nemmeno il riposo (R, mezza giornata R piccola in alto la mattina, in basso il pomeriggio)."
+            : "Ferie: F1 con 48 ore di avviso, F2 con 24; nei festivi valgono il quadruplo. Mezza giornata: F piccola in alto la mattina, in basso il pomeriggio, 1 punto (festivo 4)."}{" "}
+          Malattia: M, tutta la giornata, senza punti. Servizi: \ = 1, X = 2,
+          \\\ = 3{!contract && "; in prova P = 1, PP = 2, PPP = 3"}.
         </p>
       </div>
 
       <MarkSheet
         target={openDay && { bearer, day: openDay }}
         mark={openDay ? marks.get(key(bearer.id, openDay.date)) : undefined}
-        onPick={(m) => {
+        onPick={(m, keepOpen) => {
           if (openDay) onChoose(bearer.id, openDay.date, m);
-          setOpenDay(null);
+          if (!keepOpen) setOpenDay(null);
         }}
         onClose={() => setOpenDay(null)}
       />
@@ -244,7 +266,9 @@ function Stat({
         {label}
         {hint && <span className="block opacity-80">{hint}</span>}
       </dt>
-      <dd className="text-xl font-semibold tabular-nums">{value}</dd>
+      <dd className="text-xl font-semibold tabular-nums">
+        {value.toLocaleString("it-IT")}
+      </dd>
     </div>
   );
 }

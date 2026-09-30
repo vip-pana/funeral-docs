@@ -159,9 +159,14 @@ export const bearers = sqliteTable("bearers", {
  * The bearers' calendar: one row per bearer per marked day, and no row for a
  * day with nothing to record. `code` is "F" for a day of ferie, which carries
  * how much notice was given (48 or 24 hours), or "L" for a worked day, which
- * carries how many funeral services were done (1 to 3). A
- * code rather than a boolean: the paper sheet it replaces has more kinds of
- * day (R, M, E, I, V) that will be added later.
+ * carries how many funeral services were done (1 to 3), "H" for half a day
+ * of ferie, which carries which half and the services done in the other (0
+ * to 3), or "R" for a rest, only for bearers on a contract: the whole day
+ * with no half, or half of it with the services of the other, like "H", or
+ * "M" for sick leave, always the whole day and carrying nothing else. The
+ * services of a bearer in their trial period are flagged by `trial`. A code
+ * rather than a boolean: the paper sheet it replaces has more kinds of day
+ * (E, I, V) that will be added later.
  *
  * The days go with the bearer: once they are off the list, their past
  * holidays have no row to be shown on.
@@ -175,13 +180,24 @@ export const bearerDays = sqliteTable(
       .references(() => bearers.id, { onDelete: "cascade" }),
     date: text("date").notNull(),
     code: text("code").notNull().default("F"),
-    /** Only on a worked day ("L"): null for ferie. */
+    /** On a worked day ("L") or half a day off: null for a whole day off. */
     services: integer("services"),
     /**
      * Only on ferie ("F"): 48 or 24, the hours of notice. Null on the rows
      * saved before it existed, which are read as 48.
      */
     noticeHours: integer("notice_hours"),
+    /**
+     * Only on half a day off ("H", or "R" for half a rest): "M" for the
+     * morning, "P" for the afternoon. `services` then holds what was done in
+     * the other half, 0 to 3.
+     */
+    halfDay: text("half_day"),
+    /**
+     * The services were done in the trial period (prova), written P, PP, PPP.
+     * Only on a day with services, and never for a bearer on a contract.
+     */
+    trial: integer("trial", { mode: "boolean" }).notNull().default(false),
     createdAt: text("created_at")
       .notNull()
       .default(sql`(datetime('now'))`),

@@ -145,16 +145,50 @@ export function moveOnto<T extends { id: string }>(
 }
 
 /**
- * What a cell records: a day of ferie with the hours of notice given, or a
- * day worked with 1 to 3 services.
+ * What a cell records: a day of ferie with the hours of notice given, a day
+ * of rest (riposo, only for bearers on a contract), a day of sick leave
+ * (malattia, always the whole day and nothing else), a day worked with 1 to
+ * 3 services, or half a day of ferie or rest — the morning or the afternoon
+ * — with up to 3 services in the other half.
+ *
+ * `trial` marks the services of a bearer in their trial period (prova): they
+ * count the same, and are written P, PP, PPP. Never on a contract.
  */
 export type DayMark =
-  { code: "F"; notice: 48 | 24 } | { code: "L"; services: 1 | 2 | 3 };
+  | { code: "F"; notice: 48 | 24 }
+  | { code: "R" }
+  | { code: "M" }
+  | { code: "L"; services: 1 | 2 | 3; trial?: true }
+  | {
+      code: "H";
+      kind: HalfKind;
+      half: HalfDay;
+      services: 0 | 1 | 2 | 3;
+      trial?: true;
+    };
+
+/** "M" for the morning, "P" for the afternoon (pomeriggio). */
+export type HalfDay = "M" | "P";
+
+/** What the half day off is: ferie ("F") or rest ("R"). */
+export type HalfKind = "F" | "R";
+
+export const HALF_KIND_LABEL: Record<HalfKind, string> = {
+  F: "Ferie",
+  R: "Riposo",
+};
+
+export const HALF_DAY_LABEL: Record<HalfDay, string> = {
+  M: "Mattina",
+  P: "Pomeriggio",
+};
 
 /** Every choice the cell menu offers, in the order it shows them. */
 export const DAY_MARKS: DayMark[] = [
   { code: "F", notice: 48 },
   { code: "F", notice: 24 },
+  { code: "R" },
+  { code: "M" },
   { code: "L", services: 1 },
   { code: "L", services: 2 },
   { code: "L", services: 3 },
@@ -163,11 +197,48 @@ export const DAY_MARKS: DayMark[] = [
 /**
  * The choices for one bearer. Those on a contract get a single entry for
  * ferie: their ferie score nothing, so the notice would change nothing. It is
- * saved as 48 hours, what an unmarked notice has always been read as.
+ * saved as 48 hours, what an unmarked notice has always been read as. Rest is
+ * for them alone.
  */
 export function dayMarks(hasContract: boolean): DayMark[] {
-  if (!hasContract) return DAY_MARKS;
+  if (!hasContract) return DAY_MARKS.filter((m) => m.code !== "R");
   return DAY_MARKS.filter((m) => m.code !== "F" || m.notice === 48);
+}
+
+/** The halves of a day off a bearer can take: rest only on a contract. */
+export function halfKinds(hasContract: boolean): HalfKind[] {
+  return hasContract ? ["F", "R"] : ["F"];
+}
+
+/**
+ * Whether the services can be marked as done in the trial period: not for a
+ * bearer on a contract, who is past it.
+ */
+export function trialAllowed(hasContract: boolean): boolean {
+  return !hasContract;
+}
+
+/** Whether the day's services were done in the trial period. */
+export function isTrial(mark: DayMark | undefined): boolean {
+  return (mark?.code === "L" || mark?.code === "H") && mark.trial === true;
+}
+
+/** The services done that day: none on a whole day of ferie or rest. */
+export function servicesOf(mark: DayMark | undefined): number {
+  return mark && (mark.code === "L" || mark.code === "H") ? mark.services : 0;
+}
+
+/**
+ * Whether the cell leaves out its running total: the day adds nothing to it
+ * by design, a bearer on a contract's ferie or a rest.
+ */
+export function hidesTotal(mark: DayMark, hasContract: boolean): boolean {
+  if (mark.code === "R" || mark.code === "M") return true;
+  if (mark.code === "F") return hasContract;
+  if (mark.code === "H") {
+    return mark.services === 0 && (mark.kind === "R" || hasContract);
+  }
+  return false;
 }
 
 /**
@@ -184,6 +255,18 @@ export function holidayPoints(
 }
 
 /**
+ * What half a day of ferie adds: always 1, whatever the notice, and 4 on a
+ * red day like a whole one. Nothing for a bearer on a contract. Rest, whole
+ * or half, never adds anything.
+ */
+export function halfDayPoints(isHoliday: boolean, hasContract = false): number {
+  if (hasContract) return 0;
+  return isHoliday ? 4 : 1;
+}
+
+const SERVICE_SIGNS = ["", "\\", "X", "\\\\\\"];
+
+/**
  * The sign written in the cell, as on the paper sheet. A bearer on a contract
  * gets a bare "F": there are no points to write after it.
  */
@@ -195,14 +278,66 @@ export function markSign(
   if (mark.code === "F") {
     return hasContract ? "F" : `F${holidayPoints(mark.notice, isHoliday)}`;
   }
-  return ["\\", "X", "\\\\\\"][mark.services - 1];
+  if (mark.code === "R" || mark.code === "M") return mark.code;
+  // Half a day shows only the services here: the small F or R beside them is
+  // drawn by the cell, above or below depending on the half.
+  if (mark.trial) return "P".repeat(mark.services);
+  return SERVICE_SIGNS[mark.services];
 }
+
+const servicesLabel = (n: number, trial = false) =>
+  `${n === 1 ? "1 servizio" : `${n} servizi`}${trial ? " in prova" : ""}`;
 
 export function markLabel(mark: DayMark, hasContract = false): string {
   if (mark.code === "F") {
     return hasContract ? "Ferie" : `Ferie, avviso ${mark.notice} ore`;
   }
-  return mark.services === 1 ? "1 servizio" : `${mark.services} servizi`;
+  if (mark.code === "R") return "Riposo";
+  if (mark.code === "M") return "Malattia";
+  if (mark.code === "H") {
+    const off = `${HALF_KIND_LABEL[mark.kind]} ${HALF_DAY_LABEL[mark.half].toLowerCase()}`;
+    return mark.services
+      ? `${off} + ${servicesLabel(mark.services, mark.trial)}`
+      : off;
+  }
+  return servicesLabel(mark.services, mark.trial);
+}
+
+/**
+ * The day after tapping Mattina or Pomeriggio on the ferie or the rest row.
+ * The same half of the same kind is taken off again, leaving the services on
+ * their own; anything else takes its place, keeping the services. A whole day
+ * of ferie or rest gives way to the half.
+ */
+export function withHalfDay(
+  mark: DayMark | undefined,
+  kind: HalfKind,
+  half: HalfDay,
+): DayMark | null {
+  const services = servicesOf(mark) as 0 | 1 | 2 | 3;
+  // The trial goes with the services, and only while there are some.
+  const trial = services && isTrial(mark) ? { trial: true as const } : {};
+  if (mark?.code === "H" && mark.kind === kind && mark.half === half) {
+    return services ? { code: "L", services, ...trial } : null;
+  }
+  return { code: "H", kind, half, services, ...trial };
+}
+
+/**
+ * The day after picking a number of services, in the trial period or not: a
+ * half day off stays.
+ */
+export function withServices(
+  mark: DayMark | undefined,
+  services: 1 | 2 | 3,
+  trial = false,
+): DayMark {
+  const flag = trial ? { trial: true as const } : {};
+  if (mark?.code === "H") {
+    const { code, kind, half } = mark;
+    return { code, kind, half, services, ...flag };
+  }
+  return { code: "L", services, ...flag };
 }
 
 /**
@@ -219,7 +354,19 @@ export function sameMark(
   if (a.code === "F") {
     return b.code === "F" && (hasContract || a.notice === b.notice);
   }
-  return b.code === "L" && a.services === b.services;
+  if (a.code === "R" || a.code === "M") return true;
+  if (a.code === "H") {
+    return (
+      b.code === "H" &&
+      a.kind === b.kind &&
+      a.half === b.half &&
+      a.services === b.services &&
+      isTrial(a) === isTrial(b)
+    );
+  }
+  return (
+    b.code === "L" && a.services === b.services && isTrial(a) === isTrial(b)
+  );
 }
 
 /** A stored row as a mark, or undefined for a row this version cannot read. */
@@ -227,16 +374,33 @@ export function toMark(row: {
   code: string;
   services: number | null;
   noticeHours: number | null;
+  halfDay?: string | null;
+  trial?: boolean;
 }): DayMark | undefined {
   if (row.code === "F") {
     return { code: "F", notice: row.noticeHours === 24 ? 24 : 48 };
   }
   const services = row.services;
+  const trial = row.trial && services ? { trial: true as const } : {};
+  if (row.code === "M") return { code: "M" };
+  // A rest with no half is the whole day.
+  if (row.code === "R" && row.halfDay == null) return { code: "R" };
+  if (
+    (row.code === "H" || row.code === "R") &&
+    (row.halfDay === "M" || row.halfDay === "P")
+  ) {
+    const n = services ?? 0;
+    if (n === 0 || n === 1 || n === 2 || n === 3) {
+      const kind = row.code === "H" ? "F" : "R";
+      return { code: "H", kind, half: row.halfDay, services: n, ...trial };
+    }
+    return undefined;
+  }
   if (
     row.code === "L" &&
     (services === 1 || services === 2 || services === 3)
   ) {
-    return { code: "L", services };
+    return { code: "L", services, ...trial };
   }
   return undefined;
 }
@@ -265,7 +429,12 @@ export function runningTotals(
     const mark = marks[i];
     if (mark?.code === "F") {
       sum += holidayPoints(mark.notice, d.isHoliday, hasContract);
-    } else if (mark?.code === "L" && !d.isHoliday) sum += mark.services;
+      return sum;
+    }
+    if (mark?.code === "H" && mark.kind === "F") {
+      sum += halfDayPoints(d.isHoliday, hasContract);
+    }
+    if (!d.isHoliday) sum += servicesOf(mark);
     return sum;
   });
 }
@@ -289,8 +458,13 @@ export type MonthSummary = {
   services: number;
   /** Services on Sundays and holidays: recorded, not counted. */
   holidayServices: number;
+  /** Half days count as 0.5. */
   ferieDays: number;
   feriePoints: number;
+  /** Days of rest, half days as 0.5: only a bearer on a contract has them. */
+  restDays: number;
+  /** Days of sick leave: always whole, worth nothing. */
+  sickDays: number;
 };
 
 /** The month's total taken apart, for the view of a single bearer. */
@@ -305,13 +479,25 @@ export function monthSummary(
     holidayServices: 0,
     ferieDays: 0,
     feriePoints: 0,
+    restDays: 0,
+    sickDays: 0,
   };
   days.forEach((d, i) => {
     const mark = marks[i];
     if (mark?.code === "F") {
       out.ferieDays++;
       out.feriePoints += holidayPoints(mark.notice, d.isHoliday, hasContract);
-    } else if (mark?.code === "L") {
+    } else if (mark?.code === "R") {
+      out.restDays++;
+    } else if (mark?.code === "M") {
+      out.sickDays++;
+    } else if (mark) {
+      if (mark.code === "H" && mark.kind === "F") {
+        out.ferieDays += 0.5;
+        out.feriePoints += halfDayPoints(d.isHoliday, hasContract);
+      } else if (mark.code === "H") {
+        out.restDays += 0.5;
+      }
       if (d.isHoliday) out.holidayServices += mark.services;
       else out.services += mark.services;
     }

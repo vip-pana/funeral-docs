@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+import { addBearer, bearerCard, deleteResource, unique } from "./helpers";
+
 /**
  * The page that used to be Impostazioni: vehicles and staff. The declarant and
  * the company moved to Clienti, the password to Impostazioni.
@@ -56,4 +58,30 @@ test("dalla sidebar si raggiungono le altre pagine", async ({ page }) => {
     await expect(page).toHaveURL(new RegExp(`${href}$`));
     await expect(page.locator("h1")).toContainText(title);
   }
+});
+
+test("la ricerca filtra i necrofori per nome", async ({ page }, info) => {
+  const found = unique(info, "Nicolò Cercato");
+  const other = unique(info, "Altro Nascosto");
+  await addBearer(page, found);
+  await addBearer(page, other);
+
+  const row = (name: string) =>
+    bearerCard(page).locator("tr", { hasText: name });
+  // Lowercase and without the accent, as it is typed on a phone.
+  await page.fill("#bearerSearch", "nicolo cercato");
+  await expect(row(found)).toBeVisible();
+  await expect(row(other)).toHaveCount(0);
+
+  await page.fill("#bearerSearch", "nessuno si chiama cosi");
+  await expect(
+    bearerCard(page).getByText("Nessun necroforo trovato"),
+  ).toBeVisible();
+
+  await page.fill("#bearerSearch", "");
+  await expect(row(found)).toBeVisible();
+  await expect(row(other)).toBeVisible();
+
+  await deleteResource(page, bearerCard, found);
+  await deleteResource(page, bearerCard, other);
 });

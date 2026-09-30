@@ -11,9 +11,18 @@ import {
   type CalendarDay,
   type DayMark,
   dayMarks,
+  HALF_DAY_LABEL,
+  HALF_KIND_LABEL,
+  type HalfDay,
+  halfKinds,
+  isTrial,
   markLabel,
   markSign,
   sameMark,
+  servicesOf,
+  trialAllowed,
+  withHalfDay,
+  withServices,
 } from "@/lib/calendar";
 import type { Bearer } from "@/lib/db/schema";
 import { cn } from "@/lib/utils";
@@ -33,13 +42,55 @@ export const LONG_DAY_FORMAT = new Intl.DateTimeFormat("it-IT", {
 
 export const utc = (date: string) => new Date(`${date}T00:00:00Z`);
 
-/** The colours of a mark outside the paper-sheet grid: ferie amber, work blue. */
+/**
+ * The colours of a mark outside the paper-sheet grid: ferie amber, rest
+ * violet, sick leave grey, work blue. A half day takes the colour of its
+ * half off.
+ */
 export function markTone(mark: DayMark | undefined): string {
   if (!mark) return "";
-  return mark.code === "F"
-    ? "bg-amber-500/15 text-amber-800 dark:text-amber-300"
-    : "bg-sky-500/15 text-sky-800 dark:text-sky-300";
+  const kind = mark.code === "H" ? mark.kind : mark.code;
+  if (kind === "F") return "bg-amber-500/15 text-amber-800 dark:text-amber-300";
+  if (kind === "R") {
+    return "bg-violet-500/15 text-violet-800 dark:text-violet-300";
+  }
+  if (kind === "M") return "bg-zinc-500/20 text-zinc-800 dark:text-zinc-200";
+  return "bg-sky-500/15 text-sky-800 dark:text-sky-300";
 }
+
+/**
+ * What a cell shows. Half a day off is a small F (ferie) or R (rest) beside
+ * the services, high for the morning and low for the afternoon.
+ */
+export function MarkGlyph({
+  mark,
+  isHoliday,
+  hasContract,
+}: {
+  mark: DayMark;
+  isHoliday: boolean;
+  hasContract: boolean;
+}) {
+  const sign = markSign(mark, isHoliday, hasContract);
+  if (mark.code !== "H") return <>{sign}</>;
+  return (
+    <span className="inline-flex h-[1.6em] items-stretch gap-px align-middle">
+      <span
+        data-half={mark.half}
+        data-kind={mark.kind}
+        className={cn(
+          "text-[0.65em] leading-none",
+          mark.half === "M" ? "self-start" : "self-end",
+        )}
+      >
+        {mark.kind}
+      </span>
+      {sign && <span className="self-center">{sign}</span>}
+    </span>
+  );
+}
+
+const HALVES: HalfDay[] = ["M", "P"];
 
 /**
  * The choices for one bearer on one day, then Svuota. Compact in the grid's
@@ -55,33 +106,121 @@ export function MarkOptions({
   bearer: Bearer;
   day: CalendarDay;
   mark: DayMark | undefined;
-  onPick: (mark: DayMark | null) => void;
+  /**
+   * `keepOpen` for a half day: the services of the other half are usually
+   * the next thing picked.
+   */
+  onPick: (mark: DayMark | null, keepOpen?: boolean) => void;
   large?: boolean;
 }) {
   const contract = bearer.hasContract;
+  const option = cn(
+    "flex w-full items-center justify-between rounded-sm px-2 py-1.5 text-sm",
+    "hover:bg-accent aria-pressed:bg-accent",
+    large &&
+      "h-14 gap-2 rounded-lg border px-3 text-left aria-pressed:border-primary aria-pressed:ring-2 aria-pressed:ring-primary/30",
+  );
+  const sign = cn("font-mono font-bold", large && "text-base");
+  // Whole days off first, then the halves, then the services.
+  const wholeDays = dayMarks(contract).filter(
+    (m) => m.code === "F" || m.code === "R" || m.code === "M",
+  );
+  const services = [1, 2, 3] as const;
   return (
     <>
       <div className={cn(large && "grid grid-cols-2 gap-2")}>
-        {dayMarks(contract).map((m) => (
+        {wholeDays.map((m) => (
           <button
             key={markLabel(m)}
             type="button"
             aria-pressed={sameMark(mark, m, contract)}
             onClick={() => onPick(m)}
-            className={cn(
-              "flex w-full items-center justify-between rounded-sm px-2 py-1.5 text-sm",
-              "hover:bg-accent aria-pressed:bg-accent",
-              large &&
-                "h-14 gap-2 rounded-lg border px-3 text-left aria-pressed:border-primary aria-pressed:ring-2 aria-pressed:ring-primary/30",
-            )}
+            className={option}
           >
             {markLabel(m, contract)}
-            <span className={cn("font-mono font-bold", large && "text-base")}>
-              {markSign(m, day.isHoliday, contract)}
-            </span>
+            <span className={sign}>{markSign(m, day.isHoliday, contract)}</span>
           </button>
         ))}
       </div>
+      {halfKinds(contract).map((kind) => (
+        <div key={kind}>
+          <p
+            className={cn(
+              "px-2 pt-2 pb-0.5 text-xs text-muted-foreground",
+              large && "px-0 pt-3",
+            )}
+          >
+            {HALF_KIND_LABEL[kind]} mezza giornata
+          </p>
+          <div className={cn("grid grid-cols-2", large ? "gap-2" : "gap-0.5")}>
+            {HALVES.map((half) => (
+              <button
+                key={half}
+                type="button"
+                aria-label={`${HALF_KIND_LABEL[kind]} ${HALF_DAY_LABEL[half].toLowerCase()}`}
+                aria-pressed={
+                  mark?.code === "H" && mark.kind === kind && mark.half === half
+                }
+                onClick={() => onPick(withHalfDay(mark, kind, half), true)}
+                className={option}
+              >
+                {HALF_DAY_LABEL[half]}
+                <span className={sign}>
+                  <MarkGlyph
+                    mark={{ code: "H", kind, half, services: 0 }}
+                    isHoliday={day.isHoliday}
+                    hasContract={contract}
+                  />
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+      <div className={cn("my-1 h-px bg-border", large && "my-2")} />
+      {/* The same services twice for a bearer who is not on a contract: the
+          second group records them as done in the trial period. */}
+      {(trialAllowed(contract) ? [false, true] : [false]).map((trial) => (
+        <div key={String(trial)}>
+          {trial && (
+            <p
+              className={cn(
+                "px-2 pt-2 pb-0.5 text-xs text-muted-foreground",
+                large && "px-0 pt-3",
+              )}
+            >
+              In prova
+            </p>
+          )}
+          <div className={cn(large && "grid grid-cols-2 gap-2")}>
+            {services.map((n) => {
+              const m = withServices(mark, n, trial);
+              const label = `${n === 1 ? "1 servizio" : `${n} servizi`}`;
+              return (
+                <button
+                  key={n}
+                  type="button"
+                  aria-label={trial ? `${label} in prova` : undefined}
+                  aria-pressed={
+                    servicesOf(mark) === n && isTrial(mark) === trial
+                  }
+                  onClick={() => onPick(m)}
+                  className={option}
+                >
+                  {label}
+                  <span className={sign}>
+                    {markSign(
+                      { code: "L", services: n, ...(trial && { trial }) },
+                      day.isHoliday,
+                      contract,
+                    )}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
       <div className={cn("my-1 h-px bg-border", large && "my-2")} />
       <button
         type="button"
@@ -107,7 +246,7 @@ export function MarkSheet({
 }: {
   target: { bearer: Bearer; day: CalendarDay } | null;
   mark: DayMark | undefined;
-  onPick: (mark: DayMark | null) => void;
+  onPick: (mark: DayMark | null, keepOpen?: boolean) => void;
   onClose: () => void;
 }) {
   return (

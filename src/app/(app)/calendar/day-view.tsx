@@ -10,14 +10,19 @@ import {
   type CalendarDay,
   type DayMark,
   markLabel,
-  markSign,
   serviceTotal,
 } from "@/lib/calendar";
 import type { Bearer } from "@/lib/db/schema";
 import { cn } from "@/lib/utils";
 
 import { key } from "./calendar-grid";
-import { LONG_DAY_FORMAT, MarkSheet, markTone, utc } from "./mark-menu";
+import {
+  LONG_DAY_FORMAT,
+  MarkGlyph,
+  MarkSheet,
+  markTone,
+  utc,
+} from "./mark-menu";
 
 const WEEKDAY = new Intl.DateTimeFormat("it-IT", {
   weekday: "short",
@@ -189,7 +194,15 @@ export function DayView({
                       : "border border-dashed text-muted-foreground",
                   )}
                 >
-                  {mark ? markSign(mark, current.isHoliday, contract) : "+"}
+                  {mark ? (
+                    <MarkGlyph
+                      mark={mark}
+                      isHoliday={current.isHoliday}
+                      hasContract={contract}
+                    />
+                  ) : (
+                    "+"
+                  )}
                 </span>
                 <span className="w-10 text-right" title="Totale del mese">
                   <span className="block text-sm font-semibold tabular-nums">
@@ -210,9 +223,9 @@ export function DayView({
         mark={
           openBearer ? marks.get(key(openBearer.id, current.date)) : undefined
         }
-        onPick={(m) => {
+        onPick={(m, keepOpen) => {
           if (openBearer) onChoose(openBearer.id, current.date, m);
-          setOpenBearer(null);
+          if (!keepOpen) setOpenBearer(null);
         }}
         onClose={() => setOpenBearer(null)}
       />

@@ -37,7 +37,12 @@ test("con il contratto le ferie sono una F senza punti", async ({
   const menu = page.locator("[data-slot=popover-content]");
   const entries = await menu.locator("button").allTextContents();
   expect(entries.filter((t) => t.startsWith("Ferie"))).toHaveLength(1);
-  await menu.getByRole("button", { name: /^Ferie/ }).click();
+  // The whole day, first in the menu: the half days below are named
+  // "Ferie mattina" and "Ferie pomeriggio".
+  await menu
+    .getByRole("button", { name: /^Ferie/ })
+    .first()
+    .click();
   await expect(cell).toHaveText("F");
 
   await page.reload();
