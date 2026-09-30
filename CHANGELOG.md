@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.0](https://github.com/vip-pana/funeral-docs/compare/v0.10.3...v0.11.0) (2026-09-30)
+
+
+### Funzionalità
+
+* drag the bearers into order on the calendar ([#42](https://github.com/vip-pana/funeral-docs/issues/42)) ([7cf084d](https://github.com/vip-pana/funeral-docs/commit/7cf084d5aff8357f0f675e1712def4ebc9a6c357))
+* let the clients' declarants be picked as the hearse driver ([#40](https://github.com/vip-pana/funeral-docs/issues/40)) ([e524f2b](https://github.com/vip-pana/funeral-docs/commit/e524f2b21046ca9ca368c885cf27a9ca997ae23e))
+
 ## [0.10.3](https://github.com/vip-pana/funeral-docs/compare/v0.10.2...v0.10.3) (2026-09-30)
 
 
