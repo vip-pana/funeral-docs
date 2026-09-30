@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.3](https://github.com/vip-pana/funeral-docs/compare/v0.10.2...v0.10.3) (2026-09-30)
+
+
+### Correzioni
+
+* exclude the Playwright config from the Docker image ([#38](https://github.com/vip-pana/funeral-docs/issues/38)) ([8a54a71](https://github.com/vip-pana/funeral-docs/commit/8a54a717d801aa63d222991247ed2b43f125b9ed))
+
 ## [0.10.2](https://github.com/vip-pana/funeral-docs/compare/v0.10.1...v0.10.2) (2026-09-29)
 
 
