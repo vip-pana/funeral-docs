@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/vip-pana/funeral-docs/compare/v0.11.0...v0.12.0) (2026-09-30)
+
+
+### Funzionalità
+
+* new calendar marks (half-day ferie, rest, sick leave, trial) and a wider month grid ([#43](https://github.com/vip-pana/funeral-docs/issues/43)) ([b945f57](https://github.com/vip-pana/funeral-docs/commit/b945f5740fa5f732b1c6b3cf952138ed326e78fe))
+
 ## [0.11.0](https://github.com/vip-pana/funeral-docs/compare/v0.10.3...v0.11.0) (2026-09-30)
 
 
