@@ -193,6 +193,18 @@
 .calendar .calendar-holiday {
   background: var(--calendar-holiday);
 }
+/* Today's column, laid over whatever colour the cell already has, so a
+   holiday stays red underneath. Screen only: the printed sheet is for the
+   whole month. */
+.calendar .calendar-today {
+  box-shadow: inset 0 0 0 100vmax
+    color-mix(in oklch, var(--primary) 16%, transparent);
+}
+@media print {
+  .calendar .calendar-today {
+    box-shadow: none;
+  }
+}
 
 @media print {
   @page {
