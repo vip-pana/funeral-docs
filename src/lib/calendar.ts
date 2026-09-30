@@ -126,13 +126,22 @@ export function bearerLabel(bearer: {
   return `${(bearer.shoulderHeight / 100).toFixed(2).replace(".", ",")} ${name}`;
 }
 
-/** Tallest first, as on the sheet; those without a height go last. */
-export function byShoulderHeight<
-  T extends { name: string; shoulderHeight: number | null },
->(a: T, b: T): number {
-  const ha = a.shoulderHeight ?? -1;
-  const hb = b.shoulderHeight ?? -1;
-  return hb - ha || a.name.localeCompare(b.name, "it");
+/**
+ * The list with `id` moved to where `overId` was, as a row dropped onto
+ * another lands: the rows in between shift by one. Unchanged if either is
+ * missing.
+ */
+export function moveOnto<T extends { id: string }>(
+  items: T[],
+  id: string,
+  overId: string,
+): T[] {
+  const from = items.findIndex((item) => item.id === id);
+  const to = items.findIndex((item) => item.id === overId);
+  if (from < 0 || to < 0 || from === to) return items;
+  const next = [...items];
+  next.splice(to, 0, ...next.splice(from, 1));
+  return next;
 }
 
 /**

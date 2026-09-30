@@ -16,6 +16,7 @@ import {
   type DayMark,
   daysOfMonth,
   monthLabel,
+  moveOnto,
   shiftMonth,
   todayIso,
   toMark,
@@ -23,7 +24,7 @@ import {
 import type { Bearer, BearerDay } from "@/lib/db/schema";
 import { cn } from "@/lib/utils";
 
-import { setDay } from "./actions";
+import { moveBearer, setDay } from "./actions";
 import { CalendarGrid, key } from "./calendar-grid";
 import { DayView } from "./day-view";
 import { PersonView } from "./person-view";
@@ -48,7 +49,7 @@ const MODES: { mode: CalendarMode; label: string; icon: typeof UserIcon }[] = [
  */
 export function CalendarView({
   month,
-  bearers,
+  bearers: savedBearers,
   days,
   initialMode,
   initialBearer,
@@ -74,6 +75,13 @@ export function CalendarView({
       else next.delete(change.k);
       return next;
     },
+  );
+
+  // The order moves as soon as a row is dropped, before the server saves it.
+  const [bearers, applyOrder] = useOptimistic(
+    savedBearers,
+    (current, move: { id: string; overId: string }) =>
+      moveOnto(current, move.id, move.overId),
   );
 
   const calendar = daysOfMonth(month);
@@ -113,6 +121,14 @@ export function CalendarView({
     startTransition(async () => {
       applyMark({ k: key(bearer, date), mark });
       const { error } = await setDay(bearer, date, mark);
+      if (error) toast.error(error);
+    });
+  }
+
+  function reorder(id: string, overId: string) {
+    startTransition(async () => {
+      applyOrder({ id, overId });
+      const { error } = await moveBearer(id, overId);
       if (error) toast.error(error);
     });
   }
@@ -242,6 +258,7 @@ export function CalendarView({
           marks={marks}
           today={today}
           onChoose={choose}
+          onReorder={reorder}
         />
       </div>
     </div>

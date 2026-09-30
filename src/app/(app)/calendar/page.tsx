@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 import { listBearerDays } from "@/lib/bearer-days";
-import { listBearers } from "@/lib/bearers";
-import { byShoulderHeight, parseMonth } from "@/lib/calendar";
+import { listBearersByPosition } from "@/lib/bearers";
+import { parseMonth } from "@/lib/calendar";
 
 import { type CalendarMode, CalendarView } from "./calendar-view";
 
@@ -25,7 +25,7 @@ export default async function CalendarioPage({
   const params = await searchParams;
   const month = parseMonth(params.month);
   const [bearers, days] = await Promise.all([
-    listBearers(),
+    listBearersByPosition(),
     listBearerDays(month),
   ]);
   const mode = MODES.find((m) => m === params.view) ?? null;
@@ -45,7 +45,7 @@ export default async function CalendarioPage({
           // Keyed on the month so the optimistic state starts over on change.
           key={month}
           month={month}
-          bearers={[...bearers].sort(byShoulderHeight)}
+          bearers={bearers}
           days={days}
           initialMode={mode}
           initialBearer={params.who}

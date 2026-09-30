@@ -141,6 +141,13 @@
       "when": 1790766379526,
       "tag": "0019_past_junta",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "6",
+      "when": 1790768694594,
+      "tag": "0020_short_power_man",
+      "breakpoints": true
     }
   ]
 }
