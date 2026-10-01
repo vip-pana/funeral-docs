@@ -36,6 +36,7 @@ import {
   type BearerFormState,
   setBearerContract,
   setBearerDriver,
+  setBearerNote,
   setBearerShoulderHeight,
 } from "./bearer-actions";
 import { DeleteBearerButton } from "./delete-bearer-button";
@@ -87,7 +88,8 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
           nella scelta del conducente, il cui nome finisce nel documento 4.
           Spunta Contratto per chi e&apos; assunto, a tempo determinato o
           indeterminato, e non a chiamata: nel calendario le sue ferie non danno
-          punti.
+          punti. La nota compare in piccolo sotto il calendario, ma non nella
+          stampa.
         </CardDescription>
       </CardHeader>
 
@@ -156,6 +158,7 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
                       cm
                     </label>
                   </div>
+                  <NoteInput bearer={b} />
                 </li>
               ))}
             </ul>
@@ -171,6 +174,7 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
                     <TableHead>Conducente</TableHead>
                     <TableHead>Contratto</TableHead>
                     <TableHead>Altezza spalla (cm)</TableHead>
+                    <TableHead>Nota</TableHead>
                     <TableHead className="text-right">Azioni</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -203,6 +207,9 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
                       </TableCell>
                       <TableCell>
                         <ShoulderHeightInput bearer={b} />
+                      </TableCell>
+                      <TableCell className="min-w-56">
+                        <NoteInput bearer={b} />
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
@@ -247,6 +254,16 @@ export function BearersCard({ bearers }: { bearers: Bearer[] }) {
             max={200}
             placeholder="Es. 145"
             error={err("bearerShoulderHeight")}
+          />
+          {/* On a row of its own under name and height, but typed right after
+              them. */}
+          <Field
+            name="bearerNote"
+            label="Nota"
+            maxLength={200}
+            placeholder="Es. solo la mattina il sabato"
+            className="sm:col-span-2 sm:col-start-1 sm:row-start-2"
+            error={err("bearerNote")}
           />
           {/* Radix renders its own hidden input for `name`, which posts "on"
               when ticked and nothing at all when not. */}
@@ -306,6 +323,33 @@ function ShoulderHeightInput({ bearer }: { bearer: Bearer }) {
       max={200}
       className="w-24"
       aria-label={`${bearer.name}: altezza alla spalla in cm`}
+      defaultValue={saved}
+      onBlur={(e) => save(e.currentTarget)}
+    />
+  );
+}
+
+/** Saved on blur, like the shoulder height. */
+function NoteInput({ bearer }: { bearer: Bearer }) {
+  const saved = bearer.note;
+
+  async function save(input: HTMLInputElement) {
+    if (input.value.trim() === saved) return;
+    const { error } = await setBearerNote(bearer.id, input.value);
+    if (error) {
+      toast.error(error);
+      input.value = saved;
+    } else {
+      toast.success("Nota salvata.");
+    }
+  }
+
+  return (
+    <Input
+      key={saved}
+      maxLength={200}
+      placeholder="Nota…"
+      aria-label={`${bearer.name}: nota`}
       defaultValue={saved}
       onBlur={(e) => save(e.currentTarget)}
     />

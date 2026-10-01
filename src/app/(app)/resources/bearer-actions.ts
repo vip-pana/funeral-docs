@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 
 import { db, schema } from "@/lib/db";
 import { collectErrors } from "@/lib/form-errors";
-import { bearerSchema, shoulderHeight } from "@/lib/validation";
+import { bearerNote, bearerSchema, shoulderHeight } from "@/lib/validation";
 
 /**
  * Kept separate from `actions.ts`: saving here is independent of saving the
@@ -38,6 +38,7 @@ export async function addBearer(
     isDriver: formData.get("bearerIsDriver"),
     hasContract: formData.get("bearerHasContract"),
     shoulderHeight: formData.get("bearerShoulderHeight"),
+    note: formData.get("bearerNote") ?? undefined,
   });
 
   if (!parsed.success) {
@@ -47,6 +48,7 @@ export async function addBearer(
       errors: collectErrors(parsed.error.issues, {
         name: "bearerName",
         shoulderHeight: "bearerShoulderHeight",
+        note: "bearerNote",
       }),
       message: "Controlla i campi segnalati.",
     };
@@ -83,6 +85,7 @@ export async function updateBearer(
     isDriver: formData.get("editBearerIsDriver"),
     hasContract: formData.get("editBearerHasContract"),
     shoulderHeight: formData.get("editBearerShoulderHeight"),
+    note: formData.get("editBearerNote") ?? undefined,
   });
 
   if (!parsed.success) {
@@ -90,6 +93,7 @@ export async function updateBearer(
       errors: collectErrors(parsed.error.issues, {
         name: "editBearerName",
         shoulderHeight: "editBearerShoulderHeight",
+        note: "editBearerNote",
       }),
       message: "Controlla i campi segnalati.",
     };
@@ -149,6 +153,23 @@ export async function setBearerShoulderHeight(
     .set({ shoulderHeight: parsed.data })
     .where(eq(schema.bearers.id, id));
   revalidateBearerViews();
+  return {};
+}
+
+/** Edited straight from the table row, like the shoulder height. */
+export async function setBearerNote(
+  id: string,
+  value: string,
+): Promise<{ error?: string }> {
+  const parsed = bearerNote.safeParse(value);
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+  await db
+    .update(schema.bearers)
+    .set({ note: parsed.data })
+    .where(eq(schema.bearers.id, id));
+  revalidateBearerViews();
+  revalidatePath("/calendar");
   return {};
 }
 
