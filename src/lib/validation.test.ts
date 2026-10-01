@@ -490,6 +490,18 @@ describe("vehicleSchema and bearerSchema", () => {
     }
   });
 
+  it("trims the note and keeps a missing one empty", () => {
+    const typed = bearerSchema.safeParse({ name: "Paolo", note: " sabato " });
+    expect(typed.success && typed.data.note).toBe("sabato");
+    const none = bearerSchema.safeParse({ name: "Paolo" });
+    expect(none.success && none.data.note).toBe("");
+  });
+
+  it("rejects a note longer than 200 characters", () => {
+    const note = "a".repeat(201);
+    expect(bearerSchema.safeParse({ name: "Paolo", note }).success).toBe(false);
+  });
+
   /**
    * A checkbox posts "on" when ticked and nothing at all when not, so the
    * absent value has to come out false rather than fail as missing.

@@ -150,6 +150,12 @@ export const bearers = sqliteTable("bearers", {
    * bearers go last.
    */
   position: integer("position").notNull().default(0),
+  /**
+   * Free text for the office, shown under the month's calendar on screen and
+   * left off the printed sheet. Empty rather than null, like the optional
+   * fields of a record.
+   */
+  note: text("note").notNull().default(""),
   createdAt: text("created_at")
     .notNull()
     .default(sql`(datetime('now'))`),

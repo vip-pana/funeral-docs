@@ -1,12 +1,22 @@
 "use client";
 
-import { RotateCcwIcon } from "lucide-react";
+import { PencilIcon, RotateCcwIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Field as FieldRoot,
   FieldDescription,
@@ -23,7 +33,7 @@ import {
 } from "@/components/ui/table";
 import { bearerLabel, type DayMark } from "@/lib/calendar";
 import type { Bearer } from "@/lib/db/schema";
-import { availability, rankTeams } from "@/lib/extraction";
+import { availability, type Availability, rankTeams } from "@/lib/extraction";
 import { cn } from "@/lib/utils";
 
 import { addService } from "../actions";
@@ -83,7 +93,6 @@ export function ExtractionView({
   );
   const team = teams[variant % teams.length];
   const selected = manual ?? team.ids;
-  const picked = rows.filter((r) => selected.includes(r.bearer.id));
 
   // Tallest first, as on the sheet; those without a height last.
   const sorted = [...rows].sort(
@@ -91,16 +100,18 @@ export function ExtractionView({
       (b.bearer.shoulderHeight ?? -1) - (a.bearer.shoulderHeight ?? -1) ||
       a.bearer.name.localeCompare(b.bearer.name, "it"),
   );
+  const picked = sorted.filter((r) => selected.includes(r.bearer.id));
 
   const heights = picked
     .map((r) => r.bearer.shoulderHeight)
     .filter((h): h is number => h != null);
   const day = DAY_FORMAT.format(utc(date));
 
-  function toggle(id: string, on: boolean) {
-    setManual(
-      on ? [...selected, id] : selected.filter((other) => other !== id),
-    );
+  function pick(ids: string[]) {
+    const same =
+      ids.length === selected.length &&
+      ids.every((id) => selected.includes(id));
+    if (!same) setManual(ids);
   }
 
   function confirm() {
@@ -213,6 +224,15 @@ export function ExtractionView({
           )}
         </div>
         <div className="flex flex-wrap gap-2">
+          <PickDialog
+            rows={sorted}
+            status={status}
+            selected={selected}
+            size={size}
+            date={date}
+            day={day}
+            onConfirm={pick}
+          />
           <Button
             variant="outline"
             onClick={() => {
@@ -231,7 +251,134 @@ export function ExtractionView({
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border">
+      <div
+        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+        data-testid="extraction-picked"
+      >
+        {picked.length === 0 ? (
+          <p className="text-sm text-muted-foreground sm:col-span-full">
+            Nessun necroforo scelto: aggiungili con Modifica.
+          </p>
+        ) : (
+          picked.map(({ bearer, total }) => {
+            const s = status.get(bearer.id)!;
+            const note = s.available ? s.note : undefined;
+            return (
+              <div
+                key={bearer.id}
+                data-bearer={bearer.id}
+                className="space-y-1 rounded-xl border bg-card px-4 py-3"
+              >
+                <p className="font-medium">{bearerLabel(bearer)}</p>
+                <p className="text-sm text-muted-foreground">
+                  {bearer.shoulderHeight == null
+                    ? "altezza mancante"
+                    : `altezza ${metres(bearer.shoulderHeight)}`}
+                  {` · Tot. al ${Number(date.slice(8))}: ${total}`}
+                </p>
+                {note && <p className="text-sm">{note}</p>}
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The full list, to correct the proposal by hand. The ticks are a draft until
+ * Conferma: closing the dialog any other way leaves the choice as it was.
+ */
+function PickDialog({
+  rows,
+  status,
+  selected,
+  size,
+  date,
+  day,
+  onConfirm,
+}: {
+  rows: ExtractionRow[];
+  status: Map<string, Availability>;
+  selected: string[];
+  size: number;
+  date: string;
+  day: string;
+  onConfirm: (ids: string[]) => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline">
+          <PencilIcon />
+          Modifica
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>Necrofori del {day}</DialogTitle>
+          <DialogDescription>
+            Spunta chi va al funerale, poi conferma.
+          </DialogDescription>
+        </DialogHeader>
+        {/* Mounted only while open, so each opening starts from the current
+            choice. */}
+        {open && (
+          <PickList
+            rows={rows}
+            status={status}
+            selected={selected}
+            size={size}
+            date={date}
+            day={day}
+            onConfirm={(ids) => {
+              onConfirm(ids);
+              setOpen(false);
+            }}
+          />
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function PickList({
+  rows,
+  status,
+  selected,
+  size,
+  date,
+  day,
+  onConfirm,
+}: {
+  rows: ExtractionRow[];
+  status: Map<string, Availability>;
+  selected: string[];
+  size: number;
+  date: string;
+  day: string;
+  onConfirm: (ids: string[]) => void;
+}) {
+  const [draft, setDraft] = useState(selected);
+
+  function toggle(id: string, on: boolean) {
+    setDraft(on ? [...draft, id] : draft.filter((other) => other !== id));
+  }
+
+  return (
+    <>
+      <p
+        className={cn(
+          "text-sm font-medium",
+          draft.length !== size && "text-amber-700 dark:text-amber-400",
+        )}
+      >
+        {draft.length} scelt{draft.length === 1 ? "o" : "i"} · ne servono {size}
+      </p>
+      <div className="max-h-[60vh] overflow-auto rounded-xl border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -247,9 +394,9 @@ export function ExtractionView({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sorted.map(({ bearer, total }) => {
+            {rows.map(({ bearer, total }) => {
               const s = status.get(bearer.id)!;
-              const on = selected.includes(bearer.id);
+              const on = draft.includes(bearer.id);
               return (
                 <TableRow
                   key={bearer.id}
@@ -288,6 +435,12 @@ export function ExtractionView({
           </TableBody>
         </Table>
       </div>
-    </div>
+      <DialogFooter>
+        <DialogClose asChild>
+          <Button variant="outline">Annulla</Button>
+        </DialogClose>
+        <Button onClick={() => onConfirm(draft)}>Conferma</Button>
+      </DialogFooter>
+    </>
   );
 }

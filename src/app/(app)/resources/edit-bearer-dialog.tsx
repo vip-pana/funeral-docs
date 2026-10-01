@@ -92,6 +92,14 @@ function EditBearerForm({
         defaultValue={bearer.shoulderHeight ?? ""}
         error={err("editBearerShoulderHeight")}
       />
+      <Field
+        name="editBearerNote"
+        label="Nota"
+        maxLength={200}
+        defaultValue={bearer.note}
+        hint="Compare sotto il calendario, non nella stampa."
+        error={err("editBearerNote")}
+      />
       <label className="flex items-center gap-2 text-sm">
         <Checkbox
           id="editBearerIsDriver"

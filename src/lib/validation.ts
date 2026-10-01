@@ -151,11 +151,17 @@ const checkbox = z
   .optional()
   .transform((v) => v === "on" || v === "true");
 
+/** Short enough to stay one line under the calendar. */
+export const bearerNote = optionalText.pipe(
+  z.string().max(200, "Nota: massimo 200 caratteri"),
+);
+
 export const bearerSchema = z.object({
   name: requiredText("Nome"),
   isDriver: checkbox,
   hasContract: checkbox,
   shoulderHeight,
+  note: bearerNote,
 });
 
 /**

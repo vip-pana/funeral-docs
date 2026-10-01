@@ -106,6 +106,8 @@ export function CalendarGrid({
     }),
   );
   const ids = bearers.map((b) => b.id);
+  // Screen only: the printed sheet goes on a wall.
+  const noted = bearers.filter((b) => b.note);
 
   function drop({ active, over }: DragEndEvent) {
     if (!over || active.id === over.id) return;
@@ -148,26 +150,20 @@ export function CalendarGrid({
           >
             <colgroup>
               <col className="w-56" />
-              <col className="w-10" />
               {thisMonth && <col className="w-10 print:hidden" />}
               {calendar.map((d) => (
                 <col key={d.day} />
               ))}
+              <col className="w-10" />
             </colgroup>
             <thead>
               <tr className="calendar-head">
                 <th className="calendar-sunday sticky left-0 z-10 bg-inherit px-1.5 py-1.5 text-left font-semibold print:static">
                   {monthLabel(month)}
                 </th>
-                <th
-                  className="sticky left-56 z-10 bg-inherit py-1.5 text-center font-semibold print:static"
-                  title="Servizi del mese"
-                >
-                  Tot.
-                </th>
                 {thisMonth && (
                   <th
-                    className="calendar-today sticky left-[16.5rem] z-10 bg-inherit py-1.5 text-center font-semibold print:hidden"
+                    className="calendar-today sticky left-56 z-10 bg-inherit py-1.5 text-center font-semibold print:hidden"
                     title="Totale fino a oggi: le ferie ancora da venire non contano"
                   >
                     Oggi
@@ -193,6 +189,12 @@ export function CalendarGrid({
                     </span>
                   </th>
                 ))}
+                <th
+                  className="calendar-total sticky right-0 z-10 py-1.5 text-center font-semibold print:static"
+                  title="Servizi del mese"
+                >
+                  Tot.
+                </th>
               </tr>
             </thead>
             <SortableContext items={ids} strategy={verticalListSortingStrategy}>
@@ -227,13 +229,10 @@ export function CalendarGrid({
                               </span>
                             </div>
                           </th>
-                          <td className="sticky left-56 z-10 bg-inherit text-center font-bold print:static">
-                            {totals.at(-1) || ""}
-                          </td>
                           {thisMonth && (
                             <td
                               data-total-today
-                              className="calendar-today sticky left-[16.5rem] z-10 bg-inherit text-center font-bold print:hidden"
+                              className="calendar-today sticky left-56 z-10 bg-inherit text-center font-bold print:hidden"
                             >
                               {totals[todayIndex] || ""}
                             </td>
@@ -302,6 +301,12 @@ export function CalendarGrid({
                               </td>
                             );
                           })}
+                          <td
+                            data-total
+                            className="calendar-total sticky right-0 z-10 text-center font-bold print:static"
+                          >
+                            {totals.at(-1) || ""}
+                          </td>
                         </>
                       )}
                     </SortableRow>
@@ -311,6 +316,24 @@ export function CalendarGrid({
             </SortableContext>
           </table>
         </div>
+        {noted.length > 0 && (
+          <div
+            data-testid="calendar-notes"
+            className="mt-1 border-t pt-1 text-[11px] print:hidden"
+          >
+            <p className="font-medium uppercase">Note</p>
+            <ul className="text-muted-foreground">
+              {noted.map((b) => (
+                <li key={b.id}>
+                  <span className="font-semibold text-foreground">
+                    {bearerLabel(b)}
+                  </span>
+                  : {b.note}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         <p className="calendar-legend mt-1 flex flex-wrap gap-x-8 gap-y-0.5 border-t pt-1 text-[10px] font-medium uppercase">
           {thisMonth && (
             <span className="print:hidden">

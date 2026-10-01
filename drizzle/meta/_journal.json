@@ -162,6 +162,13 @@
       "when": 1790787800861,
       "tag": "0022_sparkling_lightspeed",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "6",
+      "when": 1790870434154,
+      "tag": "0023_pale_hitman",
+      "breakpoints": true
     }
   ]
 }

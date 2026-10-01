@@ -29,8 +29,7 @@ test("con il contratto le ferie sono una F senza punti", async ({
   });
   const total = page
     .locator("tr", { has: page.locator("th", { hasText: name.toUpperCase() }) })
-    .locator("td")
-    .first();
+    .locator("[data-total]");
 
   await page.goto(`/calendar?month=${MONTH}&view=mese`);
   await cell.click();
