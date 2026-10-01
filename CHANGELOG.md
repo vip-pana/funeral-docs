@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.13.0](https://github.com/vip-pana/funeral-docs/compare/v0.12.0...v0.13.0) (2026-10-01)
+
+
+### Funzionalità
+
+* propose the bearers for a funeral, and lay out the record's bearers in columns ([#45](https://github.com/vip-pana/funeral-docs/issues/45)) ([50419f7](https://github.com/vip-pana/funeral-docs/commit/50419f720ec4c69e4a926a53a87aec39be9e2962))
+* show the total up to today beside the month's total ([#47](https://github.com/vip-pana/funeral-docs/issues/47)) ([27f7564](https://github.com/vip-pana/funeral-docs/commit/27f7564ce92d1ecff997ad9fcae2accbf48fb91b))
+
 ## [0.12.0](https://github.com/vip-pana/funeral-docs/compare/v0.11.0...v0.12.0) (2026-09-30)
 
 
