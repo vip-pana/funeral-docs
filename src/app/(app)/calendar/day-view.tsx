@@ -11,6 +11,7 @@ import {
   type DayMark,
   markLabel,
   serviceTotal,
+  totalUpTo,
 } from "@/lib/calendar";
 import type { Bearer } from "@/lib/db/schema";
 import { cn } from "@/lib/utils";
@@ -206,13 +207,30 @@ export function DayView({
                     "+"
                   )}
                 </span>
-                <span className="w-10 text-right" title="Totale del mese">
-                  <span className="block text-sm font-semibold tabular-nums">
-                    {serviceTotal(rowMarks, calendar, contract)}
+                {/* Up to the day on screen, what deciding who works goes by;
+                    the month's total, ferie to come included, beside it. */}
+                <span
+                  className="w-12 text-right"
+                  title={`Totale fino al ${current.day}`}
+                >
+                  <span
+                    className="block text-sm font-semibold tabular-nums"
+                    data-testid="day-total"
+                  >
+                    {totalUpTo(rowMarks, calendar, current.date, contract)}
                   </span>
                   <span className="block text-[10px] text-muted-foreground">
-                    tot.
+                    al {current.day}
                   </span>
+                </span>
+                <span
+                  className="w-10 text-right text-muted-foreground"
+                  title="Totale del mese"
+                >
+                  <span className="block text-sm tabular-nums">
+                    {serviceTotal(rowMarks, calendar, contract)}
+                  </span>
+                  <span className="block text-[10px]">mese</span>
                 </span>
               </button>
             </li>

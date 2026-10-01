@@ -93,6 +93,11 @@ export function CalendarGrid({
     box.scrollLeft = cell.offsetLeft - box.clientWidth / 2;
   }, []);
 
+  // The total up to today has a column of its own, in the current month only:
+  // in a past one it is the Tot., in a future one nothing.
+  const todayIndex = calendar.findIndex((d) => d.date === today);
+  const thisMonth = todayIndex >= 0;
+
   const sensors = useSensors(
     // A few pixels before a drag starts, so a tap on the grip is not one.
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -134,13 +139,17 @@ export function CalendarGrid({
           className="overflow-x-auto overscroll-x-contain print:overflow-visible"
         >
           <table
-            className="calendar w-full min-w-[66rem] table-fixed text-xs print:min-w-0"
+            className={cn(
+              "calendar w-full table-fixed text-xs print:min-w-0",
+              thisMonth ? "min-w-[68.5rem]" : "min-w-[66rem]",
+            )}
             // Print stretches the rows to fill the sheet, so it needs the count.
             style={{ "--calendar-rows": bearers.length } as CSSProperties}
           >
             <colgroup>
               <col className="w-56" />
               <col className="w-10" />
+              {thisMonth && <col className="w-10 print:hidden" />}
               {calendar.map((d) => (
                 <col key={d.day} />
               ))}
@@ -156,6 +165,14 @@ export function CalendarGrid({
                 >
                   Tot.
                 </th>
+                {thisMonth && (
+                  <th
+                    className="calendar-today sticky left-[16.5rem] z-10 bg-inherit py-1.5 text-center font-semibold print:hidden"
+                    title="Totale fino a oggi: le ferie ancora da venire non contano"
+                  >
+                    Oggi
+                  </th>
+                )}
                 {calendar.map((d) => (
                   <th
                     key={d.day}
@@ -213,6 +230,14 @@ export function CalendarGrid({
                           <td className="sticky left-56 z-10 bg-inherit text-center font-bold print:static">
                             {totals.at(-1) || ""}
                           </td>
+                          {thisMonth && (
+                            <td
+                              data-total-today
+                              className="calendar-today sticky left-[16.5rem] z-10 bg-inherit text-center font-bold print:hidden"
+                            >
+                              {totals[todayIndex] || ""}
+                            </td>
+                          )}
                           {calendar.map((d, j) => {
                             const k = key(b.id, d.date);
                             const mark = rowMarks[j];
@@ -287,6 +312,11 @@ export function CalendarGrid({
           </table>
         </div>
         <p className="calendar-legend mt-1 flex flex-wrap gap-x-8 gap-y-0.5 border-t pt-1 text-[10px] font-medium uppercase">
+          {thisMonth && (
+            <span className="print:hidden">
+              Oggi = totale fino a oggi, senza le ferie ancora da venire
+            </span>
+          )}
           <span>Ferie avviso 48 ore = F1 (festivo F4)</span>
           <span>Ferie avviso 24 ore = F2 (festivo F8)</span>
           <span>

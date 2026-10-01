@@ -31,7 +31,7 @@ import { DAY_FORMAT, utc } from "../mark-menu";
 
 export type ExtractionRow = {
   bearer: Bearer;
-  /** The month's total so far, as in the Tot. column. */
+  /** The month's total up to the funeral's day, that day included. */
   total: number;
   /** What the chosen day already holds. */
   mark: DayMark | undefined;
@@ -237,8 +237,11 @@ export function ExtractionView({
             <TableRow>
               <TableHead className="w-10" />
               <TableHead>Necroforo</TableHead>
-              <TableHead className="text-right" title="Totale del mese">
-                Tot.
+              <TableHead
+                className="text-right"
+                title={`Totale del mese fino al ${day}`}
+              >
+                Tot. al {Number(date.slice(8))}
               </TableHead>
               <TableHead>Il {day}</TableHead>
             </TableRow>

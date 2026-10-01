@@ -17,6 +17,7 @@ import {
   monthLabel,
   todayIso,
   toMark,
+  totalUpTo,
   withHalfDay,
   withServices,
   weekdayIndex,
@@ -537,6 +538,38 @@ describe("calendar helpers", () => {
       expect(sameMark(pp, { code: "L", services: 2 })).toBe(false);
       expect(sameMark(pp, pp)).toBe(true);
       expect(isTrial(pp)).toBe(true);
+    });
+  });
+
+  describe("totalUpTo", () => {
+    const days = daysOfMonth("2026-12");
+    // A service on the 9th and ferie on the 21st.
+    const marks = days.map((d) =>
+      d.day === 9
+        ? ({ code: "L", services: 2 } as const)
+        : d.day === 21
+          ? ({ code: "F", notice: 48 } as const)
+          : undefined,
+    );
+
+    it("leaves out the ferie still to come", () => {
+      expect(totalUpTo(marks, days, "2026-12-15")).toBe(2);
+      expect(serviceTotal(marks, days)).toBe(3);
+    });
+
+    it("counts the day itself", () => {
+      expect(totalUpTo(marks, days, "2026-12-08")).toBe(0);
+      expect(totalUpTo(marks, days, "2026-12-09")).toBe(2);
+      expect(totalUpTo(marks, days, "2026-12-21")).toBe(3);
+    });
+
+    it("is 0 before the month and the whole total after it", () => {
+      expect(totalUpTo(marks, days, "2026-11-30")).toBe(0);
+      expect(totalUpTo(marks, days, "2027-01-05")).toBe(3);
+    });
+
+    it("leaves out the ferie of a bearer on a contract", () => {
+      expect(totalUpTo(marks, days, "2026-12-31", true)).toBe(2);
     });
   });
 });
