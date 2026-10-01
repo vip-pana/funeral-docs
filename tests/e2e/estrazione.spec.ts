@@ -34,13 +34,21 @@ test("si scelgono i necrofori a mano e il servizio va sul calendario", async ({
   await expect(cell(away)).toHaveText(/^F1/);
 
   await page.goto(`/calendar/estrazione?date=${DATE}`);
-  const row = (name: string) => page.locator("tr", { hasText: name });
+  const summary = page.getByTestId("extraction-summary");
+  const cards = page.getByTestId("extraction-picked");
+  const dialog = page.getByRole("dialog");
+  const row = (name: string) => dialog.locator("tr", { hasText: name });
+  const edit = page.getByRole("button", { name: "Modifica" });
+
+  // The list lives in the dialog: unavailable bearers have no box to tick.
+  await edit.click();
   await expect(row(away)).toContainText("Non disponibile: Ferie");
   await expect(row(away).getByRole("checkbox")).toHaveCount(0);
+  await dialog.getByRole("button", { name: "Annulla" }).click();
+  await expect(dialog).toBeHidden();
 
   // Ricalcola moves on to another proposal, as many times as wanted: every
   // real bearer has 0 in that month, so there are plenty.
-  const summary = page.getByTestId("extraction-summary");
   await expect(summary).toContainText("Proposta 1 di");
   const recalc = page.getByRole("button", { name: "Ricalcola proposta" });
   await recalc.click();
@@ -48,12 +56,22 @@ test("si scelgono i necrofori a mano e il servizio va sul calendario", async ({
   await recalc.click();
   await expect(summary).toContainText("Proposta 3 di");
 
-  // Only the two of them: the proposal's ticks come off first.
-  const ticked = page.getByRole("checkbox", { checked: true });
-  while ((await ticked.count()) > 0) await ticked.first().click();
-  await page.getByRole("checkbox", { name: `Scegli ${first}` }).click();
-  await page.getByRole("checkbox", { name: `Scegli ${second}` }).click();
+  // Only the two of them: the proposal's ticks come off first. Nothing
+  // changes on the page until Conferma.
+  const ticked = dialog.getByRole("checkbox", { checked: true });
+  async function choose(...names: string[]) {
+    await edit.click();
+    while ((await ticked.count()) > 0) await ticked.first().click();
+    for (const name of names) {
+      await dialog.getByRole("checkbox", { name: `Scegli ${name}` }).click();
+    }
+    await dialog.getByRole("button", { name: "Conferma" }).click();
+    await expect(dialog).toBeHidden();
+  }
+  await choose(first, second);
   await expect(summary).toContainText("2 scelti");
+  await expect(cards).toContainText(first, { ignoreCase: true });
+  await expect(cards).toContainText(second, { ignoreCase: true });
 
   const confirm = page.getByRole("button", {
     name: `Segna il servizio il ${DAY}`,
@@ -62,14 +80,18 @@ test("si scelgono i necrofori a mano e il servizio va sul calendario", async ({
   await expect(
     page.locator("[data-sonner-toast]", { hasText: "Servizio segnato" }),
   ).toBeVisible();
-  // The totals moved, and the table says what the day now holds.
+  // The totals moved, and the list says what the day now holds.
+  await edit.click();
   await expect(row(first)).toContainText("1 servizio già segnato");
+  await dialog.getByRole("button", { name: "Annulla" }).click();
 
   // Once more by hand: the second service of the day.
-  while ((await ticked.count()) > 0) await ticked.first().click();
-  await page.getByRole("checkbox", { name: `Scegli ${first}` }).click();
+  await choose(first);
+  await expect(cards).toContainText("1 servizio già segnato");
   await confirm.click();
+  await edit.click();
   await expect(row(first)).toContainText("2 servizi già segnati");
+  await dialog.getByRole("button", { name: "Annulla" }).click();
 
   await page.goto(`/calendar?month=${DATE.slice(0, 7)}&view=mese`);
   await expect(cell(first)).toHaveText(/^X/);
