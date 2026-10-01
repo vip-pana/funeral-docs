@@ -169,10 +169,11 @@ export const bearers = sqliteTable("bearers", {
  * of ferie, which carries which half and the services done in the other (0
  * to 3), or "R" for a rest, only for bearers on a contract: the whole day
  * with no half, or half of it with the services of the other, like "H", or
- * "M" for sick leave, always the whole day and carrying nothing else. The
- * services of a bearer in their trial period are flagged by `trial`. A code
- * rather than a boolean: the paper sheet it replaces has more kinds of day
- * (E, I, V) that will be added later.
+ * "M" for sick leave, or "V" for a day of travel, both always the whole day
+ * and carrying nothing else. Half a day of travel is `travel_half` beside any
+ * of the others but a whole day. The services of a bearer in their trial
+ * period are flagged by `trial`. A code rather than a boolean: the paper sheet
+ * it replaces has more kinds of day (E, I) that will be added later.
  *
  * The days go with the bearer: once they are off the list, their past
  * holidays have no row to be shown on.
@@ -199,6 +200,11 @@ export const bearerDays = sqliteTable(
      * the other half, 0 to 3.
      */
     halfDay: text("half_day"),
+    /**
+     * Half a day of travel, "M" or "P", never the half already off: on a
+     * worked day ("L", then with 0 to 3 services) or half a day off.
+     */
+    travelHalf: text("travel_half"),
     /**
      * The services were done in the trial period (prova), written P, PP, PPP.
      * Only on a day with services, and never for a bearer on a contract.

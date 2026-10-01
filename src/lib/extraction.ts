@@ -8,7 +8,12 @@
  * so that by the end of the month everyone has done about the same.
  */
 
-import { type DayMark, HALF_DAY_LABEL, HALF_KIND_LABEL } from "@/lib/calendar";
+import {
+  type DayMark,
+  HALF_DAY_LABEL,
+  HALF_KIND_LABEL,
+  TRAVEL_LABEL,
+} from "@/lib/calendar";
 
 export type Availability =
   { available: true; note?: string } | { available: false; reason: string };
@@ -23,18 +28,27 @@ export function availability(mark: DayMark | undefined): Availability {
       return { available: false, reason: "Riposo" };
     case "M":
       return { available: false, reason: "Malattia" };
+    case "V":
+      return { available: false, reason: TRAVEL_LABEL };
     case "L":
-      if (mark.services === 3) {
-        return { available: false, reason: "Già 3 servizi" };
-      }
-      return { available: true, note: servicesNote(mark.services) };
     case "H": {
       if (mark.services === 3) {
         return { available: false, reason: "Già 3 servizi" };
       }
-      const off = `${HALF_KIND_LABEL[mark.kind]} ${HALF_DAY_LABEL[mark.half].toLowerCase()}`;
-      const done = mark.services ? `, ${servicesNote(mark.services)}` : "";
-      return { available: true, note: `${off}${done}` };
+      const notes = [];
+      if (mark.code === "H") {
+        notes.push(
+          `${HALF_KIND_LABEL[mark.kind]} ${HALF_DAY_LABEL[mark.half].toLowerCase()}`,
+        );
+      }
+      if (mark.travel) {
+        notes.push(
+          `${TRAVEL_LABEL} ${HALF_DAY_LABEL[mark.travel].toLowerCase()}`,
+        );
+      }
+      if (mark.services) notes.push(servicesNote(mark.services));
+      const note = notes.join(", ");
+      return note ? { available: true, note } : { available: true };
     }
   }
 }
@@ -43,16 +57,12 @@ const servicesNote = (n: number) =>
   n === 1 ? "1 servizio già segnato" : `${n} servizi già segnati`;
 
 /**
- * The day with one more service: the half day off and the trial flag stay.
- * Null when the day has no room for it.
+ * The day with one more service: the half day off, the travel and the trial
+ * flag stay. Null when the day has no room for it.
  */
 export function plusOneService(mark: DayMark | undefined): DayMark | null {
   if (!mark) return { code: "L", services: 1 };
-  if (mark.code === "L") {
-    if (mark.services === 3) return null;
-    return { ...mark, services: (mark.services + 1) as 2 | 3 };
-  }
-  if (mark.code === "H") {
+  if (mark.code === "L" || mark.code === "H") {
     if (mark.services === 3) return null;
     return { ...mark, services: (mark.services + 1) as 1 | 2 | 3 };
   }
