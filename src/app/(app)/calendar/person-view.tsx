@@ -20,6 +20,7 @@ import {
   markLabel,
   monthSummary,
   runningTotals,
+  totalUpTo,
   weekdayIndex,
 } from "@/lib/calendar";
 import type { Bearer } from "@/lib/db/schema";
@@ -133,6 +134,15 @@ export function PersonView({
             <p className="mt-1 text-xs text-muted-foreground">
               totale del mese
             </p>
+            {/* In the current month, without the ferie still to come. */}
+            {today.startsWith(calendar[0].date.slice(0, 7)) && (
+              <p
+                className="mt-0.5 text-xs font-medium"
+                data-testid="person-total-today"
+              >
+                {totalUpTo(rowMarks, calendar, today, contract)} fino a oggi
+              </p>
+            )}
           </div>
         </div>
         <dl className="mt-4 grid grid-cols-3 gap-2 text-center">

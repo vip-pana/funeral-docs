@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { listBearerDays } from "@/lib/bearer-days";
 import { listBearersByPosition } from "@/lib/bearers";
-import { daysOfMonth, serviceTotal, todayIso, toMark } from "@/lib/calendar";
+import { daysOfMonth, todayIso, toMark, totalUpTo } from "@/lib/calendar";
 import { isoDate } from "@/lib/validation";
 
 import { type ExtractionRow, ExtractionView } from "./extraction-view";
@@ -47,9 +47,12 @@ export default async function EstrazionePage({
     );
     return {
       bearer: b,
-      total: serviceTotal(
+      // Up to the funeral's day, that day included: ferie still to come
+      // must not count against anyone yet.
+      total: totalUpTo(
         calendar.map((d) => marks.get(d.date)),
         calendar,
+        date,
         b.hasContract,
       ),
       mark: marks.get(date),
@@ -61,8 +64,9 @@ export default async function EstrazionePage({
       <div>
         <h1 className="text-2xl font-semibold">Estrai necrofori</h1>
         <p className="text-sm text-muted-foreground">
-          Proposta per un funerale: altezze simili, e precedenza a chi nel mese
-          ha il totale più basso. Correggila a mano, poi segna il servizio.{" "}
+          Proposta per un funerale: altezze simili, e precedenza a chi ha il
+          totale più basso fino a quel giorno (le ferie ancora da venire non
+          contano). Correggila a mano, poi segna il servizio.{" "}
           <Link href={back} className="underline">
             Torna al calendario
           </Link>

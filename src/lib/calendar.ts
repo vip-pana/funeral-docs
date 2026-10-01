@@ -418,6 +418,23 @@ export function serviceTotal(
   return runningTotals(marks, days, hasContract).at(-1) ?? 0;
 }
 
+/**
+ * The total at the end of `date`, that day included: what the office goes by
+ * to decide who works next, since ferie still to come must not weigh yet. 0
+ * before the month, the whole month's total after it.
+ */
+export function totalUpTo(
+  marks: (DayMark | undefined)[],
+  days: CalendarDay[],
+  date: string,
+  hasContract = false,
+): number {
+  const totals = runningTotals(marks, days, hasContract);
+  if (!days.length || date < days[0].date) return 0;
+  const last = days.findLastIndex((d) => d.date <= date);
+  return totals[last];
+}
+
 /** The month's total so far, day by day: what the corner of each cell shows. */
 export function runningTotals(
   marks: (DayMark | undefined)[],
