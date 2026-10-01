@@ -4,7 +4,8 @@ import { and, asc, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { type DayMark, moveOnto } from "@/lib/calendar";
+import { type DayMark, moveOnto, toMark } from "@/lib/calendar";
+import { availability, plusOneService } from "@/lib/extraction";
 import { db, schema } from "@/lib/db";
 import { isoDate } from "@/lib/validation";
 
@@ -28,6 +29,25 @@ const dayMark = z.discriminatedUnion("code", [
     trial: z.literal(true).optional(),
   }),
 ]);
+
+/**
+ * A mark as the columns of its row. Half a day of rest is stored as "R" with
+ * its half, half a day of ferie as "H": a whole rest is "R" with no half.
+ */
+function rowValues(mark: DayMark) {
+  const services =
+    mark.code === "L" || mark.code === "H" ? mark.services : null;
+  return {
+    code: mark.code === "H" && mark.kind === "R" ? "R" : mark.code,
+    services,
+    noticeHours: mark.code === "F" ? mark.notice : null,
+    halfDay: mark.code === "H" ? mark.half : null,
+    trial:
+      (mark.code === "L" || mark.code === "H") &&
+      mark.trial === true &&
+      Boolean(services),
+  };
+}
 
 /**
  * Records what a bearer did on a day, replacing whatever was there. `null`
@@ -73,18 +93,7 @@ export async function setDay(
           ),
         );
     } else {
-      // Half a day of rest is stored as "R" with its half, half a day of
-      // ferie as "H": a whole rest is "R" with no half.
-      const values = {
-        code: data.code === "H" && data.kind === "R" ? "R" : data.code,
-        services: data.code === "L" || data.code === "H" ? data.services : null,
-        noticeHours: data.code === "F" ? data.notice : null,
-        halfDay: data.code === "H" ? data.half : null,
-        trial:
-          Boolean(trial) &&
-          (data.code === "L" || data.code === "H") &&
-          data.services > 0,
-      };
+      const values = rowValues(data as DayMark);
       await db
         .insert(schema.bearerDays)
         .values({ bearerId, date, ...values })
@@ -135,4 +144,69 @@ export async function moveBearer(
 
   revalidatePath("/calendar");
   return {};
+}
+
+/**
+ * One more funeral service on `date` for each of the bearers picked for it.
+ * Each day is re-read here: whoever has meanwhile been marked off, or already
+ * has 3 services, is skipped and reported rather than overwritten.
+ */
+export async function addService(
+  date: string,
+  bearerIds: string[],
+): Promise<{ error?: string; added?: string[]; skipped?: string[] }> {
+  if (!isoDate.safeParse(date).success) return { error: "Data non valida." };
+  const ids = z.array(z.string().min(1)).min(1).safeParse(bearerIds);
+  if (!ids.success) return { error: "Scegli almeno un necroforo." };
+
+  const added: string[] = [];
+  const skipped: string[] = [];
+  try {
+    // better-sqlite3 is synchronous, and so is its transaction callback.
+    db.transaction((tx) => {
+      for (const id of new Set(ids.data)) {
+        const [bearer] = tx
+          .select({ name: schema.bearers.name })
+          .from(schema.bearers)
+          .where(eq(schema.bearers.id, id))
+          .limit(1)
+          .all();
+        if (!bearer) continue;
+        const [row] = tx
+          .select()
+          .from(schema.bearerDays)
+          .where(
+            and(
+              eq(schema.bearerDays.bearerId, id),
+              eq(schema.bearerDays.date, date),
+            ),
+          )
+          .limit(1)
+          .all();
+        const current = row ? toMark(row) : undefined;
+        const next = plusOneService(current);
+        if (!next) {
+          const status = availability(current);
+          skipped.push(
+            `${bearer.name} (${status.available ? "giorno pieno" : status.reason.toLowerCase()})`,
+          );
+          continue;
+        }
+        const values = rowValues(next);
+        tx.insert(schema.bearerDays)
+          .values({ bearerId: id, date, ...values })
+          .onConflictDoUpdate({
+            target: [schema.bearerDays.bearerId, schema.bearerDays.date],
+            set: values,
+          })
+          .run();
+        added.push(bearer.name);
+      }
+    });
+  } catch {
+    return { error: "Impossibile segnare il servizio." };
+  }
+
+  revalidatePath("/calendar", "layout");
+  return { added, skipped };
 }

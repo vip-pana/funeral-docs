@@ -195,14 +195,18 @@ export function PersonView({
                   markTone(mark),
                   d.date === today &&
                     "ring-2 ring-primary ring-offset-1 ring-offset-background",
+                  // Tinted too while empty; a mark keeps its own colour.
+                  d.date === today && !mark && "bg-primary/10",
                 )}
               >
                 <span
                   className={cn(
                     "absolute top-1 left-1.5 text-[10px] leading-none font-medium",
-                    d.isHoliday
-                      ? "text-[var(--calendar-sunday)]"
-                      : "text-muted-foreground",
+                    d.date === today
+                      ? "-top-px -left-px rounded-full bg-primary px-1.5 py-0.5 text-primary-foreground"
+                      : d.isHoliday
+                        ? "text-[var(--calendar-sunday)]"
+                        : "text-muted-foreground",
                   )}
                 >
                   {d.day}

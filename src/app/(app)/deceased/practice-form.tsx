@@ -818,10 +818,14 @@ export function PracticeForm({
             {/* Checkboxes, not a Select: several are chosen at once. Radix's
                 Checkbox does not post anything, so each ticked one carries a
                 hidden input with the same name — the server reads them as a
-                list. */}
-            <div className="flex flex-wrap gap-x-6 gap-y-3">
+                list. In columns, top to bottom: the list is alphabetical, and
+                a name is found by reading down rather than across. */}
+            <div className="columns-2 gap-x-6 sm:columns-3 lg:columns-4">
               {bearers.map((b) => (
-                <label key={b.id} className="flex items-center gap-2 text-sm">
+                <label
+                  key={b.id}
+                  className="flex break-inside-avoid items-center gap-2 py-1.5 text-sm"
+                >
                   <Checkbox
                     checked={bearerIds.includes(b.id)}
                     onCheckedChange={(on) =>

@@ -163,11 +163,17 @@ export function CalendarGrid({
                     className={cn(
                       "py-1.5 text-center font-semibold",
                       d.isHoliday && "calendar-sunday",
-                      d.date === today &&
-                        "underline decoration-2 underline-offset-2 print:no-underline",
                     )}
                   >
-                    {d.day}
+                    {/* Today in a coloured disc, its column tinted below. */}
+                    <span
+                      className={cn(
+                        d.date === today &&
+                          "inline-flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground print:size-auto print:bg-transparent print:text-inherit",
+                      )}
+                    >
+                      {d.day}
+                    </span>
                   </th>
                 ))}
               </tr>
@@ -221,6 +227,7 @@ export function CalendarGrid({
                                 className={cn(
                                   "p-0",
                                   d.isHoliday && "calendar-holiday",
+                                  d.date === today && "calendar-today",
                                 )}
                               >
                                 <Popover

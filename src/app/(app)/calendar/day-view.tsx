@@ -96,7 +96,9 @@ export function DayView({
                 !selected &&
                   d.isHoliday &&
                   "border-transparent bg-[var(--calendar-holiday)]",
-                !selected && d.date === today && "border-primary",
+                !selected &&
+                  d.date === today &&
+                  "border-primary bg-primary/15 font-semibold",
               )}
             >
               <span
