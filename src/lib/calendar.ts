@@ -149,7 +149,12 @@ export function moveOnto<T extends { id: string }>(
  * of rest (riposo, only for bearers on a contract), a day of sick leave
  * (malattia, always the whole day and nothing else), a day worked with 1 to
  * 3 services, or half a day of ferie or rest — the morning or the afternoon
- * — with up to 3 services in the other half.
+ * — with up to 3 services in the other half, or a day of travel (viaggio,
+ * the whole day and nothing else). Anyone can travel, and it scores nothing.
+ *
+ * `travel` marks half a day of travel, the morning or the afternoon, beside
+ * whatever the day holds: services, half a day off in the other half, or on
+ * its own as a worked day with no services. Never in the half already off.
  *
  * `trial` marks the services of a bearer in their trial period (prova): they
  * count the same, and are written P, PP, PPP. Never on a contract.
@@ -158,12 +163,20 @@ export type DayMark =
   | { code: "F"; notice: 48 | 24 }
   | { code: "R" }
   | { code: "M" }
-  | { code: "L"; services: 1 | 2 | 3; trial?: true }
+  | { code: "V" }
+  | {
+      code: "L";
+      /** 0 only beside half a day of travel. */
+      services: 0 | 1 | 2 | 3;
+      travel?: HalfDay;
+      trial?: true;
+    }
   | {
       code: "H";
       kind: HalfKind;
       half: HalfDay;
       services: 0 | 1 | 2 | 3;
+      travel?: HalfDay;
       trial?: true;
     };
 
@@ -189,6 +202,7 @@ export const DAY_MARKS: DayMark[] = [
   { code: "F", notice: 24 },
   { code: "R" },
   { code: "M" },
+  { code: "V" },
   { code: "L", services: 1 },
   { code: "L", services: 2 },
   { code: "L", services: 3 },
@@ -233,8 +247,9 @@ export function servicesOf(mark: DayMark | undefined): number {
  * by design, a bearer on a contract's ferie or a rest.
  */
 export function hidesTotal(mark: DayMark, hasContract: boolean): boolean {
-  if (mark.code === "R" || mark.code === "M") return true;
+  if (mark.code === "R" || mark.code === "M" || mark.code === "V") return true;
   if (mark.code === "F") return hasContract;
+  if (mark.code === "L") return mark.services === 0;
   if (mark.code === "H") {
     return mark.services === 0 && (mark.kind === "R" || hasContract);
   }
@@ -278,9 +293,11 @@ export function markSign(
   if (mark.code === "F") {
     return hasContract ? "F" : `F${holidayPoints(mark.notice, isHoliday)}`;
   }
-  if (mark.code === "R" || mark.code === "M") return mark.code;
-  // Half a day shows only the services here: the small F or R beside them is
-  // drawn by the cell, above or below depending on the half.
+  if (mark.code === "R" || mark.code === "M" || mark.code === "V") {
+    return mark.code;
+  }
+  // Half a day shows only the services here: the small F, R or V beside them
+  // is drawn by the cell, above or below depending on the half.
   if (mark.trial) return "P".repeat(mark.services);
   return SERVICE_SIGNS[mark.services];
 }
@@ -294,13 +311,27 @@ export function markLabel(mark: DayMark, hasContract = false): string {
   }
   if (mark.code === "R") return "Riposo";
   if (mark.code === "M") return "Malattia";
+  if (mark.code === "V") return TRAVEL_LABEL;
+  const parts = [];
   if (mark.code === "H") {
-    const off = `${HALF_KIND_LABEL[mark.kind]} ${HALF_DAY_LABEL[mark.half].toLowerCase()}`;
-    return mark.services
-      ? `${off} + ${servicesLabel(mark.services, mark.trial)}`
-      : off;
+    parts.push(
+      `${HALF_KIND_LABEL[mark.kind]} ${HALF_DAY_LABEL[mark.half].toLowerCase()}`,
+    );
   }
-  return servicesLabel(mark.services, mark.trial);
+  if (mark.travel) {
+    parts.push(`${TRAVEL_LABEL} ${HALF_DAY_LABEL[mark.travel].toLowerCase()}`);
+  }
+  if (mark.services) parts.push(servicesLabel(mark.services, mark.trial));
+  return parts.join(" + ");
+}
+
+export const TRAVEL_LABEL = "Viaggio";
+
+/** The half of the day spent travelling, if any. */
+export function travelOf(mark: DayMark | undefined): HalfDay | undefined {
+  return mark && (mark.code === "L" || mark.code === "H")
+    ? mark.travel
+    : undefined;
 }
 
 /**
@@ -317,10 +348,47 @@ export function withHalfDay(
   const services = servicesOf(mark) as 0 | 1 | 2 | 3;
   // The trial goes with the services, and only while there are some.
   const trial = services && isTrial(mark) ? { trial: true as const } : {};
+  // Travel stays in the other half; the half taken off ends it.
+  const kept = travelOf(mark);
+  const travel = kept && kept !== half ? { travel: kept } : {};
   if (mark?.code === "H" && mark.kind === kind && mark.half === half) {
+    return services || travel.travel
+      ? { code: "L", services, ...travel, ...trial }
+      : null;
+  }
+  return { code: "H", kind, half, services, ...travel, ...trial };
+}
+
+/**
+ * The day after tapping Mattina or Pomeriggio on the travel row. The same
+ * half is taken off again, leaving the rest of the day; anything else takes
+ * its place, keeping the services and a half day off in the other half. A
+ * whole day off, sick or of travel gives way to the half, as does a half day
+ * off in the same half.
+ */
+export function withTravel(
+  mark: DayMark | undefined,
+  half: HalfDay,
+): DayMark | null {
+  const services = servicesOf(mark) as 0 | 1 | 2 | 3;
+  const trial = services && isTrial(mark) ? { trial: true as const } : {};
+  const off = mark?.code === "H" && mark.half !== half ? mark : undefined;
+  if (travelOf(mark) === half) {
+    if (off)
+      return { code: "H", kind: off.kind, half: off.half, services, ...trial };
     return services ? { code: "L", services, ...trial } : null;
   }
-  return { code: "H", kind, half, services, ...trial };
+  if (off) {
+    return {
+      code: "H",
+      kind: off.kind,
+      half: off.half,
+      services,
+      travel: half,
+      ...trial,
+    };
+  }
+  return { code: "L", services, travel: half, ...trial };
 }
 
 /**
@@ -333,11 +401,13 @@ export function withServices(
   trial = false,
 ): DayMark {
   const flag = trial ? { trial: true as const } : {};
+  const kept = travelOf(mark);
+  const travel = kept ? { travel: kept } : {};
   if (mark?.code === "H") {
     const { code, kind, half } = mark;
-    return { code, kind, half, services, ...flag };
+    return { code, kind, half, services, ...travel, ...flag };
   }
-  return { code: "L", services, ...flag };
+  return { code: "L", services, ...travel, ...flag };
 }
 
 /**
@@ -354,7 +424,8 @@ export function sameMark(
   if (a.code === "F") {
     return b.code === "F" && (hasContract || a.notice === b.notice);
   }
-  if (a.code === "R" || a.code === "M") return true;
+  if (a.code === "R" || a.code === "M" || a.code === "V") return true;
+  if (travelOf(a) !== travelOf(b)) return false;
   if (a.code === "H") {
     return (
       b.code === "H" &&
@@ -375,6 +446,7 @@ export function toMark(row: {
   services: number | null;
   noticeHours: number | null;
   halfDay?: string | null;
+  travelHalf?: string | null;
   trial?: boolean;
 }): DayMark | undefined {
   if (row.code === "F") {
@@ -383,6 +455,12 @@ export function toMark(row: {
   const services = row.services;
   const trial = row.trial && services ? { trial: true as const } : {};
   if (row.code === "M") return { code: "M" };
+  if (row.code === "V") return { code: "V" };
+  const half = row.travelHalf;
+  const travel: { travel?: HalfDay } =
+    (half === "M" || half === "P") && half !== row.halfDay
+      ? { travel: half }
+      : {};
   // A rest with no half is the whole day.
   if (row.code === "R" && row.halfDay == null) return { code: "R" };
   if (
@@ -392,7 +470,14 @@ export function toMark(row: {
     const n = services ?? 0;
     if (n === 0 || n === 1 || n === 2 || n === 3) {
       const kind = row.code === "H" ? "F" : "R";
-      return { code: "H", kind, half: row.halfDay, services: n, ...trial };
+      return {
+        code: "H",
+        kind,
+        half: row.halfDay,
+        services: n,
+        ...travel,
+        ...trial,
+      };
     }
     return undefined;
   }
@@ -400,7 +485,10 @@ export function toMark(row: {
     row.code === "L" &&
     (services === 1 || services === 2 || services === 3)
   ) {
-    return { code: "L", services, ...trial };
+    return { code: "L", services, ...travel, ...trial };
+  }
+  if (row.code === "L" && !services && travel.travel) {
+    return { code: "L", services: 0, ...travel };
   }
   return undefined;
 }
@@ -482,6 +570,8 @@ export type MonthSummary = {
   restDays: number;
   /** Days of sick leave: always whole, worth nothing. */
   sickDays: number;
+  /** Days of travel, half days as 0.5: worth nothing. */
+  travelDays: number;
 };
 
 /** The month's total taken apart, for the view of a single bearer. */
@@ -498,6 +588,7 @@ export function monthSummary(
     feriePoints: 0,
     restDays: 0,
     sickDays: 0,
+    travelDays: 0,
   };
   days.forEach((d, i) => {
     const mark = marks[i];
@@ -508,7 +599,10 @@ export function monthSummary(
       out.restDays++;
     } else if (mark?.code === "M") {
       out.sickDays++;
+    } else if (mark?.code === "V") {
+      out.travelDays++;
     } else if (mark) {
+      if (mark.travel) out.travelDays += 0.5;
       if (mark.code === "H" && mark.kind === "F") {
         out.ferieDays += 0.5;
         out.feriePoints += halfDayPoints(d.isHoliday, hasContract);

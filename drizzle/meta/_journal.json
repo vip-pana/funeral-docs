@@ -169,6 +169,13 @@
       "when": 1790870434154,
       "tag": "0023_pale_hitman",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "6",
+      "when": 1790874866937,
+      "tag": "0024_right_meteorite",
+      "breakpoints": true
     }
   ]
 }

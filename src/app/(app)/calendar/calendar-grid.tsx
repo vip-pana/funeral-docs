@@ -339,6 +339,10 @@ export function CalendarGrid({
           <span>Necrofori con contratto: ferie = F, senza punti</span>
           <span>Malattia = M, tutta la giornata, senza punti</span>
           <span>
+            Viaggio = V, tutta la giornata o V piccola in alto (mattina) o in
+            basso (pomeriggio): senza punti, per tutti
+          </span>
+          <span>
             Servizi in prova = P, PP, PPP (non per chi ha il contratto)
           </span>
           <span>

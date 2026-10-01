@@ -150,9 +150,14 @@ export function PersonView({
             label="Servizi"
             value={summary.services}
             hint={
-              summary.sickDays
-                ? `malattia ${summary.sickDays.toLocaleString("it-IT")} gg`
-                : undefined
+              [
+                summary.sickDays &&
+                  `malattia ${summary.sickDays.toLocaleString("it-IT")} gg`,
+                summary.travelDays &&
+                  `viaggio ${summary.travelDays.toLocaleString("it-IT")} gg`,
+              ]
+                .filter(Boolean)
+                .join(" · ") || undefined
             }
           />
           <Stat

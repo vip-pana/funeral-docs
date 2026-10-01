@@ -20,6 +20,7 @@ import {
   totalUpTo,
   withHalfDay,
   withServices,
+  withTravel,
   weekdayIndex,
   parseMonth,
   runningTotals,
@@ -114,8 +115,8 @@ describe("calendar helpers", () => {
   });
 
   it("offers a contract a single ferie entry", () => {
-    // Two ferie, sick leave and three counts of services.
-    expect(dayMarks(false)).toHaveLength(6);
+    // Two ferie, sick leave, travel and three counts of services.
+    expect(dayMarks(false)).toHaveLength(7);
     const ferie = dayMarks(true).filter((m) => m.code === "F");
     expect(ferie).toEqual([{ code: "F", notice: 48 }]);
     // A day saved with 24 hours' notice still shows as that entry.
@@ -224,6 +225,7 @@ describe("calendar helpers", () => {
       feriePoints: 2,
       restDays: 0,
       sickDays: 0,
+      travelDays: 0,
     });
     expect(monthSummary(marks, days, true).total).toBe(2);
     expect(monthSummary(marks, days).total).toBe(serviceTotal(marks, days));
@@ -262,6 +264,7 @@ describe("calendar helpers", () => {
         feriePoints: 4,
         restDays: 0,
         sickDays: 0,
+        travelDays: 0,
       });
     });
 
@@ -380,6 +383,7 @@ describe("calendar helpers", () => {
         feriePoints: 0,
         restDays: 0.5,
         sickDays: 0,
+        travelDays: 0,
       });
       expect(monthSummary(only(9, { code: "R" }), days, true).restDays).toBe(1);
     });
@@ -570,6 +574,141 @@ describe("calendar helpers", () => {
 
     it("leaves out the ferie of a bearer on a contract", () => {
       expect(totalUpTo(marks, days, "2026-12-31", true)).toBe(2);
+    });
+  });
+
+  describe("travel", () => {
+    const days = daysOfMonth("2026-12");
+    // Wednesday the 9th is a working day.
+    const only = (day: number, mark: DayMark) =>
+      days.map((d) => (d.day === day ? mark : undefined));
+
+    it("is open to everyone and worth nothing", () => {
+      expect(dayMarks(true)).toContainEqual({ code: "V" });
+      expect(dayMarks(false)).toContainEqual({ code: "V" });
+      expect(markSign({ code: "V" }, true)).toBe("V");
+      expect(serviceTotal(only(9, { code: "V" }), days)).toBe(0);
+      expect(hidesTotal({ code: "V" }, false)).toBe(true);
+      const half: DayMark = { code: "L", services: 0, travel: "M" };
+      expect(serviceTotal(only(9, half), days)).toBe(0);
+      expect(hidesTotal(half, false)).toBe(true);
+      expect(hidesTotal({ ...half, services: 1 }, false)).toBe(false);
+    });
+
+    it("labels half a day beside the rest of it", () => {
+      expect(markLabel({ code: "V" })).toBe("Viaggio");
+      expect(
+        markLabel({
+          code: "H",
+          kind: "F",
+          half: "P",
+          services: 2,
+          travel: "M",
+        }),
+      ).toBe("Ferie pomeriggio + Viaggio mattina + 2 servizi");
+      expect(markLabel({ code: "L", services: 0, travel: "P" })).toBe(
+        "Viaggio pomeriggio",
+      );
+    });
+
+    it("toggles half a day, keeping the services and the other half off", () => {
+      expect(withTravel(undefined, "M")).toEqual({
+        code: "L",
+        services: 0,
+        travel: "M",
+      });
+      expect(withTravel({ code: "L", services: 0, travel: "M" }, "M")).toBe(
+        null,
+      );
+      expect(
+        withTravel({ code: "L", services: 2, travel: "M", trial: true }, "M"),
+      ).toEqual({ code: "L", services: 2, trial: true });
+      expect(withTravel({ code: "L", services: 0, travel: "M" }, "P")).toEqual({
+        code: "L",
+        services: 0,
+        travel: "P",
+      });
+      expect(
+        withTravel({ code: "H", kind: "F", half: "P", services: 1 }, "M"),
+      ).toEqual({ code: "H", kind: "F", half: "P", services: 1, travel: "M" });
+    });
+
+    it("takes the place of a whole day or the same half off", () => {
+      expect(withTravel({ code: "F", notice: 48 }, "M")).toEqual({
+        code: "L",
+        services: 0,
+        travel: "M",
+      });
+      expect(withTravel({ code: "V" }, "P")).toEqual({
+        code: "L",
+        services: 0,
+        travel: "P",
+      });
+      expect(
+        withTravel({ code: "H", kind: "R", half: "M", services: 2 }, "M"),
+      ).toEqual({ code: "L", services: 2, travel: "M" });
+      // And the other way round: half a day off in its half ends it.
+      expect(
+        withHalfDay({ code: "L", services: 1, travel: "M" }, "F", "M"),
+      ).toEqual({ code: "H", kind: "F", half: "M", services: 1 });
+      expect(
+        withHalfDay({ code: "L", services: 0, travel: "M" }, "F", "P"),
+      ).toEqual({ code: "H", kind: "F", half: "P", services: 0, travel: "M" });
+      expect(
+        withHalfDay(
+          { code: "H", kind: "F", half: "P", services: 0, travel: "M" },
+          "F",
+          "P",
+        ),
+      ).toEqual({ code: "L", services: 0, travel: "M" });
+      expect(withServices({ code: "L", services: 0, travel: "P" }, 2)).toEqual({
+        code: "L",
+        services: 2,
+        travel: "P",
+      });
+    });
+
+    it("tells the travel apart when matching a choice", () => {
+      expect(
+        sameMark(
+          { code: "L", services: 1, travel: "M" },
+          { code: "L", services: 1 },
+        ),
+      ).toBe(false);
+      expect(sameMark({ code: "V" }, { code: "V" })).toBe(true);
+    });
+
+    it("reads a stored row back", () => {
+      const row = { services: null, noticeHours: null };
+      expect(toMark({ ...row, code: "V" })).toEqual({ code: "V" });
+      expect(
+        toMark({ ...row, code: "L", services: 0, travelHalf: "P" }),
+      ).toEqual({ code: "L", services: 0, travel: "P" });
+      expect(toMark({ ...row, code: "L", services: 0 })).toBeUndefined();
+      expect(
+        toMark({
+          ...row,
+          code: "H",
+          services: 1,
+          halfDay: "M",
+          travelHalf: "P",
+        }),
+      ).toEqual({ code: "H", kind: "F", half: "M", services: 1, travel: "P" });
+    });
+
+    it("counts the days of travel, half days as 0.5", () => {
+      const marks = days.map((d): DayMark | undefined =>
+        d.day === 9
+          ? { code: "V" }
+          : d.day === 10
+            ? { code: "L", services: 2, travel: "M" }
+            : undefined,
+      );
+      expect(monthSummary(marks, days)).toMatchObject({
+        travelDays: 1.5,
+        services: 2,
+        total: 2,
+      });
     });
   });
 });

@@ -20,9 +20,12 @@ import {
   markSign,
   sameMark,
   servicesOf,
+  TRAVEL_LABEL,
+  travelOf,
   trialAllowed,
   withHalfDay,
   withServices,
+  withTravel,
 } from "@/lib/calendar";
 import type { Bearer } from "@/lib/db/schema";
 import { cn } from "@/lib/utils";
@@ -44,12 +47,20 @@ export const utc = (date: string) => new Date(`${date}T00:00:00Z`);
 
 /**
  * The colours of a mark outside the paper-sheet grid: ferie amber, rest
- * violet, sick leave grey, work blue. A half day takes the colour of its
- * half off.
+ * violet, sick leave grey, travel green, work blue. A half day takes the
+ * colour of its half off; half a day of travel shows only with no services.
  */
 export function markTone(mark: DayMark | undefined): string {
   if (!mark) return "";
-  const kind = mark.code === "H" ? mark.kind : mark.code;
+  const kind =
+    mark.code === "H"
+      ? mark.kind
+      : mark.code === "L" && !mark.services && mark.travel
+        ? "V"
+        : mark.code;
+  if (kind === "V") {
+    return "bg-emerald-500/15 text-emerald-800 dark:text-emerald-300";
+  }
   if (kind === "F") return "bg-amber-500/15 text-amber-800 dark:text-amber-300";
   if (kind === "R") {
     return "bg-violet-500/15 text-violet-800 dark:text-violet-300";
@@ -60,7 +71,8 @@ export function markTone(mark: DayMark | undefined): string {
 
 /**
  * What a cell shows. Half a day off is a small F (ferie) or R (rest) beside
- * the services, high for the morning and low for the afternoon.
+ * the services, high for the morning and low for the afternoon, and half a
+ * day of travel a small V the same way: the two never share a half.
  */
 export function MarkGlyph({
   mark,
@@ -72,18 +84,33 @@ export function MarkGlyph({
   hasContract: boolean;
 }) {
   const sign = markSign(mark, isHoliday, hasContract);
-  if (mark.code !== "H") return <>{sign}</>;
+  const travel = travelOf(mark);
+  if (mark.code !== "H" && !travel) return <>{sign}</>;
+  const halves: { half: HalfDay; kind: string }[] = [];
+  if (mark.code === "H") halves.push({ half: mark.half, kind: mark.kind });
+  if (travel) halves.push({ half: travel, kind: "V" });
+  const at = (half: HalfDay) => halves.find((h) => h.half === half);
+  const morning = at("M");
+  const afternoon = at("P");
+  const small = (h: { half: HalfDay; kind: string }) => (
+    <span data-half={h.half} data-kind={h.kind}>
+      {h.kind}
+    </span>
+  );
   return (
     <span className="inline-flex h-[1.6em] items-stretch gap-px align-middle">
       <span
-        data-half={mark.half}
-        data-kind={mark.kind}
         className={cn(
-          "text-[0.65em] leading-none",
-          mark.half === "M" ? "self-start" : "self-end",
+          "flex flex-col text-[0.65em] leading-none",
+          morning && afternoon
+            ? "justify-between"
+            : morning
+              ? "justify-start"
+              : "justify-end",
         )}
       >
-        {mark.kind}
+        {morning && small(morning)}
+        {afternoon && small(afternoon)}
       </span>
       {sign && <span className="self-center">{sign}</span>}
     </span>
@@ -122,9 +149,7 @@ export function MarkOptions({
   );
   const sign = cn("font-mono font-bold", large && "text-base");
   // Whole days off first, then the halves, then the services.
-  const wholeDays = dayMarks(contract).filter(
-    (m) => m.code === "F" || m.code === "R" || m.code === "M",
-  );
+  const wholeDays = dayMarks(contract).filter((m) => m.code !== "L");
   const services = [1, 2, 3] as const;
   return (
     <>
@@ -177,6 +202,37 @@ export function MarkOptions({
           </div>
         </div>
       ))}
+      <div>
+        <p
+          className={cn(
+            "px-2 pt-2 pb-0.5 text-xs text-muted-foreground",
+            large && "px-0 pt-3",
+          )}
+        >
+          {TRAVEL_LABEL} mezza giornata
+        </p>
+        <div className={cn("grid grid-cols-2", large ? "gap-2" : "gap-0.5")}>
+          {HALVES.map((half) => (
+            <button
+              key={half}
+              type="button"
+              aria-label={`${TRAVEL_LABEL} ${HALF_DAY_LABEL[half].toLowerCase()}`}
+              aria-pressed={travelOf(mark) === half}
+              onClick={() => onPick(withTravel(mark, half), true)}
+              className={option}
+            >
+              {HALF_DAY_LABEL[half]}
+              <span className={sign}>
+                <MarkGlyph
+                  mark={{ code: "L", services: 0, travel: half }}
+                  isHoliday={day.isHoliday}
+                  hasContract={contract}
+                />
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
       <div className={cn("my-1 h-px bg-border", large && "my-2")} />
       {/* The same services twice for a bearer who is not on a contract: the
           second group records them as done in the trial period. */}
