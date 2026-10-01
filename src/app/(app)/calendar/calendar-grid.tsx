@@ -148,26 +148,20 @@ export function CalendarGrid({
           >
             <colgroup>
               <col className="w-56" />
-              <col className="w-10" />
               {thisMonth && <col className="w-10 print:hidden" />}
               {calendar.map((d) => (
                 <col key={d.day} />
               ))}
+              <col className="w-10" />
             </colgroup>
             <thead>
               <tr className="calendar-head">
                 <th className="calendar-sunday sticky left-0 z-10 bg-inherit px-1.5 py-1.5 text-left font-semibold print:static">
                   {monthLabel(month)}
                 </th>
-                <th
-                  className="sticky left-56 z-10 bg-inherit py-1.5 text-center font-semibold print:static"
-                  title="Servizi del mese"
-                >
-                  Tot.
-                </th>
                 {thisMonth && (
                   <th
-                    className="calendar-today sticky left-[16.5rem] z-10 bg-inherit py-1.5 text-center font-semibold print:hidden"
+                    className="calendar-today sticky left-56 z-10 bg-inherit py-1.5 text-center font-semibold print:hidden"
                     title="Totale fino a oggi: le ferie ancora da venire non contano"
                   >
                     Oggi
@@ -193,6 +187,12 @@ export function CalendarGrid({
                     </span>
                   </th>
                 ))}
+                <th
+                  className="sticky right-0 z-10 bg-inherit py-1.5 text-center font-semibold print:static"
+                  title="Servizi del mese"
+                >
+                  Tot.
+                </th>
               </tr>
             </thead>
             <SortableContext items={ids} strategy={verticalListSortingStrategy}>
@@ -227,13 +227,10 @@ export function CalendarGrid({
                               </span>
                             </div>
                           </th>
-                          <td className="sticky left-56 z-10 bg-inherit text-center font-bold print:static">
-                            {totals.at(-1) || ""}
-                          </td>
                           {thisMonth && (
                             <td
                               data-total-today
-                              className="calendar-today sticky left-[16.5rem] z-10 bg-inherit text-center font-bold print:hidden"
+                              className="calendar-today sticky left-56 z-10 bg-inherit text-center font-bold print:hidden"
                             >
                               {totals[todayIndex] || ""}
                             </td>
@@ -302,6 +299,12 @@ export function CalendarGrid({
                               </td>
                             );
                           })}
+                          <td
+                            data-total
+                            className="sticky right-0 z-10 bg-inherit text-center font-bold print:static"
+                          >
+                            {totals.at(-1) || ""}
+                          </td>
                         </>
                       )}
                     </SortableRow>

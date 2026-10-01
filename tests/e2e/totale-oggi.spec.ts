@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 import { addBearer, bearerCard, deleteResource, unique } from "./helpers";
 
 /**
- * The total up to today, beside the month's Tot.: ferie still to come do not
+ * The total up to today, right after the name: ferie still to come do not
  * count in it, since it is what deciding who works next goes by.
  */
 
@@ -51,7 +51,7 @@ test("la colonna Oggi non conta le ferie ancora da venire", async ({
   const corner = await cell(today).locator(".calendar-corner").textContent();
   const upToToday = row.locator("[data-total-today]");
   await expect(upToToday).toHaveText(corner!);
-  const total = Number(await row.locator("td").first().textContent());
+  const total = Number(await row.locator("[data-total]").textContent());
   expect(total).toBeGreaterThan(Number(corner));
 
   await deleteResource(page, bearerCard, name);

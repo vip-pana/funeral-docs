@@ -28,8 +28,7 @@ test("mezza giornata di ferie con i servizi dell'altra metà", async ({
   const totalIn = (p: Page) =>
     p
       .locator("tr", { has: p.locator("th", { hasText: name.toUpperCase() }) })
-      .locator("td")
-      .first();
+      .locator("[data-total]");
   const cell = (day: string) => cellIn(page, day);
   const half = (day: string) => cell(day).locator("[data-half]");
   const total = totalIn(page);

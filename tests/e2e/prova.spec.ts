@@ -26,8 +26,7 @@ test("i servizi in prova valgono come gli altri", async ({ page }, info) => {
   const totalIn = (p: Page) =>
     p
       .locator("tr", { has: p.locator("th", { hasText: name.toUpperCase() }) })
-      .locator("td")
-      .first();
+      .locator("[data-total]");
   const cell = (day: string) => cellIn(page, day);
   const total = totalIn(page);
   const menu = page.locator("[data-slot=popover-content]");
