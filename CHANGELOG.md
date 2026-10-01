@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.0](https://github.com/vip-pana/funeral-docs/compare/v0.13.0...v0.14.0) (2026-10-01)
+
+
+### Funzionalità
+
+* picked bearers as cards, Tot. at the end of the calendar row, and a note on each bearer ([#48](https://github.com/vip-pana/funeral-docs/issues/48)) ([ff9a940](https://github.com/vip-pana/funeral-docs/commit/ff9a940346700dcfaab588145a7f443c3656936e))
+
 ## [0.13.0](https://github.com/vip-pana/funeral-docs/compare/v0.12.0...v0.13.0) (2026-10-01)
 
 
