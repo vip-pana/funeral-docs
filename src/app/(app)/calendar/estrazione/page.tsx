@@ -64,9 +64,10 @@ export default async function EstrazionePage({
       <div>
         <h1 className="text-2xl font-semibold">Estrai necrofori</h1>
         <p className="text-sm text-muted-foreground">
-          Proposta per un funerale: altezze simili, e precedenza a chi ha il
-          totale più basso fino a quel giorno (le ferie ancora da venire non
-          contano). Correggila a mano, poi segna il servizio.{" "}
+          Proposta per un funerale: altezze simili, sempre almeno un conducente,
+          e precedenza a chi ha il totale più basso fino a quel giorno (le ferie
+          ancora da venire non contano). Correggila a mano, poi segna il
+          servizio.{" "}
           <Link href={back} className="underline">
             Torna al calendario
           </Link>

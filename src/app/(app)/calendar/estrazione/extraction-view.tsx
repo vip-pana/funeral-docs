@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -84,6 +85,7 @@ export function ExtractionView({
       id: r.bearer.id,
       height: r.bearer.shoulderHeight!,
       total: r.total,
+      driver: r.bearer.isDriver,
     }));
   // Ranked once per input rather than on every tick of a box.
   const key = JSON.stringify(candidates);
@@ -101,6 +103,7 @@ export function ExtractionView({
       a.bearer.name.localeCompare(b.bearer.name, "it"),
   );
   const picked = sorted.filter((r) => selected.includes(r.bearer.id));
+  const hasDriver = picked.some((r) => r.bearer.isDriver);
 
   const heights = picked
     .map((r) => r.bearer.shoulderHeight)
@@ -208,6 +211,17 @@ export function ExtractionView({
               {team.spread} cm).
             </p>
           )}
+          {manual === null && team.noDriver && candidates.length > 0 && (
+            <p className="text-amber-700 dark:text-amber-400">
+              Nessun conducente disponibile quel giorno (servono anche
+              l&apos;altezza e la spunta Conducente in Risorse).
+            </p>
+          )}
+          {picked.length > 0 && !hasDriver && !team.noDriver && (
+            <p className="text-amber-700 dark:text-amber-400">
+              Nessun conducente tra gli scelti.
+            </p>
+          )}
           {picked.length !== size && (
             <p className="text-amber-700 dark:text-amber-400">
               Ne servono {size}.
@@ -269,7 +283,10 @@ export function ExtractionView({
                 data-bearer={bearer.id}
                 className="space-y-1 rounded-xl border bg-card px-4 py-3"
               >
-                <p className="font-medium">{bearerLabel(bearer)}</p>
+                <p className="font-medium">
+                  {bearerLabel(bearer)}
+                  {bearer.isDriver && <DriverBadge />}
+                </p>
                 <p className="text-sm text-muted-foreground">
                   {bearer.shoulderHeight == null
                     ? "altezza mancante"
@@ -363,6 +380,9 @@ function PickList({
   onConfirm: (ids: string[]) => void;
 }) {
   const [draft, setDraft] = useState(selected);
+  const draftHasDriver = rows.some(
+    (r) => r.bearer.isDriver && draft.includes(r.bearer.id),
+  );
 
   function toggle(id: string, on: boolean) {
     setDraft(on ? [...draft, id] : draft.filter((other) => other !== id));
@@ -373,10 +393,12 @@ function PickList({
       <p
         className={cn(
           "text-sm font-medium",
-          draft.length !== size && "text-amber-700 dark:text-amber-400",
+          (draft.length !== size || !draftHasDriver) &&
+            "text-amber-700 dark:text-amber-400",
         )}
       >
         {draft.length} scelt{draft.length === 1 ? "o" : "i"} · ne servono {size}
+        {!draftHasDriver && " · manca un conducente"}
       </p>
       <div className="max-h-[60vh] overflow-auto rounded-xl border">
         <Table>
@@ -415,6 +437,7 @@ function PickList({
                   </TableCell>
                   <TableCell className="font-medium">
                     {bearerLabel(bearer)}
+                    {bearer.isDriver && <DriverBadge />}
                     {bearer.shoulderHeight == null && (
                       <span className="ml-2 text-xs font-normal text-muted-foreground">
                         altezza mancante
@@ -442,5 +465,14 @@ function PickList({
         <Button onClick={() => onConfirm(draft)}>Conferma</Button>
       </DialogFooter>
     </>
+  );
+}
+
+/** Beside the name: whoever can take the hearse, as each team needs one. */
+function DriverBadge() {
+  return (
+    <Badge variant="secondary" className="ml-2 align-middle">
+      Conducente
+    </Badge>
   );
 }

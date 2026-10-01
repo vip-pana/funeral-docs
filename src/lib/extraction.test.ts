@@ -14,6 +14,12 @@ const c = (id: string, height: number, total: number): Candidate => ({
   total,
 });
 
+/** A candidate who can drive the hearse. */
+const d = (id: string, height: number, total: number): Candidate => ({
+  ...c(id, height, total),
+  driver: true,
+});
+
 describe("availability", () => {
   it("leaves out a whole day off and a full day", () => {
     expect(availability({ code: "F", notice: 48 })).toEqual({
@@ -176,5 +182,83 @@ describe("rankTeams", () => {
 
   it("stops at the limit", () => {
     expect(rankTeams(same, 2, 3, 3)).toHaveLength(3);
+  });
+});
+
+describe("the driver", () => {
+  it("is always in the team, even if it costs fairness", () => {
+    // The fairest four are a-d, none of them drives: the driver with the
+    // lowest total takes the place of the one who has done most.
+    const team = pickTeam(
+      [
+        c("a", 150, 0),
+        c("b", 150, 0),
+        c("c", 150, 0),
+        c("d", 150, 1),
+        d("x", 151, 5),
+        d("y", 150, 3),
+      ],
+      4,
+      3,
+    );
+    expect(team.ids.sort()).toEqual(["a", "b", "c", "y"]);
+    expect(team.noDriver).toBe(false);
+  });
+
+  it("keeps the fairest team when it already has one", () => {
+    const team = pickTeam(
+      [d("a", 150, 0), c("b", 150, 0), c("c", 150, 4), d("e", 150, 4)],
+      2,
+      3,
+    );
+    expect(team.ids.sort()).toEqual(["a", "b"]);
+  });
+
+  it("stays within the tolerance with the driver", () => {
+    // The only driver is 160: the team moves to his height.
+    const team = pickTeam(
+      [c("a", 150, 0), c("b", 150, 0), c("e", 159, 2), d("x", 160, 3)],
+      2,
+      3,
+    );
+    expect(team.ids.sort()).toEqual(["e", "x"]);
+    expect(team.widened).toBe(false);
+  });
+
+  it("widens for the driver rather than leave him out", () => {
+    const team = pickTeam(
+      [c("a", 150, 0), c("b", 150, 0), d("x", 160, 0)],
+      2,
+      3,
+    );
+    expect(team.ids).toContain("x");
+    expect(team.widened).toBe(true);
+  });
+
+  it("is the one picked when a single bearer is needed", () => {
+    const team = pickTeam([c("a", 150, 0), d("x", 150, 9)], 1, 3);
+    expect(team.ids).toEqual(["x"]);
+  });
+
+  it("puts one in every proposal Ricalcola goes through", () => {
+    const pool = [
+      c("a", 150, 0),
+      c("b", 150, 0),
+      c("c", 150, 0),
+      c("e", 151, 0),
+      d("x", 150, 2),
+      d("y", 151, 2),
+    ];
+    const teams = rankTeams(pool, 4, 3);
+    expect(teams.length).toBeGreaterThan(1);
+    for (const t of teams) {
+      expect(t.ids.some((id) => id === "x" || id === "y")).toBe(true);
+    }
+  });
+
+  it("says so when no candidate drives", () => {
+    const team = pickTeam([c("a", 150, 0), c("b", 150, 0)], 2, 3);
+    expect(team.noDriver).toBe(true);
+    expect(team.ids).toHaveLength(2);
   });
 });
