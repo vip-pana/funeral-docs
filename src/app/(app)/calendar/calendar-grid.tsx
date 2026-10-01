@@ -106,8 +106,6 @@ export function CalendarGrid({
     }),
   );
   const ids = bearers.map((b) => b.id);
-  // Screen only: the printed sheet goes on a wall.
-  const noted = bearers.filter((b) => b.note);
 
   function drop({ active, over }: DragEndEvent) {
     if (!over || active.id === over.id) return;
@@ -221,12 +219,22 @@ export function CalendarGrid({
                           >
                             <div className="flex items-center gap-0.5">
                               {grip(`Sposta ${b.name}`)}
-                              <span
-                                className="min-w-0 truncate"
-                                title={bearerLabel(b)}
-                              >
-                                {bearerLabel(b)}
-                              </span>
+                              <div className="min-w-0">
+                                <p className="truncate" title={bearerLabel(b)}>
+                                  {bearerLabel(b)}
+                                </p>
+                                {/* Screen only: the printed sheet goes on a
+                                    wall. */}
+                                {b.note && (
+                                  <p
+                                    data-bearer-note
+                                    className="truncate text-[10px] leading-tight font-normal text-muted-foreground print:hidden"
+                                    title={b.note}
+                                  >
+                                    {b.note}
+                                  </p>
+                                )}
+                              </div>
                             </div>
                           </th>
                           {thisMonth && (
@@ -316,24 +324,6 @@ export function CalendarGrid({
             </SortableContext>
           </table>
         </div>
-        {noted.length > 0 && (
-          <div
-            data-testid="calendar-notes"
-            className="mt-1 border-t pt-1 text-[11px] print:hidden"
-          >
-            <p className="font-medium uppercase">Note</p>
-            <ul className="text-muted-foreground">
-              {noted.map((b) => (
-                <li key={b.id}>
-                  <span className="font-semibold text-foreground">
-                    {bearerLabel(b)}
-                  </span>
-                  : {b.note}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
         <p className="calendar-legend mt-1 flex flex-wrap gap-x-8 gap-y-0.5 border-t pt-1 text-[10px] font-medium uppercase">
           {thisMonth && (
             <span className="print:hidden">

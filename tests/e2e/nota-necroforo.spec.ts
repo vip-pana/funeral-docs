@@ -4,17 +4,20 @@ import { bearerCard, deleteResource, unique } from "./helpers";
 
 /**
  * A bearer's note: written on Risorse, from the add form, the row or the edit
- * dialog, and read under the month's calendar, but never on the printed sheet.
+ * dialog, and read under the name on the month's calendar, but never on the
+ * printed sheet.
  */
 
 test.use({ viewport: { width: 1600, height: 960 } });
 
-test("la nota del necroforo compare sotto il calendario, non in stampa", async ({
+test("la nota del necroforo compare sotto il nome nel calendario, non in stampa", async ({
   page,
 }, info) => {
   const name = unique(info, "Mario Nota");
-  const notes = page.getByTestId("calendar-notes");
-  const noteOf = () => notes.locator("li", { hasText: name.toUpperCase() });
+  const noteOf = () =>
+    page
+      .locator("tbody th", { hasText: name.toUpperCase() })
+      .locator("[data-bearer-note]");
 
   await page.goto("/resources");
   const card = bearerCard(page);
@@ -28,7 +31,7 @@ test("la nota del necroforo compare sotto il calendario, non in stampa", async (
 
   // Printed, the list is gone.
   await page.emulateMedia({ media: "print" });
-  await expect(notes).toBeHidden();
+  await expect(noteOf()).toBeHidden();
   await page.emulateMedia({ media: "screen" });
 
   // From the edit dialog.
