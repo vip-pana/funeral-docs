@@ -144,6 +144,7 @@
   --calendar-ink: oklch(0.2 0 0);
   --calendar-sunday: oklch(0.58 0.22 27);
   --calendar-holiday: oklch(0.9 0.05 20);
+  --calendar-total: oklch(0.87 0.1 150);
 }
 
 .dark {
@@ -154,6 +155,7 @@
   --calendar-ink: oklch(0.95 0 0);
   --calendar-sunday: oklch(0.72 0.19 27);
   --calendar-holiday: oklch(0.33 0.06 20);
+  --calendar-total: oklch(0.34 0.08 150);
 }
 
 .calendar {
@@ -193,6 +195,12 @@
 .calendar .calendar-holiday {
   background: var(--calendar-holiday);
 }
+/* The month's Tot., set apart from the days it closes. Opaque, since it stays
+   on top of them while they scroll. */
+.calendar .calendar-total {
+  background: var(--calendar-total);
+  border-left: 2px solid var(--calendar-line);
+}
 /* Today's column, laid over whatever colour the cell already has, so a
    holiday stays red underneath. Screen only: the printed sheet is for the
    whole month. */
@@ -219,6 +227,7 @@
     --calendar-line: oklch(0.7 0 0);
     --calendar-ink: oklch(0.2 0 0);
     --calendar-holiday: oklch(0.9 0.05 20);
+    --calendar-total: oklch(0.87 0.1 150);
     /* Paper is white: the dark theme's surfaces would print as black. */
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);

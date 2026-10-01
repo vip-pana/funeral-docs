@@ -188,7 +188,7 @@ export function CalendarGrid({
                   </th>
                 ))}
                 <th
-                  className="sticky right-0 z-10 bg-inherit py-1.5 text-center font-semibold print:static"
+                  className="calendar-total sticky right-0 z-10 py-1.5 text-center font-semibold print:static"
                   title="Servizi del mese"
                 >
                   Tot.
@@ -301,7 +301,7 @@ export function CalendarGrid({
                           })}
                           <td
                             data-total
-                            className="sticky right-0 z-10 bg-inherit text-center font-bold print:static"
+                            className="calendar-total sticky right-0 z-10 text-center font-bold print:static"
                           >
                             {totals.at(-1) || ""}
                           </td>
