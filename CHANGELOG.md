@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.0](https://github.com/vip-pana/funeral-docs/compare/v0.14.0...v0.15.0) (2026-10-01)
+
+
+### Funzionalità
+
+* show the bearer's note under their name on the calendar ([#50](https://github.com/vip-pana/funeral-docs/issues/50)) ([1cdb28d](https://github.com/vip-pana/funeral-docs/commit/1cdb28dda0bf9f19e4b681b8ed7655b314ae0d6b))
+
 ## [0.14.0](https://github.com/vip-pana/funeral-docs/compare/v0.13.0...v0.14.0) (2026-10-01)
 
 
