@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.0](https://github.com/vip-pana/funeral-docs/compare/v0.15.0...v0.16.0) (2026-10-05)
+
+
+### Funzionalità
+
+* add travel (V) to the bearers' calendar ([#52](https://github.com/vip-pana/funeral-docs/issues/52)) ([2355ade](https://github.com/vip-pana/funeral-docs/commit/2355ade60172250fcfe13d6b5d7ecc26ec734154))
+
 ## [0.15.0](https://github.com/vip-pana/funeral-docs/compare/v0.14.0...v0.15.0) (2026-10-01)
 
 
