@@ -9,26 +9,36 @@ import { availability, plusOneService } from "@/lib/extraction";
 import { db, schema } from "@/lib/db";
 import { isoDate } from "@/lib/validation";
 
-const dayMark = z.discriminatedUnion("code", [
-  z.object({
-    code: z.literal("F"),
-    notice: z.union([z.literal(48), z.literal(24)]),
-  }),
-  z.object({ code: z.literal("R") }),
-  z.object({ code: z.literal("M") }),
-  z.object({
-    code: z.literal("L"),
-    services: z.number().int().min(1).max(3),
-    trial: z.literal(true).optional(),
-  }),
-  z.object({
-    code: z.literal("H"),
-    kind: z.enum(["F", "R"]),
-    half: z.enum(["M", "P"]),
-    services: z.number().int().min(0).max(3),
-    trial: z.literal(true).optional(),
-  }),
-]);
+const half = z.enum(["M", "P"]);
+
+const dayMark = z
+  .discriminatedUnion("code", [
+    z.object({
+      code: z.literal("F"),
+      notice: z.union([z.literal(48), z.literal(24)]),
+    }),
+    z.object({ code: z.literal("R") }),
+    z.object({ code: z.literal("M") }),
+    z.object({ code: z.literal("V") }),
+    z.object({
+      code: z.literal("L"),
+      services: z.number().int().min(0).max(3),
+      travel: half.optional(),
+      trial: z.literal(true).optional(),
+    }),
+    z.object({
+      code: z.literal("H"),
+      kind: z.enum(["F", "R"]),
+      half,
+      services: z.number().int().min(0).max(3),
+      travel: half.optional(),
+      trial: z.literal(true).optional(),
+    }),
+  ])
+  // A worked day with no services is half a day of travel, and the travel
+  // never falls in the half already off.
+  .refine((m) => m.code !== "L" || m.services > 0 || m.travel)
+  .refine((m) => m.code !== "H" || m.travel !== m.half);
 
 /**
  * A mark as the columns of its row. Half a day of rest is stored as "R" with
@@ -42,6 +52,10 @@ function rowValues(mark: DayMark) {
     services,
     noticeHours: mark.code === "F" ? mark.notice : null,
     halfDay: mark.code === "H" ? mark.half : null,
+    travelHalf:
+      (mark.code === "L" || mark.code === "H") && mark.travel
+        ? mark.travel
+        : null,
     trial:
       (mark.code === "L" || mark.code === "H") &&
       mark.trial === true &&

@@ -22,6 +22,7 @@ describe("availability", () => {
     });
     expect(availability({ code: "R" })).toMatchObject({ reason: "Riposo" });
     expect(availability({ code: "M" })).toMatchObject({ reason: "Malattia" });
+    expect(availability({ code: "V" })).toMatchObject({ reason: "Viaggio" });
     expect(availability({ code: "L", services: 3 })).toMatchObject({
       available: false,
     });
@@ -42,6 +43,22 @@ describe("availability", () => {
       available: true,
       note: "Riposo pomeriggio, 2 servizi già segnati",
     });
+    expect(
+      availability({
+        code: "H",
+        kind: "F",
+        half: "M",
+        services: 1,
+        travel: "P",
+      }),
+    ).toEqual({
+      available: true,
+      note: "Ferie mattina, Viaggio pomeriggio, 1 servizio già segnato",
+    });
+    expect(availability({ code: "L", services: 0, travel: "M" })).toEqual({
+      available: true,
+      note: "Viaggio mattina",
+    });
   });
 });
 
@@ -56,6 +73,11 @@ describe("plusOneService", () => {
     expect(
       plusOneService({ code: "H", kind: "F", half: "M", services: 0 }),
     ).toEqual({ code: "H", kind: "F", half: "M", services: 1 });
+    expect(plusOneService({ code: "L", services: 0, travel: "M" })).toEqual({
+      code: "L",
+      services: 1,
+      travel: "M",
+    });
   });
 
   it("has no room on a full day or a day off", () => {
@@ -63,6 +85,7 @@ describe("plusOneService", () => {
     expect(plusOneService({ code: "F", notice: 24 })).toBeNull();
     expect(plusOneService({ code: "M" })).toBeNull();
     expect(plusOneService({ code: "R" })).toBeNull();
+    expect(plusOneService({ code: "V" })).toBeNull();
   });
 });
 
