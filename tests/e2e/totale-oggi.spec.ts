@@ -41,6 +41,9 @@ test("la colonna Oggi non conta le ferie ancora da venire", async ({
     await cell(iso).click();
     await menu.getByRole("button", { name: /^Ferie, avviso 48/ }).click();
     await expect(cell(iso)).toHaveText(/^F/);
+    // Still in the DOM while it fades out, it would be a second menu for the
+    // next cell's locator.
+    await expect(menu).toBeHidden();
   };
 
   await page.goto("/calendar?view=mese");

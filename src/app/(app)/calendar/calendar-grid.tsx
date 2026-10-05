@@ -290,7 +290,7 @@ export function CalendarGrid({
                                     </button>
                                   </PopoverTrigger>
                                   <PopoverContent
-                                    className="w-52 gap-0 p-1"
+                                    className="max-h-(--radix-popover-content-available-height) w-52 gap-0 overflow-y-auto p-1"
                                     align="start"
                                   >
                                     <p className="px-2 py-1 text-xs text-muted-foreground">
