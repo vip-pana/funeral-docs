@@ -1,0 +1,187 @@
+# Migrazione da Victus a un VPS
+
+Da fare una volta. L'obiettivo: funeral-docs gira su un VPS Aruba invece che sul
+computer in ufficio, allo stesso indirizzo
+`https://funeral-docs.tail134f9a.ts.net`, sempre raggiungibile solo dalla
+tailnet. wealth-tracker resta su Victus.
+
+Cosa cambia: la macchina. Cosa resta uguale: immagine, compose, sidecar
+Tailscale, flusso di deploy da release-please.
+
+Costo: Aruba Cloud VPS O1I1 (1 vCPU, 1 GB, 20 GB) a 1,99 €/mese + IVA. Il
+backup su Cloudflare R2 sta nel piano gratuito (10 GB, il database pesa pochi
+MB).
+
+## 1. Il VPS
+
+1. Su Aruba Cloud crea un **Cloud VPS O1I1** con **Ubuntu 24.04**, datacenter in
+   Italia, accesso con chiave ssh (non password).
+2. Entra come root e prepara la macchina:
+
+   ```bash
+   # Swap: con 1 GB di RAM, durante un deploy le immagini vecchia e nuova
+   # convivono per qualche secondo.
+   fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
+   echo '/swapfile none swap sw 0 0' >> /etc/fstab
+
+   # Docker
+   curl -fsSL https://get.docker.com | sh
+
+   # Utente che possiede checkout, .env e container (lo stesso nome di Victus:
+   # deploy-shell.sh e sudoers puntano a /home/pana)
+   adduser --disabled-password --gecos '' pana
+   usermod -aG docker pana
+
+   # Aggiornamenti di sicurezza automatici (su Ubuntu di solito gia' attivi)
+   apt-get install -y unattended-upgrades
+   ```
+
+## 2. Tailscale sull'host
+
+Serve per il deploy: il runner di GitHub entra con Tailscale SSH come su Victus.
+
+```bash
+curl -fsSL https://tailscale.com/install.sh | sh
+tailscale up --ssh --advertise-tags=tag:prod --hostname=funeral-vps
+```
+
+Il nome `funeral-vps` è quello che andrà in `DEPLOY_HOST` (passo 7). Il tag
+`tag:prod` è quello a cui l'ACL lascia arrivare `tag:ci` sulla 22: nessuna
+modifica alla policy.
+
+## 3. Checkout e accesso al registro
+
+Come `pana`:
+
+```bash
+# Deploy key di sola lettura, nuova per questa macchina: aggiungila al repo
+# (Settings → Deploy keys) senza permesso di scrittura.
+ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_funeral -N ''
+cat >> ~/.ssh/config <<'EOF'
+Host github-funeral
+  HostName github.com
+  IdentityFile ~/.ssh/id_ed25519_funeral
+  IdentitiesOnly yes
+EOF
+git clone github-funeral:vip-pana/funeral-docs.git ~/funeral-docs
+
+# L'immagine su ghcr.io e' privata: token classico con solo read:packages.
+docker login ghcr.io -u vip-pana
+```
+
+## 4. Utente `deploy`
+
+Come su Victus (istruzioni complete in testa a `scripts/deploy-shell.sh`), ma in
+sudoers **solo la riga di funeral-docs**: wealth-tracker qui non c'è, e sudo
+rifiuterà una richiesta per lui.
+
+```bash
+useradd --create-home deploy
+install -m 755 -o root -g root /home/pana/funeral-docs/scripts/deploy-shell.sh /usr/local/sbin/deploy-shell
+usermod --shell /usr/local/sbin/deploy-shell deploy
+cat > /etc/sudoers.d/deploy <<'EOF'
+deploy ALL=(pana) NOPASSWD: /home/pana/funeral-docs/scripts/deploy-release.sh
+EOF
+chmod 440 /etc/sudoers.d/deploy && visudo -c
+```
+
+## 5. Backup su R2
+
+1. Su Cloudflare → R2 crea il bucket `funeral-docs-backup` (giurisdizione UE).
+2. Crea un token API **Object Read & Write** limitato a quel bucket.
+3. Tieni da parte access key, secret e l'endpoint
+   `https://<account-id>.eu.r2.cloudflarestorage.com`.
+
+## 6. Il passaggio
+
+Il momento in cui l'app è giù: pochi minuti. Meglio fuori orario.
+
+**Su Victus**, ferma l'app e prendi il database:
+
+```bash
+cd ~/funeral-docs
+docker compose -f docker-compose.prod.yml down
+# a container fermi il WAL e' gia' stato riversato nel file principale
+ls -la data/        # funeral.db, e niente -wal (o -wal vuoto)
+```
+
+Nella console di Tailscale **elimina il dispositivo `funeral-docs`**: il nodo
+nuovo si registrerà con lo stesso nome solo se quello vecchio non c'è più,
+altrimenti diventerebbe `funeral-docs-1`.
+
+Copia sul VPS il database e il `.env`, dalla tailnet o dalla 22 pubblica che a
+questo punto è ancora aperta:
+
+```bash
+ssh pana@funeral-vps mkdir -p funeral-docs/data
+scp data/funeral.db .env pana@funeral-vps:funeral-docs/
+ssh pana@funeral-vps 'mv funeral-docs/funeral.db funeral-docs/data/'
+```
+
+**Sul VPS**, come `pana`:
+
+```bash
+cd ~/funeral-docs
+git checkout v$(grep ^APP_VERSION= .env | cut -d= -f2)
+
+# L'app gira come uid 1000 (l'utente node dell'immagine): la cartella dati deve
+# essere sua.
+sudo chown -R 1000:1000 data
+
+# Nel .env:
+#  - TS_AUTHKEY: genera una auth key nuova (reusable, non ephemeral)
+#  - aggiungi le quattro LITESTREAM_* del passo 5 (vedi .env.example)
+nano .env
+
+docker compose -f docker-compose.prod.yml pull
+docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml ps
+docker compose -f docker-compose.prod.yml logs litestream   # deve dire "replicating"
+```
+
+Apri `https://funeral-docs.tail134f9a.ts.net`, entra e controlla che i defunti
+ci siano tutti.
+
+## 7. Deploy automatici sulla nuova macchina
+
+Su GitHub → Settings → Secrets and variables → Actions → **Variables** crea
+`DEPLOY_HOST` = `funeral-vps`. Senza, il workflow continua a puntare a `victus`.
+
+Prova: rilancia l'ultimo run di **Deploy** dalla tab Actions, oppure dal VPS
+`./scripts/deploy-release.sh <versione attuale>` — un redeploy della stessa
+versione non cambia niente ed esercita tutta la catena.
+
+## 8. Verifica del backup
+
+Un backup mai ripristinato non è un backup. Da qualsiasi macchina con Docker e
+il `.env`:
+
+```bash
+mkdir -p /tmp/restore
+docker run --rm --env-file .env -v /tmp/restore:/data \
+  -v "$PWD/docker/litestream/litestream.yml:/etc/litestream.yml:ro" \
+  litestream/litestream:0.3.13 restore /data/funeral.db
+ls -la /tmp/restore
+```
+
+Il file ripristinato si apre con qualsiasi client SQLite.
+
+## 9. Pulizia
+
+- **Firewall Aruba**: chiudi la 22 pubblica. Da qui in poi si entra con
+  `tailscale ssh pana@funeral-vps`; non serve nessuna porta aperta, nemmeno per
+  l'app.
+- **Victus**: togli la riga di funeral-docs da `/etc/sudoers.d/deploy`, e quando
+  sei sicuro che tutto va archivia `~/funeral-docs/data` (contiene ancora i dati
+  in chiaro).
+- **Deploy key** di Victus: eliminala dal repo.
+- **Registro dei trattamenti**: aggiungi Aruba e Cloudflare come responsabili del
+  trattamento; entrambi hanno il loro DPA da accettare nel pannello.
+
+## Se qualcosa va storto
+
+Fino al passo 7 si torna indietro in un minuto: su Victus `docker compose -f
+docker-compose.prod.yml up -d` (dopo aver eliminato dalla console il nodo
+`funeral-docs` del VPS), e il database di Victus è quello di prima del
+passaggio. Se nel frattempo sul VPS sono stati salvati dati, copia indietro il
+`funeral.db` del VPS invece.

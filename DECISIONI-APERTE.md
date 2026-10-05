@@ -56,7 +56,11 @@ container, e rifiuta il deploy se non riesce. Retention 30 giorni
 **Da fare**: copre solo il momento del deploy — tra due release non c'è niente.
 Manca un cron notturno, e manca il backup dei `.docx` generati.
 
-**Aperto**: il backup finisce sullo stesso disco del DB. Se il disco muore,
+**In corso**: con la migrazione al VPS (`docs/migrazione-vps.md`) il servizio
+`litestream` replica il database su Cloudflare R2 a pochi secondi di distanza,
+con 30 giorni di storia. Chiude sia il buco tra due release sia il disco unico.
+
+**Prima**: il backup finisce sullo stesso disco del DB. Se il disco muore,
 muore tutto. Valutare una copia verso un secondo posto — NAS, altra macchina
 Tailscale, storage cifrato remoto.
 

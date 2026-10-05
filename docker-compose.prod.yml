@@ -105,6 +105,29 @@ services:
       retries: 3
       start_period: 20s
 
+  # Backup continuo del database fuori dal server (vedi
+  # docker/litestream/litestream.yml). Le credenziali stanno nel .env.
+  #
+  # Gira con lo stesso uid dell'app (l'utente `node` dell'immagine): Litestream
+  # tocca i file -wal e -shm, e se li creasse root l'app non potrebbe piu'
+  # scriverli.
+  #
+  # Non lo ricrea il deploy, che tocca solo `app`: si avvia una volta con
+  # `docker compose -f docker-compose.prod.yml up -d` e resta su.
+  litestream:
+    image: litestream/litestream:0.3.13
+    restart: unless-stopped
+    user: "1000:1000"
+    command: ["replicate"]
+    depends_on:
+      app:
+        condition: service_healthy
+    volumes:
+      - ${FUNERAL_DATA_DIR:-./data}:/data
+      - ./docker/litestream/litestream.yml:/etc/litestream.yml:ro
+    env_file:
+      - .env
+
 volumes:
   # Identita' del nodo Tailscale: va conservata tra le ricreazioni.
   tailscale-state:

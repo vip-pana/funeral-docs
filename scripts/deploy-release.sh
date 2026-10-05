@@ -1,8 +1,8 @@
 #!/bin/bash
 #
-# Deploy a released version on Victus: pull the image CI built for that tag, pin
-# it in .env, recreate the container, and prove the app came back before
-# declaring success.
+# Deploy a released version on the production host: pull the image CI built for
+# that tag, pin it in .env, recreate the container, and prove the app came back
+# before declaring success.
 #
 #   ./scripts/deploy-release.sh 1.2.0        # or v1.2.0
 #
@@ -306,6 +306,19 @@ until "${COMPOSE[@]}" exec -T app \
     [ "$SECONDS" -lt "$deadline" ] || rollback
     sleep 3
 done
+
+# --- cleanup ----------------------------------------------------------------
+# Every release leaves an image of a few hundred MB behind, and on a small VPS
+# disk they add up in months. Only after a healthy deploy, and keeping the
+# previous release: that one is what makes a rollback cost no network.
+log "Removing old images"
+docker image ls "$IMAGE" --format '{{.Tag}}' | while read -r tag; do
+    case "$tag" in
+        "$VERSION" | "$PREVIOUS" | "<none>") continue ;;
+    esac
+    docker image rm "$IMAGE:$tag" >/dev/null 2>&1 || true
+done
+docker image prune -f >/dev/null 2>&1 || true
 
 log "Deployed $VERSION"
 "${COMPOSE[@]}" ps app

@@ -116,6 +116,11 @@ certificato Let's Encrypt, e non pubblica porte sull'host: si raggiunge solo dal
 suo nome. Serve una auth key reusable in `TS_AUTHKEY`. Dettagli in
 `DECISIONI-APERTE.md`, dove resta aperta la **cifratura del disco**.
 
+Lo spostamento su un VPS Aruba, per non dipendere da un computer acceso in
+ufficio, è descritto passo per passo in `docs/migrazione-vps.md`. Lì il database
+viene anche replicato di continuo su Cloudflare R2 dal servizio `litestream` del
+compose.
+
 ### Rilasciare una versione
 
 Il deploy è il merge della release PR. `release-please` la tiene aggiornata da
