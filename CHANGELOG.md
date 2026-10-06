@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.1](https://github.com/vip-pana/funeral-docs/compare/v0.16.0...v0.16.1) (2026-10-06)
+
+
+### Documentazione
+
+* record the move to the Aruba VPS and what it took ([#55](https://github.com/vip-pana/funeral-docs/issues/55)) ([6fe3a12](https://github.com/vip-pana/funeral-docs/commit/6fe3a126ce1338fdec180e1ef6d560732aed68a1))
+
 ## [0.16.0](https://github.com/vip-pana/funeral-docs/compare/v0.15.0...v0.16.0) (2026-10-05)
 
 
