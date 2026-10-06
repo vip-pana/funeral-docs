@@ -4,16 +4,21 @@ Cose rimandate durante lo sviluppo. Da riprendere prima del deploy sul serverino
 
 ## 0. Docker e deploy — FATTO
 
-In produzione su **Victus**, raggiungibile dalla tailnet a
-**<https://funeral-docs.tail134f9a.ts.net>**.
+In produzione su un **VPS Aruba** (`funeral-vps`, datacenter IT1), raggiungibile
+dalla tailnet a **<https://funeral-docs.tail134f9a.ts.net>**. Fino a ottobre
+2026 girava su Victus, il computer in ufficio: il passaggio è in
+`docs/migrazione-vps.md`.
+
+Il VPS non ha porte aperte su internet (ufw lascia entrare solo la tailnet) e
+ssh accetta solo chiavi: si entra con `tailscale ssh pana@funeral-vps`, o
+`root@` con check mode.
 
 L'app ha un **nodo Tailscale suo**, non una porta sul nome della macchina: un
 sidecar `tailscale/tailscale` nel compose si registra con hostname
 `funeral-docs` e ottiene il proprio certificato. L'app gira nel suo stack di
 rete (`network_mode: service:tailscale`), quindi **non pubblica porte**: non è
 raggiungibile sull'host, nemmeno su loopback, e l'unico ingresso è la :443 del
-nodo. Lo stesso schema vale per wealth-tracker sulla stessa macchina, e il nome
-`victus` resta libero per Portainer.
+nodo. Lo stesso schema vale per wealth-tracker su Victus.
 
 Serve una **auth key reusable e non ephemeral** in `TS_AUTHKEY` (nel `.env`, non
 nel compose che è tracciato): non ephemeral perché il nodo deve restare
@@ -25,11 +30,6 @@ registrato anche a container fermo, altrimenti il nome slitterebbe a
 può avere il flag. Accedendo invece in http a un `100.x.y.z` il browser non
 memorizzerebbe un cookie `secure` e l'accesso sarebbe impossibile — lì va
 rimesso `false`, insieme a `BIND_ADDRESS` sull'indirizzo tailnet.
-
-```bash
-# aggiornamenti
-cd ~/funeral-docs && git pull && docker compose -f docker-compose.prod.yml up -d --build
-```
 
 Il codice arriva da un clone del repo privato via **deploy key di sola
 lettura** (`~/.ssh/id_ed25519_funeral`, host alias `github-funeral`): vale per
@@ -56,9 +56,10 @@ container, e rifiuta il deploy se non riesce. Retention 30 giorni
 **Da fare**: copre solo il momento del deploy — tra due release non c'è niente.
 Manca un cron notturno, e manca il backup dei `.docx` generati.
 
-**In corso**: con la migrazione al VPS (`docs/migrazione-vps.md`) il servizio
-`litestream` replica il database su Cloudflare R2 a pochi secondi di distanza,
+**Fatto**: il servizio `litestream` replica il database su Cloudflare R2
+(bucket `funeral-docs-backup`, giurisdizione UE) a pochi secondi di distanza,
 con 30 giorni di storia. Chiude sia il buco tra due release sia il disco unico.
+Il ripristino è provato: comando nel passo 8 di `docs/migrazione-vps.md`.
 
 **Prima**: il backup finisce sullo stesso disco del DB. Se il disco muore,
 muore tutto. Valutare una copia verso un secondo posto — NAS, altra macchina

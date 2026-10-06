@@ -108,18 +108,19 @@ ricerca vengono dopo gli altri. L'elenco si rigenera con
 
 ## Deploy sul server
 
-In produzione su **Victus**: <https://funeral-docs.tail134f9a.ts.net>, raggiungibile
-solo da dentro la tailnet.
+In produzione su un **VPS Aruba** (`funeral-vps`):
+<https://funeral-docs.tail134f9a.ts.net>, raggiungibile solo da dentro la
+tailnet.
 
 L'app ha un nodo Tailscale suo (un sidecar nel compose) con il proprio
 certificato Let's Encrypt, e non pubblica porte sull'host: si raggiunge solo dal
 suo nome. Serve una auth key reusable in `TS_AUTHKEY`. Dettagli in
 `DECISIONI-APERTE.md`, dove resta aperta la **cifratura del disco**.
 
-Lo spostamento su un VPS Aruba, per non dipendere da un computer acceso in
-ufficio, è descritto passo per passo in `docs/migrazione-vps.md`. Lì il database
-viene anche replicato di continuo su Cloudflare R2 dal servizio `litestream` del
-compose.
+Prima girava su Victus, il computer in ufficio: lo spostamento, per non
+dipendere da una macchina accesa, è descritto passo per passo in
+`docs/migrazione-vps.md`. Il database è replicato di continuo su Cloudflare R2
+dal servizio `litestream` del compose.
 
 ### Rilasciare una versione
 
@@ -128,7 +129,7 @@ solo leggendo i commit convenzionali su `main`: mergiarla alza la versione,
 scrive il `CHANGELOG.md` e pubblica una release. Da lì parte tutto il resto.
 
 `.github/workflows/deploy.yml` costruisce l'immagine per quel tag, la pubblica su
-`ghcr.io/vip-pana/funeral-docs`, e solo dopo chiede a Victus di installarla.
+`ghcr.io/vip-pana/funeral-docs`, e solo dopo chiede al server di installarla.
 Sulla macchina non si compila più nulla: l'immagine in esecuzione è quella che la
 CI ha prodotto.
 
