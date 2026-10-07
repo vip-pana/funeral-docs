@@ -125,6 +125,11 @@ Nella console di Tailscale **elimina il dispositivo `funeral-docs`**: il nodo
 nuovo si registrerà con lo stesso nome solo se quello vecchio non c'è più,
 altrimenti diventerebbe `funeral-docs-1`.
 
+Il nome resta, ma per Tailscale il nodo nuovo è un altro dispositivo: perde la
+condivisione (Share) verso `centroservizieliseo@github` e prende un altro IP
+100.x. Dopo il passo 6 va quindi ricondiviso, e la regola delle access controls
+che apre la :443 a quell'account va aggiornata col nuovo IP (`tailscale status`).
+
 Copia sul VPS il database e il `.env`, dalla tailnet o dalla 22 pubblica che a
 questo punto è ancora aperta:
 
