@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.2](https://github.com/vip-pana/funeral-docs/compare/v0.16.1...v0.16.2) (2026-11-02)
+
+
+### Correzioni
+
+* address document 1 to the mayor of the destination town ([#57](https://github.com/vip-pana/funeral-docs/issues/57)) ([330b086](https://github.com/vip-pana/funeral-docs/commit/330b08668ffdf377cbccac07e51bfc317e4fc358))
+
 ## [0.16.1](https://github.com/vip-pana/funeral-docs/compare/v0.16.0...v0.16.1) (2026-10-06)
 
 
