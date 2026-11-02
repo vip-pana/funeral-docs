@@ -83,6 +83,8 @@ TEXT_FIXES = {
     "1": [
         # destinazione del trasporto, non la citta' di nascita
         ("nel comune di [personBirthCity]", "nel comune di [destinationCity]"),
+        # destinatario: il Sindaco del comune di destinazione, non di nascita
+        ("del Comune di [personBirthCity]", "del Comune di [destinationCity]"),
     ],
     "2": [
         ("al cimitero di [personBirthCity], [personBirthCityProvince]",
