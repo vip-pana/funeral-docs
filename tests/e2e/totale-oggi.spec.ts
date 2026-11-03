@@ -36,7 +36,7 @@ test("la colonna Oggi non conta le ferie ancora da venire", async ({
   });
   const cell = (iso: string) =>
     page.getByRole("button", { name: new RegExp(`^${name}, ${label(iso)}:`) });
-  const menu = page.locator("[data-slot=popover-content]");
+  const menu = page.locator("[data-slot=popover-content][data-state=open]");
   const ferie = async (iso: string) => {
     await cell(iso).click();
     await menu.getByRole("button", { name: /^Ferie, avviso 48/ }).click();

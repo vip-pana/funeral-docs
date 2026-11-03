@@ -33,7 +33,7 @@ test("mezza giornata di ferie con i servizi dell'altra metà", async ({
   const half = (day: string) => cell(day).locator("[data-half]");
   const total = totalIn(page);
   const url = `/calendar?month=${MONTH}&view=mese`;
-  const menu = page.locator("[data-slot=popover-content]");
+  const menu = page.locator("[data-slot=popover-content][data-state=open]");
 
   await page.goto(url);
 

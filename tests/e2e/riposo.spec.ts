@@ -29,7 +29,7 @@ test("il riposo, intero o a metà, non dà punti", async ({ page }, info) => {
       .locator("[data-total]");
   const cell = (day: string) => cellIn(page, day);
   const total = totalIn(page);
-  const menu = page.locator("[data-slot=popover-content]");
+  const menu = page.locator("[data-slot=popover-content][data-state=open]");
   const url = `/calendar?month=${MONTH}&view=mese`;
 
   await page.goto(url);
@@ -70,7 +70,7 @@ test("senza contratto il riposo non si offre", async ({ page }, info) => {
   await page
     .getByRole("button", { name: new RegExp(`^${name}, 9 dicembre:`) })
     .click();
-  const menu = page.locator("[data-slot=popover-content]");
+  const menu = page.locator("[data-slot=popover-content][data-state=open]");
   await expect(
     menu.getByRole("button", { name: "Ferie mattina" }),
   ).toBeVisible();

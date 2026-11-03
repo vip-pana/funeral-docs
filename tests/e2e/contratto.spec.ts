@@ -33,7 +33,7 @@ test("con il contratto le ferie sono una F senza punti", async ({
 
   await page.goto(`/calendar?month=${MONTH}&view=mese`);
   await cell.click();
-  const menu = page.locator("[data-slot=popover-content]");
+  const menu = page.locator("[data-slot=popover-content][data-state=open]");
   const entries = await menu.locator("button").allTextContents();
   expect(entries.filter((t) => t.startsWith("Ferie"))).toHaveLength(1);
   // The whole day, first in the menu: the half days below are named

@@ -30,7 +30,7 @@ test("la malattia prende tutta la giornata e non dà punti", async ({
       .locator("tr", { has: p.locator("th", { hasText: name.toUpperCase() }) })
       .locator("[data-total]");
   const cell = (day: string) => cellIn(page, day);
-  const menu = page.locator("[data-slot=popover-content]");
+  const menu = page.locator("[data-slot=popover-content][data-state=open]");
   const url = `/calendar?month=${MONTH}&view=mese`;
 
   await page.goto(url);
