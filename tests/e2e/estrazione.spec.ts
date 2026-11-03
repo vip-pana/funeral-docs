@@ -29,7 +29,7 @@ test("si scelgono i necrofori a mano e il servizio va sul calendario", async ({
   // A day of ferie for one of them.
   await page.goto(`/calendar?month=${DATE.slice(0, 7)}&view=mese`);
   await cell(away).click();
-  const menu = page.locator("[data-slot=popover-content]");
+  const menu = page.locator("[data-slot=popover-content][data-state=open]");
   await menu.getByRole("button", { name: /^Ferie, avviso 48/ }).click();
   await expect(cell(away)).toHaveText(/^F1/);
 

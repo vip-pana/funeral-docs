@@ -33,7 +33,7 @@ test("il viaggio non dà punti e a mezza giornata lascia il resto", async ({
   const small = (day: string, kind: string) =>
     cell(day).locator(`[data-kind=${kind}]`);
   const total = totalIn(page);
-  const menu = page.locator("[data-slot=popover-content]");
+  const menu = page.locator("[data-slot=popover-content][data-state=open]");
   const url = `/calendar?month=${MONTH}&view=mese`;
 
   await page.goto(url);

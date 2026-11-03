@@ -7,6 +7,11 @@ import { SESSION } from "./tests/e2e/helpers";
 export default defineConfig({
   testDir: "tests/e2e",
   fullyParallel: true,
+  // The runner has 4 vCPU and Playwright would take half of them. Every test
+  // drives a browser against the same server and spends most of its time
+  // waiting on it, so 4 workers roughly halve the suite instead of starving
+  // the server.
+  workers: process.env.CI ? 4 : undefined,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI
